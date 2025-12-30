@@ -509,4 +509,386 @@ date: ${date}
   Logger.success('消息监听器注册成功!');
   Logger.info('Content script 初始化完成!');
 
+  // ============== 悬浮球功能 ==============
+
+  /**
+   * 检查是否为有效的知乎文章页面
+   */
+  function isValidArticlePage() {
+    const pageType = detectPageType();
+    return pageType !== null;
+  }
+
+  /**
+   * 注入悬浮球样式
+   */
+  function injectFloatingBallStyles() {
+    if (document.getElementById('zhihu-md-floating-styles')) {
+      return; // 样式已注入
+    }
+
+    const styles = document.createElement('style');
+    styles.id = 'zhihu-md-floating-styles';
+    styles.textContent = `
+      /* 悬浮球容器 */
+      #zhihu-md-floating-ball {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+        box-shadow: 0 4px 16px rgba(0, 102, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+      }
+
+      #zhihu-md-floating-ball:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 24px rgba(0, 102, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      #zhihu-md-floating-ball:active {
+        transform: scale(0.95);
+      }
+
+      #zhihu-md-floating-ball.dragging {
+        transition: none;
+        opacity: 0.9;
+      }
+
+      /* 图标 */
+      #zhihu-md-floating-ball .icon {
+        width: 28px;
+        height: 28px;
+        fill: white;
+        transition: transform 0.3s ease;
+      }
+
+      /* 加载状态 */
+      #zhihu-md-floating-ball.loading {
+        pointer-events: none;
+      }
+
+      #zhihu-md-floating-ball.loading .icon {
+        animation: zhihu-md-spin 1s linear infinite;
+      }
+
+      @keyframes zhihu-md-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      /* 成功状态 */
+      #zhihu-md-floating-ball.success {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* 错误状态 */
+      #zhihu-md-floating-ball.error {
+        background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Tooltip */
+      #zhihu-md-floating-ball .tooltip {
+        position: absolute;
+        right: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-right: 12px;
+        padding: 8px 12px;
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 6px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        pointer-events: none;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      #zhihu-md-floating-ball .tooltip::after {
+        content: '';
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 6px solid transparent;
+        border-left-color: rgba(0, 0, 0, 0.85);
+      }
+
+      #zhihu-md-floating-ball:hover .tooltip {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      #zhihu-md-floating-ball.dragging .tooltip {
+        opacity: 0;
+        visibility: hidden;
+      }
+    `;
+    document.head.appendChild(styles);
+    Logger.success('悬浮球样式注入成功');
+  }
+
+  /**
+   * 创建悬浮球DOM元素
+   */
+  function createFloatingBall() {
+    if (document.getElementById('zhihu-md-floating-ball')) {
+      return document.getElementById('zhihu-md-floating-ball');
+    }
+
+    const ball = document.createElement('div');
+    ball.id = 'zhihu-md-floating-ball';
+    ball.innerHTML = `
+      <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="tooltip">导出 Markdown</span>
+    `;
+
+    document.body.appendChild(ball);
+    Logger.success('悬浮球DOM创建成功');
+    return ball;
+  }
+
+  /**
+   * 初始化悬浮球拖拽功能
+   */
+  function initDrag(ball) {
+    let isDragging = false;
+    let hasMoved = false;
+    let startX, startY, startLeft, startBottom;
+
+    ball.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // 仅左键
+
+      isDragging = true;
+      hasMoved = false;
+      ball.classList.add('dragging');
+
+      const rect = ball.getBoundingClientRect();
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = rect.left;
+      startBottom = window.innerHeight - rect.bottom;
+
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      // 如果移动超过5px，认为是拖拽
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        hasMoved = true;
+      }
+
+      const newLeft = startLeft + deltaX;
+      const newBottom = startBottom - deltaY;
+
+      // 边界限制
+      const maxLeft = window.innerWidth - ball.offsetWidth;
+      const maxBottom = window.innerHeight - ball.offsetHeight;
+
+      ball.style.left = Math.max(0, Math.min(newLeft, maxLeft)) + 'px';
+      ball.style.bottom = Math.max(0, Math.min(newBottom, maxBottom)) + 'px';
+      ball.style.right = 'auto';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        ball.classList.remove('dragging');
+
+        // 保存位置到localStorage
+        savePosition(ball);
+      }
+    });
+
+    // 返回hasMoved检查函数供点击事件使用
+    return () => hasMoved;
+  }
+
+  /**
+   * 保存悬浮球位置
+   */
+  function savePosition(ball) {
+    const rect = ball.getBoundingClientRect();
+    const position = {
+      left: rect.left,
+      bottom: window.innerHeight - rect.bottom
+    };
+    try {
+      localStorage.setItem('zhihu-md-ball-position', JSON.stringify(position));
+    } catch (e) {
+      Logger.warn('无法保存悬浮球位置:', e);
+    }
+  }
+
+  /**
+   * 恢复悬浮球位置
+   */
+  function restorePosition(ball) {
+    try {
+      const saved = localStorage.getItem('zhihu-md-ball-position');
+      if (saved) {
+        const position = JSON.parse(saved);
+        // 确保位置在可视区域内
+        const maxLeft = window.innerWidth - ball.offsetWidth;
+        const maxBottom = window.innerHeight - ball.offsetHeight;
+
+        ball.style.left = Math.max(0, Math.min(position.left, maxLeft)) + 'px';
+        ball.style.bottom = Math.max(0, Math.min(position.bottom, maxBottom)) + 'px';
+        ball.style.right = 'auto';
+        Logger.debug('恢复悬浮球位置:', position);
+      }
+    } catch (e) {
+      Logger.warn('无法恢复悬浮球位置:', e);
+    }
+  }
+
+  /**
+   * 更新悬浮球状态
+   */
+  function updateBallState(ball, state, icon = null) {
+    ball.classList.remove('loading', 'success', 'error');
+
+    const iconSvg = ball.querySelector('.icon');
+
+    switch (state) {
+      case 'loading':
+        ball.classList.add('loading');
+        iconSvg.innerHTML = `
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="32" stroke-linecap="round"/>
+        `;
+        break;
+      case 'success':
+        ball.classList.add('success');
+        iconSvg.innerHTML = `
+          <path d="M5 12L10 17L20 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        `;
+        break;
+      case 'error':
+        ball.classList.add('error');
+        iconSvg.innerHTML = `
+          <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        `;
+        break;
+      default:
+        iconSvg.innerHTML = `
+          <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+        `;
+    }
+  }
+
+  /**
+   * 处理悬浮球点击导出
+   */
+  async function handleBallClick(ball, checkHasMoved) {
+    // 如果是拖拽结束，不触发点击
+    if (checkHasMoved && checkHasMoved()) {
+      return;
+    }
+
+    Logger.info('悬浮球被点击，开始导出...');
+
+    updateBallState(ball, 'loading');
+    ball.querySelector('.tooltip').textContent = '导出中...';
+
+    try {
+      // 执行导出
+      const result = exportMarkdown();
+
+      if (result.success) {
+        Logger.success('Markdown 生成成功，发送下载请求...');
+
+        // 发送下载请求到 background script
+        await chrome.runtime.sendMessage({
+          action: 'download',
+          filename: result.data.filename,
+          content: result.data.content
+        });
+
+        updateBallState(ball, 'success');
+        ball.querySelector('.tooltip').textContent = '导出成功!';
+
+        setTimeout(() => {
+          updateBallState(ball, 'normal');
+          ball.querySelector('.tooltip').textContent = '导出 Markdown';
+        }, 2000);
+      } else {
+        throw new Error(result.error || '导出失败');
+      }
+    } catch (error) {
+      Logger.error('悬浮球导出失败:', error);
+      updateBallState(ball, 'error');
+      ball.querySelector('.tooltip').textContent = '导出失败';
+
+      setTimeout(() => {
+        updateBallState(ball, 'normal');
+        ball.querySelector('.tooltip').textContent = '导出 Markdown';
+      }, 2000);
+    }
+  }
+
+  /**
+   * 初始化悬浮球
+   */
+  function initFloatingBall() {
+    Logger.info('==========================================');
+    Logger.info('初始化悬浮球...');
+    Logger.info('==========================================');
+
+    // 检查页面类型
+    if (!isValidArticlePage()) {
+      Logger.info('非文章页面，不显示悬浮球');
+      return;
+    }
+
+    // 注入样式
+    injectFloatingBallStyles();
+
+    // 创建悬浮球
+    const ball = createFloatingBall();
+
+    // 恢复位置
+    restorePosition(ball);
+
+    // 初始化拖拽
+    const checkHasMoved = initDrag(ball);
+
+    // 绑定点击事件
+    ball.addEventListener('click', () => handleBallClick(ball, checkHasMoved));
+
+    Logger.success('悬浮球初始化完成!');
+  }
+
+  // 等待DOM加载完成后初始化悬浮球
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFloatingBall);
+  } else {
+    // 延迟一点执行，确保页面加载完成
+    setTimeout(initFloatingBall, 500);
+  }
+
 })();

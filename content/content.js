@@ -530,56 +530,80 @@ date: ${date}
     const styles = document.createElement('style');
     styles.id = 'zhihu-md-floating-styles';
     styles.textContent = `
+
       /* 悬浮球容器 */
       #zhihu-md-floating-ball {
         position: fixed;
-        right: 24px;
-        bottom: 24px;
+        right: 32px;
+        bottom: 32px;
         width: 56px;
         height: 56px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
-        box-shadow: 0 4px 16px rgba(0, 102, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+        /* Modern Gradient - Deep Blue */
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+        /* Soft, colored shadow for "glow" effect */
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35),
+                    0 4px 12px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
         cursor: pointer;
         z-index: 2147483647;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         user-select: none;
         -webkit-user-select: none;
         touch-action: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
       }
 
+      /* Hover State - Lift and Glow */
       #zhihu-md-floating-ball:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 24px rgba(0, 102, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 12px 28px rgba(37, 99, 235, 0.45),
+                    0 6px 16px rgba(0, 0, 0, 0.12),
+                    inset 0 1px 1px rgba(255, 255, 255, 0.3);
       }
 
+      /* Active/Click State - Press down */
       #zhihu-md-floating-ball:active {
-        transform: scale(0.95);
+        transform: translateY(0) scale(0.92);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3),
+                    0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
+      /* Dragging State */
       #zhihu-md-floating-ball.dragging {
         transition: none;
-        opacity: 0.9;
+        opacity: 0.95;
+        cursor: move;
+        transform: scale(1.0);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
       }
 
-      /* 图标 */
+      /* Icon styling */
       #zhihu-md-floating-ball .icon {
-        width: 28px;
-        height: 28px;
-        fill: white;
-        transition: transform 0.3s ease;
+        width: 26px;
+        height: 26px;
+        color: white;
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
       }
 
-      /* 加载状态 */
+      #zhihu-md-floating-ball:hover .icon {
+        transform: scale(1.1);
+      }
+
+      /* 加载状态 - Loading */
       #zhihu-md-floating-ball.loading {
         pointer-events: none;
+        background: linear-gradient(135deg, #4B5563 0%, #374151 100%);
+        box-shadow: 0 8px 20px rgba(75, 85, 99, 0.35);
       }
 
       #zhihu-md-floating-ball.loading .icon {
-        animation: zhihu-md-spin 1s linear infinite;
+        animation: zhihu-md-spin 1s cubic-bezier(0.55, 0.055, 0.675, 0.19) infinite;
       }
 
       @keyframes zhihu-md-spin {
@@ -587,52 +611,62 @@ date: ${date}
         to { transform: rotate(360deg); }
       }
 
-      /* 成功状态 */
+      /* 成功状态 - Success */
       #zhihu-md-floating-ball.success {
         background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35),
+                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
       }
 
-      /* 错误状态 */
+      #zhihu-md-floating-ball.success .icon {
+        transform: scale(1.1);
+      }
+
+      /* 错误状态 - Error */
       #zhihu-md-floating-ball.error {
         background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35),
+                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
       }
 
-      /* Tooltip */
+      /* Modern Tooltip */
       #zhihu-md-floating-ball .tooltip {
         position: absolute;
-        right: 100%;
+        right: 70px; /* Position to the left */
         top: 50%;
-        transform: translateY(-50%);
-        margin-right: 12px;
-        padding: 8px 12px;
-        background: rgba(0, 0, 0, 0.85);
+        transform: translateY(-50%) translateX(10px);
+        padding: 8px 14px;
+        background: rgba(17, 24, 39, 0.9);
         color: white;
         font-size: 13px;
         font-weight: 500;
-        border-radius: 6px;
+        border-radius: 8px;
         white-space: nowrap;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(4px);
       }
 
+      /* Tooltip Arrow */
       #zhihu-md-floating-ball .tooltip::after {
         content: '';
         position: absolute;
-        left: 100%;
+        left: 100%; /* Arrow on the right side of tooltip */
         top: 50%;
         transform: translateY(-50%);
         border: 6px solid transparent;
-        border-left-color: rgba(0, 0, 0, 0.85);
+        border-left-color: rgba(17, 24, 39, 0.9);
       }
 
       #zhihu-md-floating-ball:hover .tooltip {
         opacity: 1;
         visibility: visible;
+        transform: translateY(-50%) translateX(0);
       }
 
       #zhihu-md-floating-ball.dragging .tooltip {

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zhihu-md</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 3h18v18H3V3z" stroke="currentColor" stroke-width="2"/>
+          <path d="M7 8h10M7 12h6M7 16h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Zhihu-md</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <div id="status-container">
+        <div id="page-status" class="status-badge loading">
+          <span class="status-icon"></span>
+          <span class="status-text">检测中...</span>
+        </div>
+      </div>
+
+      <div id="article-info" class="article-info hidden">
+        <h2 id="article-title" class="article-title">文章标题</h2>
+        <div class="article-meta">
+          <span id="article-author" class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+            </svg>
+            <span>作者</span>
+          </span>
+          <span id="article-type" class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M8 8h8M8 12h8M8 16h4"/>
+            </svg>
+            <span>类型</span>
+          </span>
+        </div>
+      </div>
+
+      <div id="error-message" class="error-message hidden">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+        <span>此页面不是知乎文章页面</span>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <button id="export-btn" class="export-btn" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3v12M12 15l-4-4M12 15l4-4"/>
+          <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+        </svg>
+        <span>导出 Markdown</span>
+      </button>
+      <p class="hint">仅导出当前可见内容</p>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -6,7 +6,8 @@
   "permissions": [
     "activeTab",
     "downloads",
-    "scripting"
+    "scripting",
+    "webNavigation"
   ],
   "host_permissions": [
     "*://*.zhihu.com/*"
@@ -19,6 +20,10 @@
       "128": "icons/icon128.png"
     }
   },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
   "background": {
     "service_worker": "background/background.js"
   },
@@ -26,6 +31,9 @@
     {
       "matches": ["*://*.zhihu.com/*"],
       "js": ["lib/turndown.min.js", "content/content.js"],
+      "css": [
+        "content/content.css"
+      ],
       "run_at": "document_idle"
     }
   ],

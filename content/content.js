@@ -81,6 +81,43 @@
     return null;
   }
 
+  // ============== 常量定义 ==============
+  const CONSTANTS = {
+    SELECTORS: {
+      COLUMN_CONTAINER: ['.Post-RichText', '.RichText.ztext.Post-RichText'],
+      ANSWER_CONTAINER: ['.AnswerItem .RichText', '[data-za-detail-view-id="{id}"]'],
+      TITLE: {
+        COLUMN: ['.Post-Title', 'h1.Post-Title'],
+        ANSWER: ['.QuestionHeader-title']
+      },
+      AUTHOR: {
+        COLUMN: ['.AuthorInfo-name', '.UserLink-link'],
+        ANSWER: ['.AnswerItem .AuthorInfo-name', '.AnswerItem .UserLink-link']
+      },
+      UNWANTED: [
+        '.ContentItem-actions',    // Action buttons
+        '.RichText-ADLinkCardContainer', // Ad cards
+        '.AdblockBanner',          // Adblock banners
+        '.Reward',                 // Reward/tip section
+        '.Post-topicsAndReviewer', // Topics section
+        '.FollowButton',           // Follow buttons
+        '.Question-sideColumn',    // Side column
+        '.CornerButtons'           // Floating buttons
+      ]
+    }
+  };
+
+  /**
+   * Helper to find element by multiple selectors
+   */
+  function querySelectorAny(parent, selectors) {
+    for (const selector of selectors) {
+      const el = parent.querySelector(selector);
+      if (el) return el;
+    }
+    return null;
+  }
+
   /**
    * Get article content container based on page type
    */
@@ -92,9 +129,8 @@
     
     if (pageType === 'column') {
       Logger.debug('尝试查找专栏内容容器...');
-      container = document.querySelector('.Post-RichText') || 
-                  document.querySelector('.RichText.ztext.Post-RichText');
-      Logger.debug('.Post-RichText 查找结果:', container ? '找到' : '未找到');
+      container = querySelectorAny(document, CONSTANTS.SELECTORS.COLUMN_CONTAINER);
+      Logger.debug('专栏容器查找结果:', container ? '找到' : '未找到');
     } else if (pageType === 'answer') {
       Logger.debug('尝试查找问答内容容器...');
       // For answer pages, find the specific answer content
@@ -104,8 +140,11 @@
       if (answerMatch) {
         const answerId = answerMatch[1];
         Logger.debug('回答 ID:', answerId);
-        const answerElement = document.querySelector(`[data-za-detail-view-id="${answerId}"]`) ||
-                              document.querySelector('.AnswerItem .RichText');
+        // Try specific ID selector first
+        const idSelector = `[data-za-detail-view-id="${answerId}"]`;
+        const answerElement = document.querySelector(idSelector) ||
+          document.querySelector('.AnswerItem');
+
         Logger.debug('回答元素查找结果:', answerElement ? '找到' : '未找到');
         container = answerElement?.querySelector('.RichText') || answerElement;
       } else {
@@ -121,7 +160,9 @@
     } else {
       Logger.error('未找到内容容器!');
       Logger.debug('当前页面所有 class:');
-      Logger.debug(Array.from(document.querySelectorAll('*')).map(el => el.className).filter(c => c).slice(0, 50));
+      try {
+        Logger.debug(Array.from(document.querySelectorAll('*')).map(el => el.className).filter(c => c).slice(0, 50));
+      } catch (e) { }
     }
     
     Logger.groupEnd();
@@ -133,10 +174,9 @@
    */
   function getTitle(pageType) {
     if (pageType === 'column') {
-      return document.querySelector('.Post-Title')?.textContent?.trim() ||
-             document.querySelector('h1.Post-Title')?.textContent?.trim();
+      return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.COLUMN)?.textContent?.trim();
     } else if (pageType === 'answer') {
-      return document.querySelector('.QuestionHeader-title')?.textContent?.trim();
+      return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.ANSWER)?.textContent?.trim();
     }
     return document.title;
   }
@@ -146,12 +186,12 @@
    */
   function getAuthor(pageType) {
     if (pageType === 'column') {
-      return document.querySelector('.AuthorInfo-name')?.textContent?.trim() ||
-             document.querySelector('.UserLink-link')?.textContent?.trim();
+      return querySelectorAny(document, CONSTANTS.SELECTORS.AUTHOR.COLUMN)?.textContent?.trim();
     } else if (pageType === 'answer') {
       const answerItem = document.querySelector('.AnswerItem');
-      return answerItem?.querySelector('.AuthorInfo-name')?.textContent?.trim() ||
-             answerItem?.querySelector('.UserLink-link')?.textContent?.trim();
+      if (answerItem) {
+        return querySelectorAny(answerItem, ['.AuthorInfo-name', '.UserLink-link'])?.textContent?.trim();
+      }
     }
     return null;
   }
@@ -392,20 +432,13 @@ date: ${date}
       const clonedContainer = container.cloneNode(true);
       
       // Pre-process: Remove unwanted elements
-      const unwantedSelectors = [
-        '.ContentItem-actions',    // Action buttons
-        '.RichText-ADLinkCardContainer', // Ad cards
-        '.AdblockBanner',          // Adblock banners
-        '.Reward',                 // Reward/tip section
-        '.Post-topicsAndReviewer', // Topics section
-        '.FollowButton',           // Follow buttons
-      ];
-      
       Logger.debug('移除不需要的元素...');
-      unwantedSelectors.forEach(selector => {
+      CONSTANTS.SELECTORS.UNWANTED.forEach(selector => {
         const removed = clonedContainer.querySelectorAll(selector);
-        Logger.debug(`移除 ${selector}:`, removed.length, '个');
-        removed.forEach(el => el.remove());
+        if (removed.length > 0) {
+          Logger.debug(`移除 ${selector}:`, removed.length, '个');
+          removed.forEach(el => el.remove());
+        }
       });
 
       // Pre-process: Remove duplicate images (Zhihu often has multiple versions of the same image)
@@ -517,165 +550,6 @@ date: ${date}
   function isValidArticlePage() {
     const pageType = detectPageType();
     return pageType !== null;
-  }
-
-  /**
-   * 注入悬浮球样式
-   */
-  function injectFloatingBallStyles() {
-    if (document.getElementById('zhihu-md-floating-styles')) {
-      return; // 样式已注入
-    }
-
-    const styles = document.createElement('style');
-    styles.id = 'zhihu-md-floating-styles';
-    styles.textContent = `
-
-      /* 悬浮球容器 */
-      #zhihu-md-floating-ball {
-        position: fixed;
-        right: 32px;
-        bottom: 32px;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        /* Modern Gradient - Deep Blue */
-        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-        /* Soft, colored shadow for "glow" effect */
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35),
-                    0 4px 12px rgba(0, 0, 0, 0.1),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
-        cursor: pointer;
-        z-index: 2147483647;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        user-select: none;
-        -webkit-user-select: none;
-        touch-action: none;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(8px);
-      }
-
-      /* Hover State - Lift and Glow */
-      #zhihu-md-floating-ball:hover {
-        transform: translateY(-4px) scale(1.05);
-        box-shadow: 0 12px 28px rgba(37, 99, 235, 0.45),
-                    0 6px 16px rgba(0, 0, 0, 0.12),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.3);
-      }
-
-      /* Active/Click State - Press down */
-      #zhihu-md-floating-ball:active {
-        transform: translateY(0) scale(0.92);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3),
-                    0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Dragging State */
-      #zhihu-md-floating-ball.dragging {
-        transition: none;
-        opacity: 0.95;
-        cursor: move;
-        transform: scale(1.0);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      }
-
-      /* Icon styling */
-      #zhihu-md-floating-ball .icon {
-        width: 26px;
-        height: 26px;
-        color: white;
-        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-      }
-
-      #zhihu-md-floating-ball:hover .icon {
-        transform: scale(1.1);
-      }
-
-      /* 加载状态 - Loading */
-      #zhihu-md-floating-ball.loading {
-        pointer-events: none;
-        background: linear-gradient(135deg, #4B5563 0%, #374151 100%);
-        box-shadow: 0 8px 20px rgba(75, 85, 99, 0.35);
-      }
-
-      #zhihu-md-floating-ball.loading .icon {
-        animation: zhihu-md-spin 1s cubic-bezier(0.55, 0.055, 0.675, 0.19) infinite;
-      }
-
-      @keyframes zhihu-md-spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-
-      /* 成功状态 - Success */
-      #zhihu-md-floating-ball.success {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
-      }
-
-      #zhihu-md-floating-ball.success .icon {
-        transform: scale(1.1);
-      }
-
-      /* 错误状态 - Error */
-      #zhihu-md-floating-ball.error {
-        background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.2);
-      }
-
-      /* Modern Tooltip */
-      #zhihu-md-floating-ball .tooltip {
-        position: absolute;
-        right: 70px; /* Position to the left */
-        top: 50%;
-        transform: translateY(-50%) translateX(10px);
-        padding: 8px 14px;
-        background: rgba(17, 24, 39, 0.9);
-        color: white;
-        font-size: 13px;
-        font-weight: 500;
-        border-radius: 8px;
-        white-space: nowrap;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        pointer-events: none;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(4px);
-      }
-
-      /* Tooltip Arrow */
-      #zhihu-md-floating-ball .tooltip::after {
-        content: '';
-        position: absolute;
-        left: 100%; /* Arrow on the right side of tooltip */
-        top: 50%;
-        transform: translateY(-50%);
-        border: 6px solid transparent;
-        border-left-color: rgba(17, 24, 39, 0.9);
-      }
-
-      #zhihu-md-floating-ball:hover .tooltip {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(-50%) translateX(0);
-      }
-
-      #zhihu-md-floating-ball.dragging .tooltip {
-        opacity: 0;
-        visibility: hidden;
-      }
-    `;
-    document.head.appendChild(styles);
-    Logger.success('悬浮球样式注入成功');
   }
 
   /**
@@ -896,26 +770,82 @@ date: ${date}
     // 检查页面类型
     if (!isValidArticlePage()) {
       Logger.info('非文章页面，不显示悬浮球');
+      removeFloatingBall();
       return;
     }
 
-    // 注入样式
-    injectFloatingBallStyles();
+    // Check user preference
+    chrome.storage.sync.get({ showFloatingBall: true }, (items) => {
+      if (!items.showFloatingBall) {
+        Logger.info('用户禁用悬浮球，不显示');
+        removeFloatingBall();
+        return;
+      }
 
-    // 创建悬浮球
-    const ball = createFloatingBall();
+      // 创建悬浮球 (如果已存在则直接返回)
+      const ball = createFloatingBall();
 
-    // 恢复位置
-    restorePosition(ball);
+      // ... rest of init logic only if enabled ...
+      // 恢复位置
+      restorePosition(ball);
 
-    // 初始化拖拽
-    const checkHasMoved = initDrag(ball);
+      // 初始化拖拽
+      const checkHasMoved = initDrag(ball);
 
-    // 绑定点击事件
-    ball.addEventListener('click', () => handleBallClick(ball, checkHasMoved));
+      // 绑定点击事件 (先移除旧的监听器以防重复绑定)
+      const newBall = ball.cloneNode(true);
+      if (ball.parentNode) {
+        ball.parentNode.replaceChild(newBall, ball);
+        newBall.addEventListener('click', () => handleBallClick(newBall, initDrag(newBall)));
+      }
 
-    Logger.success('悬浮球初始化完成!');
+      Logger.success('悬浮球初始化/更新完成!');
+    });
   }
+
+  // Listen for storage changes
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'sync' && changes.showFloatingBall) {
+      if (changes.showFloatingBall.newValue) {
+        initFloatingBall();
+      } else {
+        removeFloatingBall();
+      }
+    }
+  });
+
+  /**
+   * 移除悬浮球
+   */
+  function removeFloatingBall() {
+    const ball = document.getElementById('zhihu-md-floating-ball');
+    if (ball) {
+      ball.remove();
+      Logger.info('悬浮球已移除');
+    }
+  }
+
+  // Handle SPA navigation
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'routeChanged') {
+      Logger.info('路由改变，重新检查悬浮球状态...', message.url);
+      // Give DOM a moment to update
+      setTimeout(initFloatingBall, 1000);
+    }
+  });
+
+  // Observe DOM changes to handle dynamic content loading
+  // Some Zhihu pages load content asynchronously
+  const observer = new MutationObserver((mutations) => {
+    // Check if we are on a valid page but ball is missing
+    if (isValidArticlePage() && !document.getElementById('zhihu-md-floating-ball')) {
+      // Debounce initialization
+      if (window._initTimeout) clearTimeout(window._initTimeout);
+      window._initTimeout = setTimeout(initFloatingBall, 1000);
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 
   // 等待DOM加载完成后初始化悬浮球
   if (document.readyState === 'loading') {

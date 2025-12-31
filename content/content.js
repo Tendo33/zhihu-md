@@ -775,44 +775,64 @@ date: ${date}
     }
 
     // Check user preference
-    chrome.storage.sync.get({ showFloatingBall: true }, (items) => {
-      if (!items.showFloatingBall) {
-        Logger.info('用户禁用悬浮球，不显示');
-        removeFloatingBall();
-        return;
-      }
+    // 确保 chrome.storage 存在后再调用
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+      chrome.storage.sync.get({ showFloatingBall: true }, (items) => {
+        if (!items.showFloatingBall) {
+          Logger.info('用户禁用悬浮球，不显示');
+          removeFloatingBall();
+          return;
+        }
 
-      // 创建悬浮球 (如果已存在则直接返回)
+        // 创建悬浮球 (如果已存在则直接返回)
+        const ball = createFloatingBall();
+
+        // ... rest of init logic only if enabled ...
+        // 恢复位置
+        restorePosition(ball);
+
+        // 初始化拖拽
+        const checkHasMoved = initDrag(ball);
+
+        // 绑定点击事件 (先移除旧的监听器以防重复绑定)
+        const newBall = ball.cloneNode(true);
+        if (ball.parentNode) {
+          ball.parentNode.replaceChild(newBall, ball);
+          newBall.addEventListener('click', () => handleBallClick(newBall, initDrag(newBall)));
+        }
+
+        Logger.success('悬浮球初始化/更新完成!');
+      });
+    } else {
+      Logger.warn('chrome.storage 不可用，使用默认设置 (显示悬浮球)');
+      // 如果 storage API 不可用，默认显示悬浮球
       const ball = createFloatingBall();
-
-      // ... rest of init logic only if enabled ...
-      // 恢复位置
       restorePosition(ball);
-
-      // 初始化拖拽
       const checkHasMoved = initDrag(ball);
-
-      // 绑定点击事件 (先移除旧的监听器以防重复绑定)
       const newBall = ball.cloneNode(true);
       if (ball.parentNode) {
         ball.parentNode.replaceChild(newBall, ball);
         newBall.addEventListener('click', () => handleBallClick(newBall, initDrag(newBall)));
       }
-
-      Logger.success('悬浮球初始化/更新完成!');
-    });
+      Logger.success('悬浮球初始化完成 (默认模式)!');
+    }
   }
 
   // Listen for storage changes
-  chrome.storage.onChanged.addListener((changes, namespace) => {
-    if (namespace === 'sync' && changes.showFloatingBall) {
-      if (changes.showFloatingBall.newValue) {
-        initFloatingBall();
-      } else {
-        removeFloatingBall();
+  // 添加防御性检查
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'sync' && changes.showFloatingBall) {
+        if (changes.showFloatingBall.newValue) {
+          initFloatingBall();
+        } else {
+          removeFloatingBall();
+        }
       }
-    }
-  });
+    });
+  } else {
+    Logger.warn('chrome.storage.onChanged 不可用，无法监听设置变化');
+  }
 
   /**
    * 移除悬浮球

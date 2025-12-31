@@ -7,7 +7,8 @@
     "activeTab",
     "downloads",
     "scripting",
-    "webNavigation"
+    "webNavigation",
+    "storage"
   ],
   "host_permissions": [
     "*://*.zhihu.com/*"

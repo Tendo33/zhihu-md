@@ -7,22 +7,22 @@
   height: 48px;
   border-radius: 50%;
   
-  /* Modern Minimal - Vercel/Linear Dark Theme */
-  background: #000000;
-  border: 1px solid #333333;
+  /* Light Blue Theme */
+  background: rgba(240, 249, 255, 0.9); /* Sky 50 */
+  border: 1px solid rgba(186, 230, 253, 0.8); /* Sky 200 */
   
-  /* Subtle luxurious shadow */
+  /* Blueish shadow */
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06),
-    0 12px 24px -4px rgba(0, 0, 0, 0.2);
+    0 4px 6px -1px rgba(2, 132, 199, 0.1),
+    0 2px 4px -1px rgba(2, 132, 199, 0.06),
+    0 12px 24px -4px rgba(2, 132, 199, 0.15);
     
   cursor: pointer;
   z-index: 2147483647;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   
   user-select: none;
   -webkit-user-select: none;
@@ -33,18 +33,18 @@
 /* Hover State */
 #zhihu-md-floating-ball:hover {
   transform: translateY(-2px) scale(1.05);
-  background: #111111;
-  border-color: #555555;
+  background: #FFFFFF;
+  border-color: #38BDF8; /* Sky 400 */
   box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.2), 
-    0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    0 20px 25px -5px rgba(2, 132, 199, 0.15), 
+    0 10px 10px -5px rgba(2, 132, 199, 0.1);
 }
 
 /* Active/Click State */
 #zhihu-md-floating-ball:active {
   transform: translateY(0) scale(0.95);
-  background: #000000;
-  border-color: #333333;
+  background: #E0F2FE; /* Sky 100 */
+  border-color: #0EA5E9; /* Sky 500 */
 }
 
 /* Dragging State */
@@ -52,31 +52,52 @@
   transition: none;
   cursor: move;
   opacity: 0.9;
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(2, 132, 199, 0.25);
+  background: #FFFFFF;
+}
+
+/* Docked/Hidden State */
+#zhihu-md-floating-ball.docked {
+  opacity: 0.3;
+  transform: scale(0.9);
+  box-shadow: none;
+  border-color: transparent;
+  background: rgba(240, 249, 255, 0.6);
+}
+
+#zhihu-md-floating-ball.docked:hover {
+  opacity: 1;
   transform: scale(1.0);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  background: #FFFFFF;
+  border-color: #38BDF8;
+  box-shadow: 
+    0 4px 6px -1px rgba(2, 132, 199, 0.1),
+    0 2px 4px -1px rgba(2, 132, 199, 0.06);
 }
 
 /* Icon styling */
 #zhihu-md-floating-ball .icon {
   width: 20px;
   height: 20px;
-  color: #EDEDED; /* Off-white */
+  color: #0369A1; /* Sky 700 */
   transition: transform 0.3s ease;
 }
 
 #zhihu-md-floating-ball:hover .icon {
-  color: #FFFFFF;
+  color: #0284C7; /* Sky 600 */
 }
 
 /* Loading State */
 #zhihu-md-floating-ball.loading {
   pointer-events: none;
-  border-color: #444;
+  border-color: #CBD5E1;
 }
 
 #zhihu-md-floating-ball.loading .icon {
   animation: zhihu-md-spin 1s linear infinite;
   opacity: 0.7;
+  color: #64748B;
 }
 
 @keyframes zhihu-md-spin {
@@ -86,25 +107,25 @@
 
 /* Success State */
 #zhihu-md-floating-ball.success {
-  background: #000000;
-  border-color: #10B981; /* Green border */
+  background: #ECFDF5; /* Emerald 50 */
+  border-color: #34D399; /* Emerald 400 */
   box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 10px 15px -3px rgba(16, 185, 129, 0.1);
 }
 
 #zhihu-md-floating-ball.success .icon {
-  color: #10B981;
+  color: #059669; /* Emerald 600 */
   transform: scale(1.1);
 }
 
 /* Error State */
 #zhihu-md-floating-ball.error {
-  background: #000000;
-  border-color: #EF4444; /* Red border */
+  background: #FEF2F2; /* Red 50 */
+  border-color: #F87171; /* Red 400 */
   box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), 0 10px 15px -3px rgba(239, 68, 68, 0.1);
 }
 
 #zhihu-md-floating-ball.error .icon {
-  color: #EF4444;
+  color: #DC2626; /* Red 600 */
 }
 
 /* Tooltip */
@@ -114,12 +135,12 @@
   top: 50%;
   transform: translateY(-50%) translateX(10px);
   padding: 6px 12px;
-  background: #000000;
-  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0F172A; /* Slate 900 */
   font-size: 12px;
   font-weight: 500;
   border-radius: 6px;
-  border: 1px solid #333333;
+  border: 1px solid #E2E8F0;
   white-space: nowrap;
   
   opacity: 0;
@@ -128,7 +149,7 @@
   
   transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
 }
 
 #zhihu-md-floating-ball:hover .tooltip {
@@ -137,7 +158,9 @@
   transform: translateY(-50%) translateX(0);
 }
 
-#zhihu-md-floating-ball.dragging .tooltip {
+#zhihu-md-floating-ball.dragging .tooltip,
+#zhihu-md-floating-ball.docked .tooltip {
   display: none;
 }
+
 

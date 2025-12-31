@@ -2,21 +2,21 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>Zhihu-md Settings</title>
+  <title>Zhihu-md 设置</title>
   <link rel="stylesheet" href="options.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <h1>Settings</h1>
+      <h1>设置</h1>
     </header>
     
     <div class="section">
       <div class="option-item">
         <div class="option-content">
-          <div class="option-label">Floating Action Button</div>
-          <div class="option-desc">Show a quick export button on the bottom-right of Zhihu articles.</div>
+          <div class="option-label">悬浮导出按钮</div>
+          <div class="option-desc">在知乎文章页面显示快捷导出悬浮球。</div>
         </div>
         <label class="switch">
           <input type="checkbox" id="showFloatingBall">
@@ -26,8 +26,8 @@
 
       <div class="option-item">
         <div class="option-content">
-          <div class="option-label">Max Answers Download</div>
-          <div class="option-desc">Maximum number of answers to download from a question page (1-50).</div>
+          <div class="option-label">最大下载回答数</div>
+          <div class="option-desc">从问题页面下载回答的最大数量 (1-50)。</div>
         </div>
         <input type="number" id="maxAnswerCount" min="1" max="50" value="20" class="number-input">
       </div>
@@ -38,7 +38,7 @@
     </div>
   </div>
   
-  <div id="status" class="status-msg">Changes saved</div>
+  <div id="status" class="status-msg">设置已保存</div>
 
   <script src="options.js"></script>
 </body>

@@ -60,22 +60,22 @@ function updateStatus(type, text) {
  */
 function showArticleInfo(info) {
   articleTitle.textContent = info.title;
-  articleAuthor.textContent = info.author || 'Unknown Author';
+  articleAuthor.textContent = info.author || '未知作者';
 
   // Handle different page types
   let typeLabel;
   switch (info.type) {
     case 'column':
-      typeLabel = 'Column';
+      typeLabel = '专栏文章';
       break;
     case 'answer':
-      typeLabel = 'Answer';
+      typeLabel = '回答';
       break;
     case 'question':
-      typeLabel = 'Question';
+      typeLabel = '问题';
       break;
     default:
-      typeLabel = 'Page';
+      typeLabel = '页面';
   }
   articleType.textContent = typeLabel;
 
@@ -89,7 +89,7 @@ function showArticleInfo(info) {
  */
 function showError(message) {
   Logger.error('Show Error:', message);
-  updateStatus('error', 'Failed');
+  updateStatus('error', '失败');
 
   // Update error message text
   const errorText = errorMessage.querySelector('p');
@@ -112,7 +112,7 @@ async function init() {
 
     if (!tab || !tab.url) {
       Logger.error('Cannot get tab info');
-      showError('Cannot access current page');
+      showError('无法访问当前页面');
       return;
     }
 
@@ -122,7 +122,7 @@ async function init() {
     const url = new URL(tab.url);
     
     if (!url.hostname.endsWith('zhihu.com')) {
-      showError('Not a Zhihu page');
+      showError('此页面不是知乎页面');
       return;
     }
 
@@ -132,7 +132,7 @@ async function init() {
     const isQuestion = url.pathname.includes('/question/') && !url.pathname.includes('/answer/');
 
     if (!isColumn && !isAnswer && !isQuestion) {
-      showError('Please open a Zhihu Article, Question or Answer');
+      showError('请打开知乎文章、问题或回答页面');
       return;
     }
 
@@ -145,7 +145,7 @@ async function init() {
       Logger.info('Received response:', response);
 
       if (response && response.success) {
-        updateStatus('success', 'Ready');
+        updateStatus('success', '就绪');
 
         // Determine type for display
         let displayType = 'page';
@@ -159,17 +159,17 @@ async function init() {
           type: displayType
         });
       } else {
-        throw new Error(response?.error || 'Failed to parse article');
+        throw new Error(response?.error || '解析文章失败');
       }
     } catch (msgError) {
       // If message fails, it might be that content script isn't ready or reloaded
       Logger.warn('Message failed (Content script might be missing):', msgError);
-      showError('Please refresh the page');
+      showError('请刷新页面后重试');
     }
 
   } catch (error) {
     Logger.error('Init Error:', error);
-    showError('Unknown error occurred');
+    showError('未知错误');
   }
 }
 
@@ -184,7 +184,7 @@ async function handleExport() {
   
   try {
     exportBtn.classList.add('loading');
-    btnText.textContent = 'Exporting...';
+    btnText.textContent = '导出中...';
     exportBtn.disabled = true;
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -203,23 +203,23 @@ async function handleExport() {
 
       exportBtn.classList.remove('loading');
       // No specific success class needed for styles, but we can reset text
-      btnText.textContent = 'Success!';
+      btnText.textContent = '导出成功!';
       
       setTimeout(() => {
-        btnText.textContent = 'Export Markdown';
+        btnText.textContent = '导出 Markdown';
         exportBtn.disabled = false;
       }, 2000);
     } else {
-      throw new Error(response?.error || 'Export failed');
+      throw new Error(response?.error || '导出失败');
     }
   } catch (error) {
     Logger.error('Export Error:', error);
     
     exportBtn.classList.remove('loading');
-    btnText.textContent = 'Failed';
+    btnText.textContent = '导出失败';
     
     setTimeout(() => {
-      btnText.textContent = 'Export Markdown';
+      btnText.textContent = '导出 Markdown';
       exportBtn.disabled = false;
     }, 2000);
   }

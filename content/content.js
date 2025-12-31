@@ -82,7 +82,7 @@
       return 'question';
     }
     
-    Logger.warn('无法识别的页面类型，路径:', pathname);
+    Logger.debug('非文章页面，路径:', pathname);
     return null;
   }
 
@@ -856,7 +856,7 @@ ${answer.content}
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      <span class="tooltip">Export Markdown</span>
+      <span class="tooltip">导出 Markdown</span>
     `;
 
     document.body.appendChild(ball);
@@ -864,11 +864,252 @@ ${answer.content}
     return ball;
   }
 
-  // initDrag same...
+  /**
+   * 初始化拖拽功能
+   */
+  function initDrag(ball) {
+    let isDragging = false;
+    let startX, startY;
+    let initialLeft, initialTop;
+    let hasMoved = false;
+    let dockTimeout;
 
-  // savePosition same...
+    // 清除 docket 状态的辅助函数
+    const clearDockedState = () => {
+      ball.classList.remove('docked');
+      if (dockTimeout) {
+        clearTimeout(dockTimeout);
+        dockTimeout = null;
+      }
+    };
 
-  // restorePosition same...
+    // 检查是否发生过移动，用于区分点击和拖拽
+    const checkHasMoved = () => hasMoved;
+
+    const onMouseDown = (e) => {
+      // 排除右键
+      if (e.button !== 0) return;
+
+      isDragging = true;
+      hasMoved = false;
+      ball.classList.add('dragging');
+      clearDockedState();
+
+      // 获取当前位置 (计算后的样式)
+      const rect = ball.getBoundingClientRect();
+      startX = e.clientX;
+      startY = e.clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      // 切换到 fixed定位 + left/top 模式，避免 right/bottom 干扰
+      ball.style.right = 'auto';
+      ball.style.bottom = 'auto';
+      ball.style.left = `${initialLeft}px`;
+      ball.style.top = `${initialTop}px`;
+
+      // 阻止文本选择
+      e.preventDefault();
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    };
+
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      // 只有移动超过一定阈值才算作拖动
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        hasMoved = true;
+      }
+
+      let newLeft = initialLeft + dx;
+      let newTop = initialTop + dy;
+
+      // 边界检查，防止拖出屏幕
+      const maxLeft = window.innerWidth - ball.offsetWidth;
+      const maxTop = window.innerHeight - ball.offsetHeight;
+
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      ball.style.left = `${newLeft}px`;
+      ball.style.top = `${newTop}px`;
+    };
+
+    const onMouseUp = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      ball.classList.remove('dragging');
+
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+
+      if (hasMoved) {
+        // 拖拽结束，检查是否需要吸附边缘
+        handleSnapAndDock();
+      }
+    };
+
+    // 触摸事件支持
+    const onTouchStart = (e) => {
+      if (e.touches.length !== 1) return;
+
+      isDragging = true;
+      hasMoved = false;
+      ball.classList.add('dragging');
+      clearDockedState();
+
+      const touch = e.touches[0];
+      const rect = ball.getBoundingClientRect();
+      startX = touch.clientX;
+      startY = touch.clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      ball.style.right = 'auto';
+      ball.style.bottom = 'auto';
+      ball.style.left = `${initialLeft}px`;
+      ball.style.top = `${initialTop}px`;
+
+      e.preventDefault(); // 防止滚动
+    };
+
+    const onTouchMove = (e) => {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        hasMoved = true;
+      }
+
+      let newLeft = initialLeft + dx;
+      let newTop = initialTop + dy;
+
+      const maxLeft = window.innerWidth - ball.offsetWidth;
+      const maxTop = window.innerHeight - ball.offsetHeight;
+
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      ball.style.left = `${newLeft}px`;
+      ball.style.top = `${newTop}px`;
+    };
+
+    const onTouchEnd = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      ball.classList.remove('dragging');
+      if (hasMoved) {
+        handleSnapAndDock();
+      }
+    };
+
+    // 处理吸附和隐藏
+    const handleSnapAndDock = () => {
+      const rect = ball.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const winWidth = window.innerWidth;
+
+      // 保存位置
+      savePosition(rect.left, rect.top);
+
+      // 如果靠近边缘 (比如 50px 内)，则吸附
+      const docThreshold = 50;
+      let isDocked = false;
+
+      // 靠近左边
+      if (rect.left < docThreshold) {
+        ball.style.left = '0px';
+        savePosition(0, rect.top);
+        isDocked = true;
+      }
+      // 靠近右边
+      else if (winWidth - rect.right < docThreshold) {
+        ball.style.left = `${winWidth - rect.width}px`; // Right align
+        savePosition(winWidth - rect.width, rect.top);
+        isDocked = true;
+      }
+
+      if (isDocked) {
+        // 延迟进入 docked 状态
+        dockTimeout = setTimeout(() => {
+          ball.classList.add('docked');
+        }, 1000);
+      }
+    };
+
+    // 鼠标进入时清除 docked 状态
+    ball.addEventListener('mouseenter', clearDockedState);
+
+    // 鼠标离开时，如果靠边，重新进入 docked 状态
+    ball.addEventListener('mouseleave', () => {
+      if (!isDragging) {
+        const rect = ball.getBoundingClientRect();
+        const winWidth = window.innerWidth;
+        // 简单的判断：如果贴着左右边缘
+        if (rect.left <= 0 || rect.right >= winWidth) {
+          dockTimeout = setTimeout(() => {
+            ball.classList.add('docked');
+          }, 1000);
+        }
+      }
+    });
+
+    ball.addEventListener('mousedown', onMouseDown);
+    ball.addEventListener('touchstart', onTouchStart, { passive: false });
+    ball.addEventListener('touchmove', onTouchMove, { passive: false });
+    ball.addEventListener('touchend', onTouchEnd);
+
+    return checkHasMoved;
+  }
+
+  /**
+   * 保存悬浮球位置
+   */
+  function savePosition(x, y) {
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      // 使用 local storage 存储特定设备的位置偏好
+      chrome.storage.local.set({
+        floatingBallPosition: { x, y }
+      });
+    }
+  }
+
+  /**
+   * 恢复悬浮球位置
+   */
+  function restorePosition(ball) {
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['floatingBallPosition'], (result) => {
+        if (result.floatingBallPosition) {
+          const { x, y } = result.floatingBallPosition;
+
+          // 简单的边界检查，防止恢复到屏幕外
+          const maxLeft = window.innerWidth - 50;
+          const maxTop = window.innerHeight - 50;
+
+          let validX = Math.max(0, Math.min(x, maxLeft));
+          let validY = Math.max(0, Math.min(y, maxTop));
+
+          ball.style.right = 'auto';
+          ball.style.bottom = 'auto';
+          ball.style.left = `${validX}px`;
+          ball.style.top = `${validY}px`;
+
+          // 如果恢复的位置在边缘，应用 docked 状态
+          if (validX <= 0 || validX >= window.innerWidth - 60) { // 60 是 approximate width constraint
+            setTimeout(() => ball.classList.add('docked'), 1000);
+          }
+        }
+      });
+    }
+  }
 
   /**
    * 更新悬浮球状态

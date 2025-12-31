@@ -1,26 +1,26 @@
 :root {
-  /* Core Colors - Dark Mode Inspired by Linear/Vercel */
-  --bg-primary: #0F0F10;
-  --bg-secondary: #000000;
-  --bg-card: #18181B;
-  --bg-hover: #27272A;
+  /* Core Colors - Light Blue Theme */
+  --bg-primary: #F0F9FF; /* Sky 50 */
+  --bg-secondary: #FFFFFF;
+  --bg-card: #E0F2FE; /* Sky 100 */
+  --bg-hover: #BAE6FD; /* Sky 200 */
   
-  --border-subtle: #27272A;
-  --border-hover: #3F3F46;
+  --border-subtle: #BAE6FD; /* Sky 200 */
+  --border-hover: #7DD3FC; /* Sky 300 */
 
-  --text-primary: #EDEDEF;
-  --text-secondary: #A1A1AA;
-  --text-tertiary: #71717A;
+  --text-primary: #0C4A6E; /* Sky 900 */
+  --text-secondary: #0369A1; /* Sky 700 */
+  --text-tertiary: #0EA5E9; /* Sky 500 */
 
   /* Accent Colors */
-  --accent: #EDEDEF; /* White accent for buttons */
-  --accent-inverse: #000000;
-  --accent-hover: #FFFFFF;
+  --accent: #0284C7; /* Sky 600 */
+  --accent-inverse: #FFFFFF;
+  --accent-hover: #0369A1; /* Sky 700 */
   
-  --success: #10B981;
-  --error: #EF4444;
-  --warning: #F59E0B;
-  --blue: #3B82F6;
+  --success: #059669; /* Emerald 600 */
+  --error: #DC2626; /* Red 600 */
+  --warning: #D97706; /* Amber 600 */
+  --blue: #0284C7; /* Sky 600 */
 
   /* Spacing & sizing */
   --radius-sm: 6px;
@@ -33,6 +33,7 @@
   --duration-fast: 150ms;
   --duration-normal: 250ms;
 }
+
 
 * {
   margin: 0;

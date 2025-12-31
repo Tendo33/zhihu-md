@@ -874,9 +874,9 @@ ${answer.content}
     let hasMoved = false;
     let dockTimeout;
 
-    // 清除 docket 状态的辅助函数
+    // 清除 docked 状态的辅助函数
     const clearDockedState = () => {
-      ball.classList.remove('docked');
+      ball.classList.remove('docked-left', 'docked-right');
       if (dockTimeout) {
         clearTimeout(dockTimeout);
         dockTimeout = null;
@@ -1013,34 +1013,33 @@ ${answer.content}
     // 处理吸附和隐藏
     const handleSnapAndDock = () => {
       const rect = ball.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
       const winWidth = window.innerWidth;
 
       // 保存位置
       savePosition(rect.left, rect.top);
 
-      // 如果靠近边缘 (比如 50px 内)，则吸附
-      const docThreshold = 50;
-      let isDocked = false;
+      // 如果靠近边缘 (比如 30px 内)，则吸附
+      const docThreshold = 30;
+      let dockedSide = null;
 
       // 靠近左边
       if (rect.left < docThreshold) {
         ball.style.left = '0px';
         savePosition(0, rect.top);
-        isDocked = true;
+        dockedSide = 'left';
       }
       // 靠近右边
       else if (winWidth - rect.right < docThreshold) {
         ball.style.left = `${winWidth - rect.width}px`; // Right align
         savePosition(winWidth - rect.width, rect.top);
-        isDocked = true;
+        dockedSide = 'right';
       }
 
-      if (isDocked) {
+      if (dockedSide) {
         // 延迟进入 docked 状态
         dockTimeout = setTimeout(() => {
-          ball.classList.add('docked');
-        }, 1000);
+          ball.classList.add(`docked-${dockedSide}`);
+        }, 800);
       }
     };
 
@@ -1052,11 +1051,15 @@ ${answer.content}
       if (!isDragging) {
         const rect = ball.getBoundingClientRect();
         const winWidth = window.innerWidth;
-        // 简单的判断：如果贴着左右边缘
-        if (rect.left <= 0 || rect.right >= winWidth) {
+        // 判断是否贴着左右边缘
+        if (rect.left <= 5) {
           dockTimeout = setTimeout(() => {
-            ball.classList.add('docked');
-          }, 1000);
+            ball.classList.add('docked-left');
+          }, 800);
+        } else if (rect.right >= winWidth - 5) {
+          dockTimeout = setTimeout(() => {
+            ball.classList.add('docked-right');
+          }, 800);
         }
       }
     });
@@ -1091,8 +1094,8 @@ ${answer.content}
           const { x, y } = result.floatingBallPosition;
 
           // 简单的边界检查，防止恢复到屏幕外
-          const maxLeft = window.innerWidth - 50;
-          const maxTop = window.innerHeight - 50;
+          const maxLeft = window.innerWidth - 40;
+          const maxTop = window.innerHeight - 40;
 
           let validX = Math.max(0, Math.min(x, maxLeft));
           let validY = Math.max(0, Math.min(y, maxTop));
@@ -1103,8 +1106,10 @@ ${answer.content}
           ball.style.top = `${validY}px`;
 
           // 如果恢复的位置在边缘，应用 docked 状态
-          if (validX <= 0 || validX >= window.innerWidth - 60) { // 60 是 approximate width constraint
-            setTimeout(() => ball.classList.add('docked'), 1000);
+          if (validX <= 5) {
+            setTimeout(() => ball.classList.add('docked-left'), 800);
+          } else if (validX >= window.innerWidth - 45) {
+            setTimeout(() => ball.classList.add('docked-right'), 800);
           }
         }
       });

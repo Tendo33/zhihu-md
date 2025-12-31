@@ -1,21 +1,21 @@
 /* 悬浮球容器 */
 #zhihu-md-floating-ball {
   position: fixed;
-  right: 32px;
-  bottom: 32px;
-  width: 48px;
-  height: 48px;
+  right: 24px;
+  bottom: 24px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   
-  /* Light Blue Theme */
-  background: rgba(240, 249, 255, 0.9); /* Sky 50 */
-  border: 1px solid rgba(186, 230, 253, 0.8); /* Sky 200 */
+  /* Frosted Glass Effect */
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   
-  /* Blueish shadow */
+  /* Soft shadow */
   box-shadow: 
-    0 4px 6px -1px rgba(2, 132, 199, 0.1),
-    0 2px 4px -1px rgba(2, 132, 199, 0.06),
-    0 12px 24px -4px rgba(2, 132, 199, 0.15);
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
     
   cursor: pointer;
   z-index: 2147483647;
@@ -27,61 +27,75 @@
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
 }
 
 /* Hover State */
 #zhihu-md-floating-ball:hover {
-  transform: translateY(-2px) scale(1.05);
-  background: #FFFFFF;
-  border-color: #38BDF8; /* Sky 400 */
+  transform: translateY(-2px) scale(1.08);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(56, 189, 248, 0.5); /* Sky 400 */
   box-shadow: 
-    0 20px 25px -5px rgba(2, 132, 199, 0.15), 
-    0 10px 10px -5px rgba(2, 132, 199, 0.1);
+    0 8px 24px rgba(2, 132, 199, 0.15), 
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 /* Active/Click State */
 #zhihu-md-floating-ball:active {
   transform: translateY(0) scale(0.95);
-  background: #E0F2FE; /* Sky 100 */
-  border-color: #0EA5E9; /* Sky 500 */
+  background: rgba(224, 242, 254, 0.8); /* Sky 100 */
+  border-color: rgba(14, 165, 233, 0.5); /* Sky 500 */
 }
 
 /* Dragging State */
 #zhihu-md-floating-ball.dragging {
   transition: none;
   cursor: move;
-  opacity: 0.9;
   transform: scale(1.05);
-  box-shadow: 0 8px 30px rgba(2, 132, 199, 0.25);
-  background: #FFFFFF;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.9);
 }
 
-/* Docked/Hidden State */
-#zhihu-md-floating-ball.docked {
-  opacity: 0.3;
-  transform: scale(0.9);
+/* Docked Left - Slide half-way off screen */
+#zhihu-md-floating-ball.docked-left {
+  transform: translateX(-20px);
+  opacity: 0.4;
   box-shadow: none;
   border-color: transparent;
-  background: rgba(240, 249, 255, 0.6);
 }
 
-#zhihu-md-floating-ball.docked:hover {
+#zhihu-md-floating-ball.docked-left:hover {
+  transform: translateX(0);
   opacity: 1;
-  transform: scale(1.0);
-  background: #FFFFFF;
-  border-color: #38BDF8;
-  box-shadow: 
-    0 4px 6px -1px rgba(2, 132, 199, 0.1),
-    0 2px 4px -1px rgba(2, 132, 199, 0.06);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Docked Right - Slide half-way off screen */
+#zhihu-md-floating-ball.docked-right {
+  transform: translateX(20px);
+  opacity: 0.4;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+#zhihu-md-floating-ball.docked-right:hover {
+  transform: translateX(0);
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 /* Icon styling */
 #zhihu-md-floating-ball .icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   color: #0369A1; /* Sky 700 */
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 #zhihu-md-floating-ball:hover .icon {
@@ -91,12 +105,12 @@
 /* Loading State */
 #zhihu-md-floating-ball.loading {
   pointer-events: none;
-  border-color: #CBD5E1;
+  border-color: rgba(203, 213, 225, 0.5);
 }
 
 #zhihu-md-floating-ball.loading .icon {
   animation: zhihu-md-spin 1s linear infinite;
-  opacity: 0.7;
+  opacity: 0.6;
   color: #64748B;
 }
 
@@ -107,9 +121,9 @@
 
 /* Success State */
 #zhihu-md-floating-ball.success {
-  background: #ECFDF5; /* Emerald 50 */
-  border-color: #34D399; /* Emerald 400 */
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 10px 15px -3px rgba(16, 185, 129, 0.1);
+  background: rgba(236, 253, 245, 0.8); /* Emerald 50 */
+  border-color: rgba(52, 211, 153, 0.5); /* Emerald 400 */
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15), 0 8px 16px rgba(16, 185, 129, 0.1);
 }
 
 #zhihu-md-floating-ball.success .icon {
@@ -119,9 +133,9 @@
 
 /* Error State */
 #zhihu-md-floating-ball.error {
-  background: #FEF2F2; /* Red 50 */
-  border-color: #F87171; /* Red 400 */
-  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), 0 10px 15px -3px rgba(239, 68, 68, 0.1);
+  background: rgba(254, 242, 242, 0.8); /* Red 50 */
+  border-color: rgba(248, 113, 113, 0.5); /* Red 400 */
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15), 0 8px 16px rgba(239, 68, 68, 0.1);
 }
 
 #zhihu-md-floating-ball.error .icon {
@@ -131,16 +145,16 @@
 /* Tooltip */
 #zhihu-md-floating-ball .tooltip {
   position: absolute;
-  right: 60px; /* Position to the left */
+  right: 52px; /* Position to the left */
   top: 50%;
-  transform: translateY(-50%) translateX(10px);
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-50%) translateX(8px);
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.9);
   color: #0F172A; /* Slate 900 */
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   border-radius: 6px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   white-space: nowrap;
   
   opacity: 0;
@@ -149,7 +163,9 @@
   
   transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 #zhihu-md-floating-ball:hover .tooltip {
@@ -159,8 +175,7 @@
 }
 
 #zhihu-md-floating-ball.dragging .tooltip,
-#zhihu-md-floating-ball.docked .tooltip {
+#zhihu-md-floating-ball.docked-left .tooltip,
+#zhihu-md-floating-ball.docked-right .tooltip {
   display: none;
 }
-
-

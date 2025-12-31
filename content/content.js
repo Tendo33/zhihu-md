@@ -62,7 +62,7 @@
   }
 
   /**
-   * Detect page type (column article or answer)
+   * Detect page type (column article, single answer, or question page)
    */
   function detectPageType() {
     const pathname = window.location.pathname;
@@ -75,6 +75,11 @@
     if (pathname.includes('/question/') && pathname.includes('/answer/')) {
       Logger.info('页面类型: 问答回答 (answer)');
       return 'answer';
+    }
+    // 支持问题页面（查看全部回答）- 只有 /question/ 没有 /answer/
+    if (pathname.includes('/question/') && !pathname.includes('/answer/')) {
+      Logger.info('页面类型: 问题页面 (question)');
+      return 'question';
     }
     
     Logger.warn('无法识别的页面类型，路径:', pathname);
@@ -151,6 +156,19 @@
         container = document.querySelector('.AnswerItem .RichText');
       }
       Logger.debug('.AnswerItem .RichText 查找结果:', container ? '找到' : '未找到');
+    } else if (pageType === 'question') {
+      // 问题页面（查看全部回答）- 获取第一个展开的回答
+      Logger.debug('尝试查找问题页面内容容器...');
+      // 首先尝试找到已展开的回答
+      const expandedAnswer = document.querySelector('.AnswerItem .RichText.ztext');
+      if (expandedAnswer) {
+        container = expandedAnswer;
+        Logger.debug('找到已展开的回答');
+      } else {
+        // 否则尝试找第一个回答
+        container = document.querySelector('.AnswerItem .RichText');
+        Logger.debug('尝试找第一个回答:', container ? '找到' : '未找到');
+      }
     }
     
     if (container) {
@@ -175,7 +193,7 @@
   function getTitle(pageType) {
     if (pageType === 'column') {
       return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.COLUMN)?.textContent?.trim();
-    } else if (pageType === 'answer') {
+    } else if (pageType === 'answer' || pageType === 'question') {
       return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.ANSWER)?.textContent?.trim();
     }
     return document.title;
@@ -187,7 +205,7 @@
   function getAuthor(pageType) {
     if (pageType === 'column') {
       return querySelectorAny(document, CONSTANTS.SELECTORS.AUTHOR.COLUMN)?.textContent?.trim();
-    } else if (pageType === 'answer') {
+    } else if (pageType === 'answer' || pageType === 'question') {
       const answerItem = document.querySelector('.AnswerItem');
       if (answerItem) {
         return querySelectorAny(answerItem, ['.AuthorInfo-name', '.UserLink-link'])?.textContent?.trim();

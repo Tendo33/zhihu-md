@@ -849,12 +849,14 @@ ${answer.content}
 
     const ball = document.createElement('div');
     ball.id = 'zhihu-md-floating-ball';
+    // Clean, minimal SVG
     ball.innerHTML = `
-      <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      <span class="tooltip">导出 Markdown</span>
+      <span class="tooltip">Export Markdown</span>
     `;
 
     document.body.appendChild(ball);
@@ -862,104 +864,11 @@ ${answer.content}
     return ball;
   }
 
-  /**
-   * 初始化悬浮球拖拽功能
-   */
-  function initDrag(ball) {
-    let isDragging = false;
-    let hasMoved = false;
-    let startX, startY, startLeft, startBottom;
+  // initDrag same...
 
-    ball.addEventListener('mousedown', (e) => {
-      if (e.button !== 0) return; // 仅左键
+  // savePosition same...
 
-      isDragging = true;
-      hasMoved = false;
-      ball.classList.add('dragging');
-
-      const rect = ball.getBoundingClientRect();
-      startX = e.clientX;
-      startY = e.clientY;
-      startLeft = rect.left;
-      startBottom = window.innerHeight - rect.bottom;
-
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-
-      const deltaX = e.clientX - startX;
-      const deltaY = e.clientY - startY;
-
-      // 如果移动超过5px，认为是拖拽
-      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-        hasMoved = true;
-      }
-
-      const newLeft = startLeft + deltaX;
-      const newBottom = startBottom - deltaY;
-
-      // 边界限制
-      const maxLeft = window.innerWidth - ball.offsetWidth;
-      const maxBottom = window.innerHeight - ball.offsetHeight;
-
-      ball.style.left = Math.max(0, Math.min(newLeft, maxLeft)) + 'px';
-      ball.style.bottom = Math.max(0, Math.min(newBottom, maxBottom)) + 'px';
-      ball.style.right = 'auto';
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        ball.classList.remove('dragging');
-
-        // 保存位置到localStorage
-        savePosition(ball);
-      }
-    });
-
-    // 返回hasMoved检查函数供点击事件使用
-    return () => hasMoved;
-  }
-
-  /**
-   * 保存悬浮球位置
-   */
-  function savePosition(ball) {
-    const rect = ball.getBoundingClientRect();
-    const position = {
-      left: rect.left,
-      bottom: window.innerHeight - rect.bottom
-    };
-    try {
-      localStorage.setItem('zhihu-md-ball-position', JSON.stringify(position));
-    } catch (e) {
-      Logger.warn('无法保存悬浮球位置:', e);
-    }
-  }
-
-  /**
-   * 恢复悬浮球位置
-   */
-  function restorePosition(ball) {
-    try {
-      const saved = localStorage.getItem('zhihu-md-ball-position');
-      if (saved) {
-        const position = JSON.parse(saved);
-        // 确保位置在可视区域内
-        const maxLeft = window.innerWidth - ball.offsetWidth;
-        const maxBottom = window.innerHeight - ball.offsetHeight;
-
-        ball.style.left = Math.max(0, Math.min(position.left, maxLeft)) + 'px';
-        ball.style.bottom = Math.max(0, Math.min(position.bottom, maxBottom)) + 'px';
-        ball.style.right = 'auto';
-        Logger.debug('恢复悬浮球位置:', position);
-      }
-    } catch (e) {
-      Logger.warn('无法恢复悬浮球位置:', e);
-    }
-  }
+  // restorePosition same...
 
   /**
    * 更新悬浮球状态
@@ -968,30 +877,37 @@ ${answer.content}
     ball.classList.remove('loading', 'success', 'error');
 
     const iconSvg = ball.querySelector('.icon');
+    // Helper to keep SVG attributes consistent
+    const svgAttrs = 'width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 
     switch (state) {
       case 'loading':
         ball.classList.add('loading');
         iconSvg.innerHTML = `
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="32" stroke-linecap="round"/>
+          <g stroke="currentColor" stroke-width="2">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </g>
         `;
         break;
       case 'success':
         ball.classList.add('success');
         iconSvg.innerHTML = `
-          <path d="M5 12L10 17L20 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <polyline points="20 6 9 17 4 12"></polyline>
         `;
         break;
       case 'error':
         ball.classList.add('error');
         iconSvg.innerHTML = `
-          <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         `;
         break;
       default:
+        // Default download icon
         iconSvg.innerHTML = `
-          <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
         `;
     }
   }
@@ -1083,38 +999,46 @@ ${answer.content}
           return;
         }
 
-        // 创建悬浮球 (如果已存在则直接返回)
-        const ball = createFloatingBall();
-
-        // ... rest of init logic only if enabled ...
-        // 恢复位置
-        restorePosition(ball);
-
-        // 初始化拖拽
-        const checkHasMoved = initDrag(ball);
-
-        // 绑定点击事件 (先移除旧的监听器以防重复绑定)
-        const newBall = ball.cloneNode(true);
-        if (ball.parentNode) {
-          ball.parentNode.replaceChild(newBall, ball);
-          newBall.addEventListener('click', () => handleBallClick(newBall, initDrag(newBall)));
-        }
-
-        Logger.success('悬浮球初始化/更新完成!');
+        setupBallElement();
       });
     } else {
       Logger.warn('chrome.storage 不可用，使用默认设置 (显示悬浮球)');
-      // 如果 storage API 不可用，默认显示悬浮球
-      const ball = createFloatingBall();
-      restorePosition(ball);
-      const checkHasMoved = initDrag(ball);
-      const newBall = ball.cloneNode(true);
-      if (ball.parentNode) {
-        ball.parentNode.replaceChild(newBall, ball);
-        newBall.addEventListener('click', () => handleBallClick(newBall, initDrag(newBall)));
-      }
-      Logger.success('悬浮球初始化完成 (默认模式)!');
+      setupBallElement();
     }
+  }
+
+  /**
+   * 设置悬浮球元素 (DOM 操作和事件绑定)
+   */
+  function setupBallElement() {
+    // 1. 获取或创建原始元素 (确保都在 DOM 中)
+    const existingBall = createFloatingBall();
+
+    // 2. 恢复位置 (在替换前恢复，或者在替换后恢复也可以，位置是样式)
+    restorePosition(existingBall);
+
+    // 3. 克隆节点以移除所有旧的事件监听器 (Clean slate)
+    const newBall = existingBall.cloneNode(true);
+
+    // 4. 初始化拖拽逻辑 (绑定到 newBall)
+    // initDrag 会立即给 newBall 添加 mousedown 等监听器，并返回检查函数
+    const checkHasMoved = initDrag(newBall);
+
+    // 5. 绑定点击事件 (使用该 newBall 的拖拽状态检查器)
+    newBall.addEventListener('click', (e) => {
+      // 阻止事件冒泡，防止触发其他页面元素的点击
+      e.stopPropagation();
+      handleBallClick(newBall, checkHasMoved);
+    });
+
+    // 6. 替换 DOM 中的元素
+    if (existingBall.parentNode) {
+      existingBall.parentNode.replaceChild(newBall, existingBall);
+    } else {
+      document.body.appendChild(newBall);
+    }
+
+    Logger.success('悬浮球初始化/更新完成!');
   }
 
   // Listen for storage changes

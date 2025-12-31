@@ -1,161 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>Zhihu-md 设置</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-      padding: 0;
-      margin: 0;
-      min-width: 400px;
-    }
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
-    h1 {
-      font-size: 24px;
-      margin-top: 0;
-      margin-bottom: 24px;
-      color: #1a1a1a;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 16px;
-    }
-    .section {
-      margin-bottom: 24px;
-    }
-    .option-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #f5f5f5;
-    }
-    .option-item:last-child {
-      border-bottom: none;
-    }
-    .option-label {
-      font-size: 16px;
-      font-weight: 500;
-    }
-    .option-desc {
-      font-size: 14px;
-      color: #666;
-      margin-top: 4px;
-    }
-    /* Toggle Switch */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 28px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 34px;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-    input:checked + .slider {
-      background-color: #2196F3;
-    }
-    input:focus + .slider {
-      box-shadow: 0 0 1px #2196F3;
-    }
-    input:checked + .slider:before {
-      transform: translateX(22px);
-    }
-    /* Number Input */
-    .number-input {
-      width: 70px;
-      padding: 8px 12px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      text-align: center;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .number-input:focus {
-      outline: none;
-      border-color: #2196F3;
-      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-    }
-    .number-input::-webkit-inner-spin-button,
-    .number-input::-webkit-outer-spin-button {
-      opacity: 1;
-    }
-    
-    .footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 13px;
-      color: #999;
-    }
-    .status-msg {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .status-msg.show {
-      opacity: 1;
-    }
-  </style>
+  <title>Zhihu-md Settings</title>
+  <link rel="stylesheet" href="options.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <h1>扩展设置</h1>
+    <header class="header">
+      <h1>Settings</h1>
+    </header>
     
     <div class="section">
       <div class="option-item">
-        <div>
-          <div class="option-label">启用页面悬浮球</div>
-          <div class="option-desc">在知乎文章页面右下角显示快捷导出按钮</div>
+        <div class="option-content">
+          <div class="option-label">Floating Action Button</div>
+          <div class="option-desc">Show a quick export button on the bottom-right of Zhihu articles.</div>
         </div>
         <label class="switch">
           <input type="checkbox" id="showFloatingBall">
           <span class="slider"></span>
         </label>
       </div>
+
       <div class="option-item">
-        <div>
-          <div class="option-label">问题页面下载回答数量</div>
-          <div class="option-desc">在问题列表页面下载的回答数量（1-50）</div>
+        <div class="option-content">
+          <div class="option-label">Max Answers Download</div>
+          <div class="option-desc">Maximum number of answers to download from a question page (1-50).</div>
         </div>
         <input type="number" id="maxAnswerCount" min="1" max="50" value="20" class="number-input">
       </div>
@@ -166,7 +38,7 @@
     </div>
   </div>
   
-  <div id="status" class="status-msg">已保存</div>
+  <div id="status" class="status-msg">Changes saved</div>
 
   <script src="options.js"></script>
 </body>

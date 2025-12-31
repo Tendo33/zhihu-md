@@ -1,9 +1,15 @@
 // Saves options to chrome.storage
 function saveOptions() {
   const showFloatingBall = document.getElementById('showFloatingBall').checked;
+  const maxAnswerCount = parseInt(document.getElementById('maxAnswerCount').value, 10);
+
+  // Validate range
+  const validCount = Math.min(50, Math.max(1, maxAnswerCount || 20));
+  document.getElementById('maxAnswerCount').value = validCount;
 
   chrome.storage.sync.set({
-    showFloatingBall: showFloatingBall
+    showFloatingBall: showFloatingBall,
+    maxAnswerCount: validCount
   }, () => {
     // Update status to let user know options were saved.
     const status = document.getElementById('status');
@@ -18,11 +24,15 @@ function saveOptions() {
 // stored in chrome.storage.
 function restoreOptions() {
   chrome.storage.sync.get({
-    showFloatingBall: true // Default value
+    showFloatingBall: true, // Default value
+    maxAnswerCount: 20      // Default value
   }, (items) => {
     document.getElementById('showFloatingBall').checked = items.showFloatingBall;
+    document.getElementById('maxAnswerCount').value = items.maxAnswerCount;
   });
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
 document.getElementById('showFloatingBall').addEventListener('change', saveOptions);
+document.getElementById('maxAnswerCount').addEventListener('change', saveOptions);
+

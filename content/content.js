@@ -354,16 +354,25 @@
   /**
    * Generate YAML front matter
    */
-  function generateFrontMatter(title, author, url) {
+  function generateFrontMatter(title, author, url, createdTime = '', editedTime = '') {
     const date = new Date().toISOString().split('T')[0];
-    return `---
+    let frontMatter = `---
 title: "${title.replace(/"/g, '\\"')}"
 url: ${url}
 author: ${author || '未知'}
-date: ${date}
----
+date: ${date}`;
+
+    if (createdTime) {
+      frontMatter += `\ncreated: ${createdTime}`;
+    }
+    if (editedTime) {
+      frontMatter += `\nedited: ${editedTime}`;
+    }
+
+    frontMatter += `\n---
 
 `;
+    return frontMatter;
   }
 
   /**
@@ -436,8 +445,39 @@ date: ${date}
     const author = getAuthor(pageType);
     const container = getContentContainer(pageType);
     
+    // 提取时间信息
+    let createdTime = '';
+    let editedTime = '';
+
+    // 对于专栏文章，查找 Post-Header 中的时间
+    if (pageType === 'column') {
+      const timeEl = document.querySelector('.Post-Header .ContentItem-time');
+      if (timeEl) {
+        const timeText = timeEl.textContent || '';
+        const createdMatch = timeText.match(/发布于\s*([^\s编]+)/);
+        const editedMatch = timeText.match(/编辑于\s*(.+)/);
+        if (createdMatch) createdTime = createdMatch[1].trim();
+        if (editedMatch) editedTime = editedMatch[1].trim();
+      }
+    } else if (pageType === 'answer') {
+      // 对于单个回答页面
+      const answerItem = document.querySelector('.AnswerItem');
+      if (answerItem) {
+        const timeEl = answerItem.querySelector('.ContentItem-time');
+        if (timeEl) {
+          const timeText = timeEl.textContent || '';
+          const createdMatch = timeText.match(/发布于\s*([^\s编]+)/);
+          const editedMatch = timeText.match(/编辑于\s*(.+)/);
+          if (createdMatch) createdTime = createdMatch[1].trim();
+          if (editedMatch) editedTime = editedMatch[1].trim();
+        }
+      }
+    }
+
     Logger.debug('标题:', title);
     Logger.debug('作者:', author);
+    Logger.debug('创建时间:', createdTime);
+    Logger.debug('编辑时间:', editedTime);
 
     if (!container) {
       Logger.error('内容容器未找到');
@@ -497,9 +537,9 @@ date: ${date}
       let markdown = turndownService.turndown(clonedContainer);
       Logger.debug('Markdown 原始长度:', markdown.length, '字符');
 
-      // Add front matter
+      // Add front matter with time info
       Logger.debug('添加 front matter...');
-      const frontMatter = generateFrontMatter(title, author, window.location.href);
+      const frontMatter = generateFrontMatter(title, author, window.location.href, createdTime, editedTime);
       markdown = frontMatter + markdown;
 
       // Clean up extra newlines
@@ -530,6 +570,235 @@ date: ${date}
       Logger.error('错误堆栈:', error.stack);
       Logger.error('==========================================');
       return { success: false, error: '导出过程中发生错误: ' + error.message };
+    }
+  }
+
+  /**
+   * Process a single answer element and extract content
+   */
+  function processAnswerContent(answerItem, turndownService) {
+    // Get author info
+    const authorEl = answerItem.querySelector('.AuthorInfo-name') ||
+      answerItem.querySelector('.UserLink-link');
+    const author = authorEl?.textContent?.trim() || '匿名用户';
+
+    // Get time info - 知乎时间通常在 ContentItem-time 或 meta 区域
+    let createdTime = '';
+    let editedTime = '';
+
+    // 尝试查找时间信息
+    const timeEl = answerItem.querySelector('.ContentItem-time');
+    if (timeEl) {
+      const timeText = timeEl.textContent || '';
+      // 解析 "发布于 xxx" 或 "编辑于 xxx"
+      const createdMatch = timeText.match(/发布于\s*([^\s编]+)/);
+      const editedMatch = timeText.match(/编辑于\s*(.+)/);
+      if (createdMatch) createdTime = createdMatch[1].trim();
+      if (editedMatch) editedTime = editedMatch[1].trim();
+    }
+
+    // 如果没找到，尝试其他选择器
+    if (!createdTime) {
+      const metaEl = answerItem.querySelector('[data-za-detail-view-name="AnswerItem"] .ContentItem-meta');
+      if (metaEl) {
+        const spans = metaEl.querySelectorAll('span');
+        spans.forEach(span => {
+          const text = span.textContent || '';
+          if (text.includes('发布于') || text.includes('创建于')) {
+            createdTime = text.replace(/发布于|创建于/g, '').trim();
+          }
+          if (text.includes('编辑于')) {
+            editedTime = text.replace('编辑于', '').trim();
+          }
+        });
+      }
+    }
+
+    // Get answer content
+    const contentEl = answerItem.querySelector('.RichText.ztext');
+    if (!contentEl) return null;
+
+    // Clone and clean
+    const clonedContent = contentEl.cloneNode(true);
+
+    // Remove unwanted elements
+    CONSTANTS.SELECTORS.UNWANTED.forEach(selector => {
+      clonedContent.querySelectorAll(selector).forEach(el => el.remove());
+    });
+
+    // Remove noscript
+    clonedContent.querySelectorAll('noscript').forEach(el => el.remove());
+
+    // Convert to markdown
+    const markdown = turndownService.turndown(clonedContent);
+
+    return {
+      author,
+      createdTime,
+      editedTime,
+      content: markdown
+    };
+  }
+
+  /**
+   * Scroll page to load more answers
+   */
+  async function scrollToLoadAnswers(targetCount) {
+    Logger.info(`尝试加载 ${targetCount} 个回答...`);
+
+    const startTime = Date.now();
+    const maxTime = 30000; // 30 seconds timeout
+    let lastCount = 0;
+    let noChangeCount = 0;
+
+    while (Date.now() - startTime < maxTime) {
+      const currentAnswers = document.querySelectorAll('.AnswerItem');
+      const currentCount = currentAnswers.length;
+
+      Logger.debug(`当前已加载 ${currentCount} 个回答`);
+
+      if (currentCount >= targetCount) {
+        Logger.success(`已加载足够数量的回答: ${currentCount}`);
+        return currentCount;
+      }
+
+      // Check if page stopped loading new answers
+      if (currentCount === lastCount) {
+        noChangeCount++;
+        if (noChangeCount >= 3) {
+          Logger.warn(`页面似乎没有更多回答了，当前数量: ${currentCount}`);
+          return currentCount;
+        }
+      } else {
+        noChangeCount = 0;
+      }
+      lastCount = currentCount;
+
+      // Scroll to bottom
+      window.scrollTo(0, document.body.scrollHeight);
+
+      // Wait for content to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    Logger.warn('滚动加载超时');
+    return document.querySelectorAll('.AnswerItem').length;
+  }
+
+  /**
+   * Export multiple answers from question page
+   */
+  async function exportMultipleAnswers() {
+    Logger.info('==========================================');
+    Logger.info('开始导出多个回答...');
+    Logger.info('==========================================');
+
+    const pageType = detectPageType();
+    if (pageType !== 'question') {
+      Logger.warn('非问题页面，使用单回答导出');
+      return exportMarkdown();
+    }
+
+    try {
+      // Get user settings
+      let maxAnswerCount = 20;
+      try {
+        const settings = await new Promise(resolve => {
+          chrome.storage.sync.get({ maxAnswerCount: 20 }, resolve);
+        });
+        maxAnswerCount = settings.maxAnswerCount;
+      } catch (e) {
+        Logger.warn('无法读取设置，使用默认值 20');
+      }
+
+      Logger.info(`目标下载回答数量: ${maxAnswerCount}`);
+
+      // Scroll to load answers
+      const loadedCount = await scrollToLoadAnswers(maxAnswerCount);
+      Logger.info(`实际加载回答数量: ${loadedCount}`);
+
+      // Get all answer items
+      const answerItems = document.querySelectorAll('.AnswerItem');
+      const answersToProcess = Array.from(answerItems).slice(0, maxAnswerCount);
+
+      if (answersToProcess.length === 0) {
+        return { success: false, error: '未找到任何回答' };
+      }
+
+      // Get question info
+      const title = getTitle('question') || '未知问题';
+      const date = new Date().toISOString().split('T')[0];
+
+      // Create turndown service
+      const turndownService = createTurndownService();
+
+      // Process each answer
+      const processedAnswers = [];
+      for (let i = 0; i < answersToProcess.length; i++) {
+        const answer = processAnswerContent(answersToProcess[i], turndownService);
+        if (answer) {
+          processedAnswers.push(answer);
+          Logger.debug(`处理回答 ${i + 1}/${answersToProcess.length}: ${answer.author}`);
+        }
+      }
+
+      if (processedAnswers.length === 0) {
+        return { success: false, error: '无法解析回答内容' };
+      }
+
+      // Build markdown content
+      let markdown = `---
+title: "${title.replace(/"/g, '\\"')}"
+url: ${window.location.href}
+date: ${date}
+answer_count: ${processedAnswers.length}
+---
+
+# ${title}
+
+`;
+
+      processedAnswers.forEach((answer, index) => {
+        markdown += `---
+
+## 回答 ${index + 1}
+
+**作者**: ${answer.author}`;
+
+        if (answer.createdTime) {
+          markdown += `  
+**创建于**: ${answer.createdTime}`;
+        }
+        if (answer.editedTime) {
+          markdown += `  
+**编辑于**: ${answer.editedTime}`;
+        }
+
+        markdown += `
+
+${answer.content}
+
+`;
+      });
+
+      // Clean up extra newlines
+      markdown = markdown.replace(/\n{3,}/g, '\n\n');
+
+      // Generate filename
+      const filename = cleanFilename(title) + '_多回答.md';
+
+      Logger.success(`导出成功! 共 ${processedAnswers.length} 个回答`);
+
+      return {
+        success: true,
+        data: {
+          content: markdown,
+          filename: filename
+        }
+      };
+    } catch (error) {
+      Logger.error('多回答导出失败:', error);
+      return { success: false, error: '导出失败: ' + error.message };
     }
   }
 
@@ -739,11 +1008,23 @@ date: ${date}
     Logger.info('悬浮球被点击，开始导出...');
 
     updateBallState(ball, 'loading');
-    ball.querySelector('.tooltip').textContent = '导出中...';
+
+    // 检测页面类型，显示不同的提示
+    const pageType = detectPageType();
+    if (pageType === 'question') {
+      ball.querySelector('.tooltip').textContent = '加载回答中...';
+    } else {
+      ball.querySelector('.tooltip').textContent = '导出中...';
+    }
 
     try {
-      // 执行导出
-      const result = exportMarkdown();
+      // 根据页面类型选择导出方法
+      let result;
+      if (pageType === 'question') {
+        result = await exportMultipleAnswers();
+      } else {
+        result = exportMarkdown();
+      }
 
       if (result.success) {
         Logger.success('Markdown 生成成功，发送下载请求...');

@@ -93,6 +93,25 @@
     input:checked + .slider:before {
       transform: translateX(22px);
     }
+    /* Number Input */
+    .number-input {
+      width: 70px;
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .number-input:focus {
+      outline: none;
+      border-color: #2196F3;
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    }
+    .number-input::-webkit-inner-spin-button,
+    .number-input::-webkit-outer-spin-button {
+      opacity: 1;
+    }
     
     .footer {
       margin-top: 40px;
@@ -132,6 +151,13 @@
           <input type="checkbox" id="showFloatingBall">
           <span class="slider"></span>
         </label>
+      </div>
+      <div class="option-item">
+        <div>
+          <div class="option-label">问题页面下载回答数量</div>
+          <div class="option-desc">在问题列表页面下载的回答数量（1-50）</div>
+        </div>
+        <input type="number" id="maxAnswerCount" min="1" max="50" value="20" class="number-input">
       </div>
     </div>
     

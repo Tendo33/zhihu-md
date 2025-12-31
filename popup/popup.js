@@ -59,7 +59,22 @@ function updateStatus(type, text) {
 function showArticleInfo(info) {
   articleTitle.textContent = info.title;
   articleAuthor.textContent = info.author || '未知作者';
-  articleType.textContent = info.type === 'column' ? '专栏文章' : '问答回答';
+  // Handle different page types
+  let typeLabel;
+  switch (info.type) {
+    case 'column':
+      typeLabel = '专栏文章';
+      break;
+    case 'answer':
+      typeLabel = '问答回答';
+      break;
+    case 'question':
+      typeLabel = '问题页面 (多回答)';
+      break;
+    default:
+      typeLabel = '未知类型';
+  }
+  articleType.textContent = typeLabel;
   articleInfo.classList.remove('hidden');
   errorMessage.classList.add('hidden');
   exportBtn.disabled = false;
@@ -116,16 +131,25 @@ async function init() {
     // Determine page type
     const isColumn = url.pathname.startsWith('/p/');
     const isAnswer = url.pathname.includes('/question/') && url.pathname.includes('/answer/');
+    const isQuestion = url.pathname.includes('/question/') && !url.pathname.includes('/answer/');
     
-    Logger.debug('页面类型判断:', { isColumn, isAnswer, pathname: url.pathname });
+    Logger.debug('页面类型判断:', { isColumn, isAnswer, isQuestion, pathname: url.pathname });
     
-    if (!isColumn && !isAnswer) {
-      Logger.warn('不是专栏或问答页面');
+    if (!isColumn && !isAnswer && !isQuestion) {
+      Logger.warn('不是专栏、问答或问题页面');
       showError('请打开知乎专栏文章或问答页面');
       return;
     }
     
-    Logger.success('页面类型:', isColumn ? '专栏文章' : '问答回答');
+    let pageTypeLabel;
+    if (isColumn) {
+      pageTypeLabel = '专栏文章';
+    } else if (isAnswer) {
+      pageTypeLabel = '问答回答';
+    } else {
+      pageTypeLabel = '问题页面 (多回答)';
+    }
+    Logger.success('页面类型:', pageTypeLabel);
 
     // Send message to content script to get article info
     Logger.info('正在向 content script 发送 getArticleInfo 消息...');
@@ -136,13 +160,24 @@ async function init() {
     Logger.info('收到 content script 响应:', response);
     
     if (response && response.success) {
-      Logger.success('成功获取文章信息');
+      Logger.success('成功获取文章信信');
       Logger.debug('文章数据:', response.data);
       updateStatus('success', '已就绪');
+
+      // Determine type for display
+      let displayType;
+      if (isColumn) {
+        displayType = 'column';
+      } else if (isAnswer) {
+        displayType = 'answer';
+      } else {
+        displayType = 'question';
+      }
+
       showArticleInfo({
         title: response.data.title,
         author: response.data.author,
-        type: isColumn ? 'column' : 'answer'
+        type: displayType
       });
     } else {
       Logger.error('获取文章信息失败:', response?.error);

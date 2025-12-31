@@ -121,7 +121,7 @@ async function init() {
     Logger.debug('解析后的 URL 对象:', { hostname: url.hostname, pathname: url.pathname });
     
     if (!url.hostname.endsWith('zhihu.com')) {
-      Logger.warn('不是知乎页面，hostname:', url.hostname);
+      Logger.info('不是知乎页面，hostname:', url.hostname);
       showError('此页面不是知乎页面');
       return;
     }
@@ -136,7 +136,7 @@ async function init() {
     Logger.debug('页面类型判断:', { isColumn, isAnswer, isQuestion, pathname: url.pathname });
     
     if (!isColumn && !isAnswer && !isQuestion) {
-      Logger.warn('不是专栏、问答或问题页面');
+      Logger.info('不是专栏、问答或问题页面');
       showError('请打开知乎专栏文章或问答页面');
       return;
     }

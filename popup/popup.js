@@ -86,9 +86,13 @@ function showArticleInfo(info) {
 
 /**
  * Show error state
+ * @param {string} message - Error message to display
+ * @param {boolean} silent - If true, don't log to console (for expected cases like non-Zhihu pages)
  */
-function showError(message) {
-  Logger.error('Show Error:', message);
+function showError(message, silent = false) {
+  if (!silent) {
+    Logger.debug('Show Error:', message);
+  }
   updateStatus('error', '失败');
 
   // Update error message text
@@ -122,7 +126,7 @@ async function init() {
     const url = new URL(tab.url);
     
     if (!url.hostname.endsWith('zhihu.com')) {
-      showError('此页面不是知乎页面');
+      showError('此页面不是知乎页面', true);  // Silent - expected case
       return;
     }
 
@@ -132,7 +136,7 @@ async function init() {
     const isQuestion = url.pathname.includes('/question/') && !url.pathname.includes('/answer/');
 
     if (!isColumn && !isAnswer && !isQuestion) {
-      showError('请打开知乎文章、问题或回答页面');
+      showError('请打开知乎文章、问题或回答页面', true);  // Silent - expected case
       return;
     }
 

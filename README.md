@@ -34,13 +34,19 @@ zhihu-md/
 ├── popup/
 │   ├── popup.html         # 弹出窗口 UI
 │   ├── popup.js           # 弹出窗口逻辑
-│   └── popup.css          # 样式
+│   └── popup.css          # 弹出窗口样式
 ├── content/
-│   └── content.js         # 内容脚本（DOM 解析）
+│   ├── content.js         # 内容脚本（DOM 解析）
+│   └── content.css        # 内容脚本样式（悬浮球）
 ├── background/
 │   └── background.js      # Service Worker
+├── options/
+│   ├── options.html       # 选项页面 UI
+│   ├── options.js         # 选项页面逻辑
+│   └── options.css        # 选项页面样式
 ├── lib/
-│   └── turndown.min.js    # HTML to Markdown 库
+│   ├── turndown.min.js    # HTML to Markdown 库
+│   └── logger.js          # 日志工具
 └── icons/
     ├── icon16.png
     ├── icon48.png

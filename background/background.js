@@ -4,25 +4,9 @@
  */
 
 // ============== 日志系统 ==============
-const Logger = {
-  PREFIX: '[Zhihu-MD Background]',
-  
-  info: function(...args) {
-    console.log(`${this.PREFIX} [INFO]`, ...args);
-  },
-  success: function(...args) {
-    console.log(`${this.PREFIX} [SUCCESS]`, ...args);
-  },
-  warn: function(...args) {
-    console.warn(`${this.PREFIX} [WARN]`, ...args);
-  },
-  error: function(...args) {
-    console.error(`${this.PREFIX} [ERROR]`, ...args);
-  },
-  debug: function(...args) {
-    console.log(`${this.PREFIX} [DEBUG]`, ...args);
-  }
-};
+// Import shared logger for service worker
+importScripts('/lib/logger.js');
+const Logger = createLogger('[Zhihu-MD Background]');
 
 Logger.info('==========================================');
 Logger.info('Background service worker 开始加载...');

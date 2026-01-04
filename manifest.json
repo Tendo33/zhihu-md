@@ -31,7 +31,11 @@
   "content_scripts": [
     {
       "matches": ["*://*.zhihu.com/*"],
-      "js": ["lib/turndown.min.js", "content/content.js"],
+      "js": [
+        "lib/turndown.min.js",
+        "lib/logger.js",
+        "content/content.js"
+      ],
       "css": [
         "content/content.css"
       ],

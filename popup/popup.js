@@ -4,32 +4,7 @@
  */
 
 // ============== Logger System ==============
-const Logger = {
-  PREFIX: '[Zhihu-MD Popup]',
-  STYLES: {
-    info: 'color: #2196F3; font-weight: bold;',
-    success: 'color: #4CAF50; font-weight: bold;',
-    warn: 'color: #FF9800; font-weight: bold;',
-    error: 'color: #F44336; font-weight: bold;',
-    debug: 'color: #9C27B0; font-weight: bold;'
-  },
-  
-  info: function(...args) {
-    console.log(`%c${this.PREFIX} [INFO]`, this.STYLES.info, ...args);
-  },
-  success: function(...args) {
-    console.log(`%c${this.PREFIX} [SUCCESS]`, this.STYLES.success, ...args);
-  },
-  warn: function(...args) {
-    console.warn(`%c${this.PREFIX} [WARN]`, this.STYLES.warn, ...args);
-  },
-  error: function(...args) {
-    console.error(`%c${this.PREFIX} [ERROR]`, this.STYLES.error, ...args);
-  },
-  debug: function(...args) {
-    console.log(`%c${this.PREFIX} [DEBUG]`, this.STYLES.debug, ...args);
-  }
-};
+const Logger = createLogger('[Zhihu-MD Popup]');
 
 Logger.info('Popup Script Loaded');
 
@@ -38,8 +13,7 @@ const statusBadge = document.getElementById('page-status');
 const statusText = statusBadge.querySelector('.status-text');
 const articleInfo = document.getElementById('article-info');
 const articleTitle = document.getElementById('article-title');
-// New selectors based on refactored HTML
-const articleAuthor = document.getElementById('article-author').querySelector('span'); // Direct span child
+const articleAuthor = document.getElementById('article-author').querySelector('span');
 const articleType = document.getElementById('article-type').querySelector('span');     // Direct span child
 const errorMessage = document.getElementById('error-message');
 const exportBtn = document.getElementById('export-btn');
@@ -182,8 +156,7 @@ async function init() {
  */
 async function handleExport() {
   Logger.info('Start Export...');
-  
-  const originalText = exportBtn.querySelector('span').textContent;
+
   const btnText = exportBtn.querySelector('span');
   
   try {

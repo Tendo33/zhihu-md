@@ -31,7 +31,7 @@
   }
 
   /**
-   * Detect page type (column article, single answer, or question page)
+   * Detect page type (column article, single answer, question page, home, follow, or hot)
    */
   function detectPageType() {
     const pathname = window.location.pathname;
@@ -49,6 +49,21 @@
     if (pathname.includes('/question/') && !pathname.includes('/answer/')) {
       Logger.info('页面类型: 问题页面 (question)');
       return 'question';
+    }
+    // 热榜页面
+    if (pathname === '/hot' || pathname === '/hot/') {
+      Logger.info('页面类型: 热榜页面 (hot)');
+      return 'hot';
+    }
+    // 关注页面
+    if (pathname === '/follow' || pathname === '/follow/') {
+      Logger.info('页面类型: 关注页面 (follow)');
+      return 'follow';
+    }
+    // 首页
+    if (pathname === '/' || pathname === '') {
+      Logger.info('页面类型: 首页 (home)');
+      return 'home';
     }
     
     Logger.debug('非文章页面，路径:', pathname);
@@ -368,6 +383,33 @@ date: ${date}`;
     if (!pageType) {
       Logger.error('页面类型无效');
       return { success: false, error: '不是有效的知乎文章页面' };
+    }
+
+    // 对于首页、关注页和热榜，不需要检查内容容器
+    if (pageType === 'home' || pageType === 'follow' || pageType === 'hot') {
+      let title, author;
+      if (pageType === 'home') {
+        title = '知乎首页推荐';
+        author = '知乎';
+      } else if (pageType === 'follow') {
+        title = '知乎关注动态';
+        author = '知乎';
+      } else {
+        title = '知乎热榜';
+        author = '知乎';
+      }
+
+      const result = {
+        success: true,
+        data: {
+          title: title,
+          author: author,
+          type: pageType
+        }
+      };
+
+      Logger.success('页面信息获取成功:', result);
+      return result;
     }
 
     const title = getTitle(pageType);
@@ -771,6 +813,331 @@ ${answer.content}
     }
   }
 
+  // ============== 热榜页导出功能 ==============
+
+  /**
+   * Export hot list items from /hot page
+   * Only exports question titles and links
+   */
+  async function exportHotList() {
+    Logger.info('==========================================');
+    Logger.info('开始导出热榜...');
+    Logger.info('==========================================');
+
+    try {
+      // 热榜页面可能需要等待加载
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // 查找热榜容器 - 知乎热榜的选择器
+      const hotItems = document.querySelectorAll('.HotList-item, .HotItem, [class*="HotItem"]');
+
+      if (hotItems.length === 0) {
+        // 备选选择器
+        const altItems = document.querySelectorAll('.HotList .HotItem-content, .css-1xgfyz0');
+        if (altItems.length === 0) {
+          Logger.error('未找到热榜条目');
+          return { success: false, error: '未找到热榜内容，请确保在热榜页面' };
+        }
+      }
+
+      const items = [];
+
+      // 遍历所有热榜条目
+      const hotListItems = document.querySelectorAll('.HotList-item, .HotItem, [class*="HotItem-content"]');
+
+      hotListItems.forEach((item, index) => {
+        // 查找标题链接
+        const titleEl = item.querySelector('.HotItem-title, [class*="HotItem-title"], a[href*="/question/"]');
+        const linkEl = item.querySelector('a[href*="/question/"]') || item.querySelector('a');
+
+        // 获取热度/排名
+        const rankEl = item.querySelector('.HotItem-rank, .HotItem-index, [class*="index"]');
+        const metricsEl = item.querySelector('.HotItem-metrics, [class*="metrics"]');
+
+        if (titleEl || linkEl) {
+          const title = titleEl?.textContent?.trim() || linkEl?.textContent?.trim() || '未知标题';
+          const href = linkEl?.getAttribute('href') || '';
+          const fullUrl = href.startsWith('http') ? href : `https://www.zhihu.com${href}`;
+          const rank = rankEl?.textContent?.trim() || String(index + 1);
+          const metrics = metricsEl?.textContent?.trim() || '';
+
+          items.push({
+            rank,
+            title,
+            url: fullUrl,
+            metrics
+          });
+        }
+      });
+
+      // 如果上面的选择器没找到，尝试更通用的方法
+      if (items.length === 0) {
+        Logger.debug('使用备选方法查找热榜...');
+        const allLinks = document.querySelectorAll('a[href*="/question/"]');
+        const seenUrls = new Set();
+
+        allLinks.forEach((link, index) => {
+          const href = link.getAttribute('href');
+          if (href && !seenUrls.has(href)) {
+            seenUrls.add(href);
+            const title = link.textContent?.trim() || '未知标题';
+            if (title && title.length > 5) { // 过滤掉太短的文本
+              items.push({
+                rank: String(items.length + 1),
+                title,
+                url: href.startsWith('http') ? href : `https://www.zhihu.com${href}`,
+                metrics: ''
+              });
+            }
+          }
+        });
+      }
+
+      if (items.length === 0) {
+        return { success: false, error: '未能提取热榜条目' };
+      }
+
+      Logger.info(`找到 ${items.length} 个热榜条目`);
+
+      // 构建 Markdown
+      const date = new Date().toISOString().split('T')[0];
+      let markdown = `---
+title: "知乎热榜"
+url: ${window.location.href}
+date: ${date}
+count: ${items.length}
+---
+
+# 知乎热榜
+
+`;
+
+      items.forEach(item => {
+        markdown += `${item.rank}. [${item.title}](${item.url})`;
+        if (item.metrics) {
+          markdown += ` - ${item.metrics}`;
+        }
+        markdown += '\n';
+      });
+
+      const filename = `知乎热榜_${date}.md`;
+
+      Logger.success(`热榜导出成功! 共 ${items.length} 条`);
+
+      return {
+        success: true,
+        data: {
+          content: markdown,
+          filename: filename
+        }
+      };
+    } catch (error) {
+      Logger.error('热榜导出失败:', error);
+      return { success: false, error: '导出失败: ' + error.message };
+    }
+  }
+
+  // ============== 首页/关注页 Feed 导出功能 ==============
+
+  /**
+   * Scroll to load more feed items
+   */
+  async function scrollToLoadFeedItems(targetCount) {
+    Logger.info(`尝试加载 ${targetCount} 个 Feed 条目...`);
+
+    const startTime = Date.now();
+    const maxTime = 30000; // 30 seconds timeout
+    let lastCount = 0;
+    let noChangeCount = 0;
+
+    while (Date.now() - startTime < maxTime) {
+      // 统计当前加载的 Feed 条目
+      const currentItems = document.querySelectorAll('.Feed, .TopstoryItem, [class*="FeedItem"], .ContentItem');
+      const currentCount = currentItems.length;
+
+      Logger.debug(`当前已加载 ${currentCount} 个 Feed 条目`);
+
+      if (currentCount >= targetCount) {
+        Logger.success(`已加载足够数量的条目: ${currentCount}`);
+        return currentCount;
+      }
+
+      // Check if page stopped loading new items
+      if (currentCount === lastCount) {
+        noChangeCount++;
+        if (noChangeCount >= 3) {
+          Logger.warn(`页面似乎没有更多内容了，当前数量: ${currentCount}`);
+          return currentCount;
+        }
+      } else {
+        noChangeCount = 0;
+      }
+      lastCount = currentCount;
+
+      // Scroll to bottom
+      window.scrollTo(0, document.body.scrollHeight);
+
+      // Wait for content to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    Logger.warn('滚动加载超时');
+    return document.querySelectorAll('.Feed, .TopstoryItem, [class*="FeedItem"], .ContentItem').length;
+  }
+
+  /**
+   * Process a single feed item and extract content
+   */
+  function processFeedItem(feedItem, turndownService) {
+    // 查找内容类型和标题
+    const titleEl = feedItem.querySelector('.ContentItem-title a, [class*="ContentItem-title"] a, h2 a');
+    const authorEl = feedItem.querySelector('.AuthorInfo-name, .UserLink-link, [class*="AuthorInfo"] a');
+
+    // 获取内容预览
+    const contentEl = feedItem.querySelector('.RichText, .RichContent-inner, [class*="RichText"]');
+
+    // 获取时间信息
+    const timeEl = feedItem.querySelector('.ContentItem-time, [class*="ContentItem-time"]');
+
+    // 获取链接
+    const linkEl = feedItem.querySelector('a[href*="/question/"], a[href*="/p/"], h2 a');
+
+    if (!titleEl && !contentEl) {
+      return null;
+    }
+
+    const title = titleEl?.textContent?.trim() || '无标题';
+    const author = authorEl?.textContent?.trim() || '未知作者';
+    const href = linkEl?.getAttribute('href') || '';
+    const fullUrl = href.startsWith('http') ? href : `https://www.zhihu.com${href}`;
+    const timeText = timeEl?.textContent?.trim() || '';
+
+    // 转换内容为 Markdown
+    let contentMd = '';
+    if (contentEl) {
+      const clonedContent = contentEl.cloneNode(true);
+      // 移除不需要的元素
+      clonedContent.querySelectorAll('.ContentItem-actions, noscript, .RichText-ADLinkCardContainer').forEach(el => el.remove());
+      contentMd = turndownService.turndown(clonedContent);
+    }
+
+    return {
+      title,
+      author,
+      url: fullUrl,
+      time: timeText,
+      content: contentMd
+    };
+  }
+
+  /**
+   * Export feed items from home or follow page
+   */
+  async function exportFeedItems(pageType) {
+    Logger.info('==========================================');
+    Logger.info(`开始导出${pageType === 'home' ? '首页' : '关注页'} Feed...`);
+    Logger.info('==========================================');
+
+    try {
+      // Get user settings for max items
+      let maxItemCount = 20;
+      try {
+        const settings = await new Promise(resolve => {
+          chrome.storage.sync.get({ maxAnswerCount: 20 }, resolve);
+        });
+        maxItemCount = settings.maxAnswerCount;
+      } catch (e) {
+        Logger.warn('无法读取设置，使用默认值 20');
+      }
+
+      Logger.info(`目标下载条目数量: ${maxItemCount}`);
+
+      // Scroll to load items
+      const loadedCount = await scrollToLoadFeedItems(maxItemCount);
+      Logger.info(`实际加载条目数量: ${loadedCount}`);
+
+      // Get all feed items
+      const feedItems = document.querySelectorAll('.Feed, .TopstoryItem, [class*="FeedItem"], .ContentItem');
+      const itemsToProcess = Array.from(feedItems).slice(0, maxItemCount);
+
+      if (itemsToProcess.length === 0) {
+        return { success: false, error: '未找到任何内容' };
+      }
+
+      // Create turndown service
+      const turndownService = createTurndownService();
+
+      // Process each item
+      const processedItems = [];
+      for (let i = 0; i < itemsToProcess.length; i++) {
+        const item = processFeedItem(itemsToProcess[i], turndownService);
+        if (item) {
+          processedItems.push(item);
+          Logger.debug(`处理条目 ${i + 1}/${itemsToProcess.length}: ${item.title.substring(0, 30)}...`);
+        }
+      }
+
+      if (processedItems.length === 0) {
+        return { success: false, error: '无法解析内容' };
+      }
+
+      // Build markdown content
+      const date = new Date().toISOString().split('T')[0];
+      const pageTitle = pageType === 'home' ? '知乎首页推荐' : '知乎关注动态';
+
+      let markdown = `---
+title: "${pageTitle}"
+url: ${window.location.href}
+date: ${date}
+item_count: ${processedItems.length}
+---
+
+# ${pageTitle}
+
+`;
+
+      processedItems.forEach((item, index) => {
+        markdown += `---
+
+## ${index + 1}. ${item.title}
+
+**作者**: ${item.author}`;
+
+        if (item.time) {
+          markdown += `  
+**时间**: ${item.time}`;
+        }
+
+        markdown += `  
+**链接**: [查看原文](${item.url})
+
+${item.content}
+
+`;
+      });
+
+      // Clean up extra newlines
+      markdown = markdown.replace(/\n{3,}/g, '\n\n');
+
+      // Generate filename
+      const filename = `${pageTitle}_${date}.md`;
+
+      Logger.success(`导出成功! 共 ${processedItems.length} 条内容`);
+
+      return {
+        success: true,
+        data: {
+          content: markdown,
+          filename: filename
+        }
+      };
+    } catch (error) {
+      Logger.error('Feed 导出失败:', error);
+      return { success: false, error: '导出失败: ' + error.message };
+    }
+  }
+
+
   // Listen for messages from popup
   Logger.info('注册消息监听器...');
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -1142,8 +1509,10 @@ ${answer.content}
 
     // 检测页面类型，显示不同的提示
     const pageType = detectPageType();
-    if (pageType === 'question') {
-      ball.querySelector('.tooltip').textContent = '加载回答中...';
+    if (pageType === 'question' || pageType === 'home' || pageType === 'follow') {
+      ball.querySelector('.tooltip').textContent = '加载内容中...';
+    } else if (pageType === 'hot') {
+      ball.querySelector('.tooltip').textContent = '导出热榜...';
     } else {
       ball.querySelector('.tooltip').textContent = '导出中...';
     }
@@ -1153,6 +1522,10 @@ ${answer.content}
       let result;
       if (pageType === 'question') {
         result = await exportMultipleAnswers();
+      } else if (pageType === 'home' || pageType === 'follow') {
+        result = await exportFeedItems(pageType);
+      } else if (pageType === 'hot') {
+        result = await exportHotList();
       } else {
         result = exportMarkdown();
       }

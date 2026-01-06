@@ -48,6 +48,15 @@ function showArticleInfo(info) {
     case 'question':
       typeLabel = '问题';
       break;
+    case 'home':
+      typeLabel = '首页推荐';
+      break;
+    case 'follow':
+      typeLabel = '关注动态';
+      break;
+    case 'hot':
+      typeLabel = '热榜';
+      break;
     default:
       typeLabel = '页面';
   }
@@ -108,9 +117,12 @@ async function init() {
     const isColumn = url.pathname.startsWith('/p/');
     const isAnswer = url.pathname.includes('/question/') && url.pathname.includes('/answer/');
     const isQuestion = url.pathname.includes('/question/') && !url.pathname.includes('/answer/');
+    const isHome = url.pathname === '/' || url.pathname === '';
+    const isFollow = url.pathname === '/follow' || url.pathname === '/follow/';
+    const isHot = url.pathname === '/hot' || url.pathname === '/hot/';
 
-    if (!isColumn && !isAnswer && !isQuestion) {
-      showError('请打开知乎文章、问题或回答页面', true);  // Silent - expected case
+    if (!isColumn && !isAnswer && !isQuestion && !isHome && !isFollow && !isHot) {
+      showError('请打开知乎文章、问题、回答、首页、关注或热榜页面', true);  // Silent - expected case
       return;
     }
 
@@ -130,6 +142,9 @@ async function init() {
         if (isColumn) displayType = 'column';
         else if (isAnswer) displayType = 'answer';
         else if (isQuestion) displayType = 'question';
+        else if (isHome) displayType = 'home';
+        else if (isFollow) displayType = 'follow';
+        else if (isHot) displayType = 'hot';
 
         showArticleInfo({
           title: response.data.title,

@@ -15,6 +15,7 @@ const PACKAGE_NAME = 'zhihu-md';
 const INCLUDE_FILES = [
   'manifest.json',
   'popup',
+  'options',
   'content',
   'background',
   'lib',

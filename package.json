@@ -1,6 +1,6 @@
 {
   "name": "zhihu-md",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "将知乎专栏/问答页面内容转换为 Markdown 格式并下载",
   "scripts": {
     "package": "node scripts/package.js"

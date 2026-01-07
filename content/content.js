@@ -857,7 +857,15 @@ ${answer.content}
         if (titleEl || linkEl) {
           const title = titleEl?.textContent?.trim() || linkEl?.textContent?.trim() || '未知标题';
           const href = linkEl?.getAttribute('href') || '';
-          const fullUrl = href.startsWith('http') ? href : `https://www.zhihu.com${href}`;
+          // 正确处理各种 URL 格式
+          let fullUrl = href;
+          if (href.startsWith('http')) {
+            fullUrl = href;
+          } else if (href.startsWith('//')) {
+            fullUrl = `https:${href}`;
+          } else if (href.startsWith('/')) {
+            fullUrl = `https://www.zhihu.com${href}`;
+          }
           const rank = rankEl?.textContent?.trim() || String(index + 1);
           const metrics = metricsEl?.textContent?.trim() || '';
 
@@ -882,10 +890,19 @@ ${answer.content}
             seenUrls.add(href);
             const title = link.textContent?.trim() || '未知标题';
             if (title && title.length > 5) { // 过滤掉太短的文本
+              // 正确处理各种 URL 格式
+              let itemUrl = href;
+              if (href.startsWith('http')) {
+                itemUrl = href;
+              } else if (href.startsWith('//')) {
+                itemUrl = `https:${href}`;
+              } else if (href.startsWith('/')) {
+                itemUrl = `https://www.zhihu.com${href}`;
+              }
               items.push({
                 rank: String(items.length + 1),
                 title,
-                url: href.startsWith('http') ? href : `https://www.zhihu.com${href}`,
+                url: itemUrl,
                 metrics: ''
               });
             }
@@ -951,8 +968,11 @@ count: ${items.length}
     let noChangeCount = 0;
 
     while (Date.now() - startTime < maxTime) {
-      // 统计当前加载的 Feed 条目
-      const currentItems = document.querySelectorAll('.Feed, .TopstoryItem, [class*="FeedItem"], .ContentItem');
+      // 统计当前加载的 Feed 条目 - 优先使用 TopstoryItem 选择器
+      let currentItems = document.querySelectorAll('.TopstoryItem');
+      if (currentItems.length === 0) {
+        currentItems = document.querySelectorAll('.Feed > .ContentItem, .ContentItem');
+      }
       const currentCount = currentItems.length;
 
       Logger.debug(`当前已加载 ${currentCount} 个 Feed 条目`);
@@ -982,7 +1002,8 @@ count: ${items.length}
     }
 
     Logger.warn('滚动加载超时');
-    return document.querySelectorAll('.Feed, .TopstoryItem, [class*="FeedItem"], .ContentItem').length;
+    const items = document.querySelectorAll('.TopstoryItem');
+    return items.length > 0 ? items.length : document.querySelectorAll('.ContentItem').length;
   }
 
   /**
@@ -1007,7 +1028,23 @@ count: ${items.length}
     const title = titleEl?.textContent?.trim() || '无标题';
     const author = authorEl?.textContent?.trim() || '未知作者';
     const href = linkEl?.getAttribute('href') || '';
-    const fullUrl = href.startsWith('http') ? href : `https://www.zhihu.com${href}`;
+
+    // 正确处理各种 URL 格式
+    let fullUrl = href;
+    if (href.startsWith('http')) {
+      // 已经是完整 URL
+      fullUrl = href;
+    } else if (href.startsWith('//')) {
+      // 协议相对 URL，如 //zhuanlan.zhihu.com/p/xxx
+      fullUrl = `https:${href}`;
+    } else if (href.startsWith('/')) {
+      // 绝对路径，如 /question/xxx
+      fullUrl = `https://www.zhihu.com${href}`;
+    } else if (href) {
+      // 相对路径
+      fullUrl = `https://www.zhihu.com/${href}`;
+    }
+
     const timeText = timeEl?.textContent?.trim() || '';
 
     // 尝试展开内容（点击"展开阅读全文"按钮）
@@ -1091,9 +1128,37 @@ count: ${items.length}
       const loadedCount = await scrollToLoadFeedItems(maxItemCount);
       Logger.info(`实际加载条目数量: ${loadedCount}`);
 
-      // Get all feed items
-      const feedItems = document.querySelectorAll('.Feed, .TopstoryItem, [class*="FeedItem"], .ContentItem');
-      const itemsToProcess = Array.from(feedItems).slice(0, maxItemCount);
+      // Get all feed items - 使用更精确的选择器避免重复匹配
+      // 知乎首页的 Feed 容器通常是 .TopstoryItem，内部包含 .ContentItem
+      // 我们只选择顶层的 Feed 容器，避免同一内容被多个选择器重复匹配
+      let feedItems = document.querySelectorAll('.TopstoryItem');
+
+      // 如果没找到 TopstoryItem，尝试其他选择器
+      if (feedItems.length === 0) {
+        feedItems = document.querySelectorAll('.Feed > .ContentItem');
+      }
+      if (feedItems.length === 0) {
+        feedItems = document.querySelectorAll('[class*="FeedItem"]');
+      }
+      if (feedItems.length === 0) {
+        feedItems = document.querySelectorAll('.ContentItem');
+      }
+
+      // 根据标签去重，避免同一内容被重复处理
+      const seenTitles = new Set();
+      const uniqueItems = [];
+
+      for (const item of feedItems) {
+        const titleEl = item.querySelector('.ContentItem-title a, [class*="ContentItem-title"] a, h2 a');
+        const title = titleEl?.textContent?.trim();
+
+        if (title && !seenTitles.has(title)) {
+          seenTitles.add(title);
+          uniqueItems.push(item);
+        }
+      }
+
+      const itemsToProcess = uniqueItems.slice(0, maxItemCount);
 
       if (itemsToProcess.length === 0) {
         return { success: false, error: '未找到任何内容' };

@@ -1193,14 +1193,12 @@ date: ${date}
 item_count: ${processedItems.length}
 ---
 
-# ${pageTitle}
-
 `;
 
       processedItems.forEach((item, index) => {
         markdown += `---
 
-## ${index + 1}. ${item.title}
+# ${index + 1}. ${item.title}
 
 **作者**: ${item.author}`;
 

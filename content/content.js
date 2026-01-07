@@ -987,14 +987,12 @@ count: ${items.length}
 
   /**
    * Process a single feed item and extract content
+   * Expands content before extracting to get full text
    */
-  function processFeedItem(feedItem, turndownService) {
+  async function processFeedItem(feedItem, turndownService) {
     // 查找内容类型和标题
     const titleEl = feedItem.querySelector('.ContentItem-title a, [class*="ContentItem-title"] a, h2 a');
     const authorEl = feedItem.querySelector('.AuthorInfo-name, .UserLink-link, [class*="AuthorInfo"] a');
-
-    // 获取内容预览
-    const contentEl = feedItem.querySelector('.RichText, .RichContent-inner, [class*="RichText"]');
 
     // 获取时间信息
     const timeEl = feedItem.querySelector('.ContentItem-time, [class*="ContentItem-time"]');
@@ -1002,7 +1000,7 @@ count: ${items.length}
     // 获取链接
     const linkEl = feedItem.querySelector('a[href*="/question/"], a[href*="/p/"], h2 a');
 
-    if (!titleEl && !contentEl) {
+    if (!titleEl) {
       return null;
     }
 
@@ -1012,12 +1010,49 @@ count: ${items.length}
     const fullUrl = href.startsWith('http') ? href : `https://www.zhihu.com${href}`;
     const timeText = timeEl?.textContent?.trim() || '';
 
+    // 尝试展开内容（点击"展开阅读全文"按钮）
+    // 注意：不能使用 :contains() 选择器，它不是标准 CSS
+    const expandButton = feedItem.querySelector(
+      'button.ContentItem-more, ' +
+      'button[class*="ContentItem-more"], ' +
+      '.ContentItem-expandButton, ' +
+      '[class*="ContentItem"] button[class*="expand"], ' +
+      '.RichContent-inner button, ' +
+      '.Button--plain'
+    );
+
+    // 备选：查找包含"阅读全文"文本的按钮
+    let expandBtn = expandButton;
+    if (!expandBtn) {
+      const buttons = feedItem.querySelectorAll('button');
+      for (const btn of buttons) {
+        if (btn.textContent.includes('阅读全文') || btn.textContent.includes('展开')) {
+          expandBtn = btn;
+          break;
+        }
+      }
+    }
+
+    if (expandBtn) {
+      try {
+        Logger.debug(`点击展开按钮: ${title.substring(0, 20)}...`);
+        expandBtn.click();
+        // 等待内容加载
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (e) {
+        Logger.debug('展开按钮点击失败:', e);
+      }
+    }
+
+    // 获取内容（展开后）
+    const contentEl = feedItem.querySelector('.RichText, .RichContent-inner, [class*="RichText"]');
+
     // 转换内容为 Markdown
     let contentMd = '';
     if (contentEl) {
       const clonedContent = contentEl.cloneNode(true);
       // 移除不需要的元素
-      clonedContent.querySelectorAll('.ContentItem-actions, noscript, .RichText-ADLinkCardContainer').forEach(el => el.remove());
+      clonedContent.querySelectorAll('.ContentItem-actions, noscript, .RichText-ADLinkCardContainer, button').forEach(el => el.remove());
       contentMd = turndownService.turndown(clonedContent);
     }
 
@@ -1067,10 +1102,11 @@ count: ${items.length}
       // Create turndown service
       const turndownService = createTurndownService();
 
-      // Process each item
+      // Process each item (with expansion)
+      Logger.info('正在展开并处理每个条目的内容...');
       const processedItems = [];
       for (let i = 0; i < itemsToProcess.length; i++) {
-        const item = processFeedItem(itemsToProcess[i], turndownService);
+        const item = await processFeedItem(itemsToProcess[i], turndownService);
         if (item) {
           processedItems.push(item);
           Logger.debug(`处理条目 ${i + 1}/${itemsToProcess.length}: ${item.title.substring(0, 30)}...`);

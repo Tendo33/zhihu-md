@@ -1,5 +1,7 @@
 # Zhihu-md
 
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh?authuser=0&hl=zh-CN)
+
 将知乎专栏/问答/首页/关注/热榜页面内容无损转换为 Markdown 格式并下载的 Chrome 扩展插件。
 
 ## ✨ 功能特性
@@ -19,6 +21,12 @@
 - **文件名清洗**：自动处理非法字符，确保下载成功
 
 ## 📦 安装方法
+
+### 方式一：从 Chrome Web Store 安装（推荐）
+
+[**🚀 点击前往 Chrome Web Store 安装**](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh?authuser=0&hl=zh-CN)
+
+### 方式二：开发者模式安装
 
 1. 下载本仓库代码（或 Clone）
 2. 打开 Chrome 浏览器，访问 `chrome://extensions/`

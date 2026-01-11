@@ -9,7 +9,7 @@ const { execSync } = require('child_process');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
-const PACKAGE_NAME = 'zhihu-md';
+const PACKAGE_NAME = 'zhihu-to-markdown';
 
 // Files and directories to include in the package
 const INCLUDE_FILES = [

@@ -3,115 +3,123 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   
-  /* Frosted Glass Effect */
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* Zhihu Blue Theme */
+  /* Zhihu Blue Theme */
+  background: #0084FF;
+  /* Removed border to eliminate 'light blue ring' effect */
+  border: none;
   
-  /* Soft shadow */
+  /* Neutral shadow for cleaner look */
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 2px 4px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1);
     
   cursor: pointer;
   z-index: 2147483647;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  
+  /* Optimize Transition */
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
+  will-change: transform;
   
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  backdrop-filter: blur(12px) saturate(180%);
+  transform: translate3d(0, 0, 0); /* Force GPU acceleration */
 }
 
-/* Hover State */
+/* Hover State - Normal */
 #zhihu-md-floating-ball:hover {
-  transform: translateY(-2px) scale(1.08);
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(56, 189, 248, 0.5); /* Sky 400 */
+  transform: translateY(-4px) scale(1.1);
+  background: #0077E6;
   box-shadow: 
-    0 8px 24px rgba(2, 132, 199, 0.15), 
-    0 4px 8px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 12px 32px rgba(0, 0, 0, 0.2), 
+    0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Active/Click State */
 #zhihu-md-floating-ball:active {
   transform: translateY(0) scale(0.95);
-  background: rgba(224, 242, 254, 0.8); /* Sky 100 */
-  border-color: rgba(14, 165, 233, 0.5); /* Sky 500 */
+  background: #0066CC;
+  box-shadow: 0 2px 8px rgba(0, 132, 255, 0.3);
+  transition-duration: 0.1s;
 }
 
 /* Dragging State */
 #zhihu-md-floating-ball.dragging {
-  transition: none;
+  transition: none; /* Disable transition during drag for responsiveness */
   cursor: move;
   transform: scale(1.05);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.9);
+  background: #0084FF;
+  box-shadow: 0 16px 32px rgba(0, 132, 255, 0.4);
+  opacity: 0.95;
 }
 
-/* Docked Left - Slide half-way off screen */
+/* Docked Left - Preview visible */
 #zhihu-md-floating-ball.docked-left {
-  transform: translateX(-20px);
-  opacity: 0.4;
-  box-shadow: none;
-  border-color: transparent;
+  transform: translateX(-30%) scale(0.9);
+  opacity: 0.6;
+  border-radius: 0 50% 50% 0; /* Semi-circle look */
+  box-shadow: 4px 0 12px rgba(0, 132, 255, 0.2);
+  left: 0 !important; /* Ensure it sticks to left */
+  right: auto !important;
 }
 
 #zhihu-md-floating-ball.docked-left:hover {
-  transform: translateX(0);
+  transform: translateX(0) scale(1);
   opacity: 1;
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(56, 189, 248, 0.5);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0, 132, 255, 0.4);
 }
 
-/* Docked Right - Slide half-way off screen */
+/* Docked Right - Preview visible */
 #zhihu-md-floating-ball.docked-right {
-  transform: translateX(20px);
-  opacity: 0.4;
-  box-shadow: none;
-  border-color: transparent;
+  transform: translateX(30%) scale(0.9);
+  opacity: 0.6;
+  border-radius: 50% 0 0 50%; /* Semi-circle look */
+  box-shadow: -4px 0 12px rgba(0, 132, 255, 0.2);
+  right: 0 !important; /* Ensure it sticks to right */
+  left: auto !important;
 }
 
 #zhihu-md-floating-ball.docked-right:hover {
-  transform: translateX(0);
+  transform: translateX(0) scale(1);
   opacity: 1;
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(56, 189, 248, 0.5);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0, 132, 255, 0.4);
 }
 
 /* Icon styling */
 #zhihu-md-floating-ball .icon {
-  width: 18px;
-  height: 18px;
-  color: #0369A1; /* Sky 700 */
-  transition: all 0.3s ease;
+  width: 24px;
+  height: 24px;
+  color: #FFFFFF;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 #zhihu-md-floating-ball:hover .icon {
-  color: #0284C7; /* Sky 600 */
+  transform: scale(1.1);
 }
 
 /* Loading State */
 #zhihu-md-floating-ball.loading {
   pointer-events: none;
-  border-color: rgba(203, 213, 225, 0.5);
+  background: #F4F6F8;
+  border-color: #E6E8EB;
 }
 
 #zhihu-md-floating-ball.loading .icon {
   animation: zhihu-md-spin 1s linear infinite;
-  opacity: 0.6;
-  color: #64748B;
+  opacity: 1;
+  color: #0084FF;
+  transform: none; /* Disable hover scale during loading */
 }
 
 @keyframes zhihu-md-spin {
@@ -121,25 +129,34 @@
 
 /* Success State */
 #zhihu-md-floating-ball.success {
-  background: rgba(236, 253, 245, 0.8); /* Emerald 50 */
-  border-color: rgba(52, 211, 153, 0.5); /* Emerald 400 */
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15), 0 8px 16px rgba(16, 185, 129, 0.1);
+  background: #34D399; /* Emerald 400 */
+  border-color: #10B981;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.2);
+  transform: scale(1.1);
 }
 
 #zhihu-md-floating-ball.success .icon {
-  color: #059669; /* Emerald 600 */
-  transform: scale(1.1);
+  color: #FFFFFF;
+  transform: scale(1.2);
 }
 
 /* Error State */
 #zhihu-md-floating-ball.error {
-  background: rgba(254, 242, 242, 0.8); /* Red 50 */
-  border-color: rgba(248, 113, 113, 0.5); /* Red 400 */
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15), 0 8px 16px rgba(239, 68, 68, 0.1);
+  background: #F87171; /* Red 400 */
+  border-color: #EF4444;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2);
+  animation: zhihu-md-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes zhihu-md-shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 
 #zhihu-md-floating-ball.error .icon {
-  color: #DC2626; /* Red 600 */
+  color: #FFFFFF;
 }
 
 /* Tooltip */

@@ -332,6 +332,82 @@
       }
     });
 
+    // Rule: Tables
+    turndownService.addRule('zhihuTable', {
+      filter: 'table',
+      replacement: function (content, node) {
+        // Helper to safely convert cell content
+        const convertCell = (cell) => {
+          const html = cell.innerHTML || '';
+          if (html.includes('<table')) {
+            return '[Nested Table]';
+          }
+          // Convert and escape pipes which break markdown tables
+          // Also handle newlines within cells
+          let text = turndownService.turndown(html);
+          text = text.replace(/\|/g, '\\|');
+          text = text.replace(/\n/g, '<br>');
+          return text.trim();
+        };
+
+        const rows = Array.from(node.rows);
+        if (rows.length === 0) return '';
+
+        let markdown = '\n\n';
+
+        // Process Header (assume first row is header)
+        const headerRow = rows[0];
+        const headers = Array.from(headerRow.cells).map(convertCell);
+        markdown += '| ' + headers.join(' | ') + ' |\n';
+        markdown += '| ' + headers.map(() => '---').join(' | ') + ' |\n';
+
+        // Process Body
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          const cells = Array.from(row.cells);
+
+          // Map cells to columns to ensure alignment
+          const rowData = headers.map((_, index) => {
+            const cell = cells[index];
+            return cell ? convertCell(cell) : '';
+          });
+
+          markdown += '| ' + rowData.join(' | ') + ' |\n';
+        }
+
+        return markdown + '\n';
+      }
+    });
+
+    // Rule: Basic Formatting (Bold, Italic, Underline, Strikethrough)
+    turndownService.addRule('zhihuFormat', {
+      filter: ['b', 'strong', 'i', 'em', 'u', 's', 'del'],
+      replacement: function (content, node) {
+        const tag = node.nodeName.toLowerCase();
+        if (tag === 'b' || tag === 'strong') return `**${content}**`;
+        if (tag === 'i' || tag === 'em') return `*${content}*`;
+        if (tag === 'u') return `<u>${content}</u>`; // Markdown doesn't support underline natively
+        if (tag === 's' || tag === 'del') return `~~${content}~~`;
+        return content;
+      }
+    });
+
+    // Rule: Line Breaks (Zhihu uses <br> often)
+    turndownService.addRule('zhihuBr', {
+      filter: 'br',
+      replacement: function () {
+        return '  \n';
+      }
+    });
+
+    // Rule: Horizontal Rule
+    turndownService.addRule('zhihuHr', {
+      filter: 'hr',
+      replacement: function () {
+        return '\n\n---\n\n';
+      }
+    });
+
     return turndownService;
   }
 

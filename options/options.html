@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Zhihu to Markdown 设置</title>
+  <link rel="stylesheet" href="../lib/shared.css">
   <link rel="stylesheet" href="options.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
@@ -31,10 +31,21 @@
         </div>
         <input type="number" id="maxAnswerCount" min="1" max="50" value="20" class="number-input">
       </div>
+
+      <div class="option-item">
+        <div class="option-content">
+          <div class="option-label">下载图片到本地</div>
+          <div class="option-desc">将文章中的图片下载到本地，而非使用远程链接。导出时会创建包含 .md 文件和 images 文件夹的 ZIP 包。</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="downloadImages">
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
     
     <div class="footer">
-      Zhihu to Markdown v1.0.6
+      Zhihu to Markdown v1.0.7
     </div>
   </div>
   

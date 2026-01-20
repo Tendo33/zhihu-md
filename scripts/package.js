@@ -20,7 +20,8 @@ const INCLUDE_FILES = [
   'background',
   'lib',
   'icons',
-  'README.md'
+  'README.md',
+  'MANIFEST_UPDATE.md'  // Instructions for manual manifest update
 ];
 
 // Files to exclude (patterns)

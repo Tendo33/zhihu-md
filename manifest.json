@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Zhihu to Markdown",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "将知乎专栏/问答页面内容转换为 Markdown 格式并下载",
   "permissions": [
     "activeTab",
@@ -32,6 +32,14 @@
       "js": [
         "lib/turndown.min.js",
         "lib/logger.js",
+        "content/modules/constants.js",
+        "content/modules/detector.js",
+        "content/modules/turndown-rules.js",
+        "content/modules/exporters/article.js",
+        "content/modules/exporters/question.js",
+        "content/modules/exporters/feed.js",
+        "content/modules/exporters/hot.js",
+        "content/modules/floating-ball.js",
         "content/content.js"
       ],
       "css": [

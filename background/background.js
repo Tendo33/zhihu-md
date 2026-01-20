@@ -174,6 +174,7 @@ async function createZipWithImages(mdFilename, mdContent, images) {
 
 /**
  * Simple ZIP file creator (no compression, store only)
+ * Supports UTF-8 filenames for Chinese characters
  * @param {Array} files - Array of {name, content}
  * @returns {Blob}
  */
@@ -182,21 +183,25 @@ function createZip(files) {
   const centralDirectory = [];
   let offset = 0;
   
+  // UTF-8 flag (bit 11) for proper Chinese filename support
+  const UTF8_FLAG = 0x0800;
+  
   for (const file of files) {
     const nameBytes = new TextEncoder().encode(file.name);
     const content = file.content;
+    const crcValue = crc32(content);
     
     // Local file header
     const localHeader = new ArrayBuffer(30 + nameBytes.length);
     const localView = new DataView(localHeader);
     
     localView.setUint32(0, 0x04034b50, true);  // Local file header signature
-    localView.setUint16(4, 10, true);           // Version needed
-    localView.setUint16(6, 0, true);            // General purpose bit flag
+    localView.setUint16(4, 20, true);           // Version needed (2.0 for UTF-8)
+    localView.setUint16(6, UTF8_FLAG, true);    // General purpose bit flag - UTF-8 encoding
     localView.setUint16(8, 0, true);            // Compression method (store)
     localView.setUint16(10, 0, true);           // File last modification time
     localView.setUint16(12, 0, true);           // File last modification date
-    localView.setUint32(14, crc32(content), true);  // CRC-32
+    localView.setUint32(14, crcValue, true);    // CRC-32
     localView.setUint32(18, content.length, true);  // Compressed size
     localView.setUint32(22, content.length, true);  // Uncompressed size
     localView.setUint16(26, nameBytes.length, true); // File name length
@@ -210,13 +215,13 @@ function createZip(files) {
     const centralView = new DataView(centralHeader);
     
     centralView.setUint32(0, 0x02014b50, true); // Central file header signature
-    centralView.setUint16(4, 20, true);          // Version made by
-    centralView.setUint16(6, 10, true);          // Version needed
-    centralView.setUint16(8, 0, true);           // General purpose bit flag
+    centralView.setUint16(4, 0x0314, true);      // Version made by (Unix + ZIP 2.0)
+    centralView.setUint16(6, 20, true);          // Version needed (2.0 for UTF-8)
+    centralView.setUint16(8, UTF8_FLAG, true);   // General purpose bit flag - UTF-8 encoding
     centralView.setUint16(10, 0, true);          // Compression method
     centralView.setUint16(12, 0, true);          // File last modification time
     centralView.setUint16(14, 0, true);          // File last modification date
-    centralView.setUint32(16, crc32(content), true); // CRC-32
+    centralView.setUint32(16, crcValue, true);   // CRC-32
     centralView.setUint32(20, content.length, true); // Compressed size
     centralView.setUint32(24, content.length, true); // Uncompressed size
     centralView.setUint16(28, nameBytes.length, true); // File name length

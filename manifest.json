@@ -32,6 +32,7 @@
       "js": [
         "lib/turndown.min.js",
         "lib/logger.js",
+        "lib/page-detector.js",
         "content/modules/constants.js",
         "content/modules/detector.js",
         "content/modules/turndown-rules.js",

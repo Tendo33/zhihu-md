@@ -66,6 +66,11 @@ body {
   color: var(--text-primary);
 }
 
+.icon-btn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  background: var(--bg-hover);
+}
 /* Main Content */
 .content {
   flex: 1;
@@ -227,6 +232,11 @@ body {
   color: var(--text-tertiary);
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 /* Utility */

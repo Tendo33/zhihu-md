@@ -10,7 +10,33 @@ const PageDetector = {
    */
   detectPageType() {
     const pathname = window.location.pathname;
-    
+    if (window.PageTypeUtils && window.PageTypeUtils.detectPageTypeFromPathname) {
+      return window.PageTypeUtils.detectPageTypeFromPathname(pathname);
+    }
+    return this._fallbackDetectPageType(pathname);
+  },
+
+  /**
+   * Check if current page is a valid article page
+   * @returns {boolean}
+   */
+  isValidArticlePage() {
+    return this.detectPageType() !== null;
+  },
+
+  /**
+   * Check page type from URL (for popup use)
+   * @param {string} url 
+   * @returns {Object} Page type flags
+   */
+  checkUrlType(url) {
+    if (window.PageTypeUtils && window.PageTypeUtils.checkUrlType) {
+      return window.PageTypeUtils.checkUrlType(url);
+    }
+    return this._fallbackCheckUrlType(url);
+  },
+
+  _fallbackDetectPageType(pathname) {
     if (pathname.startsWith('/p/')) {
       return 'column';
     }
@@ -29,24 +55,10 @@ const PageDetector = {
     if (pathname === '/' || pathname === '') {
       return 'home';
     }
-    
     return null;
   },
 
-  /**
-   * Check if current page is a valid article page
-   * @returns {boolean}
-   */
-  isValidArticlePage() {
-    return this.detectPageType() !== null;
-  },
-
-  /**
-   * Check page type from URL (for popup use)
-   * @param {string} url 
-   * @returns {Object} Page type flags
-   */
-  checkUrlType(url) {
+  _fallbackCheckUrlType(url) {
     try {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname;

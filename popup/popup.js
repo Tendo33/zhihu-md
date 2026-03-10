@@ -105,21 +105,38 @@ async function init() {
 
     Logger.info('Current URL:', tab.url);
 
-    // Check if the URL is a Zhihu page
-    const url = new URL(tab.url);
-    
-    if (!url.hostname.endsWith('zhihu.com')) {
+    const typeFlags = window.PageTypeUtils && window.PageTypeUtils.checkUrlType
+      ? window.PageTypeUtils.checkUrlType(tab.url)
+      : (() => {
+        try {
+          const url = new URL(tab.url);
+          const pathname = url.pathname;
+          return {
+            isZhihu: url.hostname.endsWith('zhihu.com'),
+            isColumn: pathname.startsWith('/p/'),
+            isAnswer: pathname.includes('/question/') && pathname.includes('/answer/'),
+            isQuestion: pathname.includes('/question/') && !pathname.includes('/answer/'),
+            isHome: pathname === '/' || pathname === '',
+            isFollow: pathname === '/follow' || pathname === '/follow/',
+            isHot: pathname === '/hot' || pathname === '/hot/'
+          };
+        } catch {
+          return { isZhihu: false };
+        }
+      })();
+
+    if (!typeFlags || !typeFlags.isZhihu) {
       showError('此页面不是知乎页面', true);  // Silent - expected case
       return;
     }
 
     // Determine page type
-    const isColumn = url.pathname.startsWith('/p/');
-    const isAnswer = url.pathname.includes('/question/') && url.pathname.includes('/answer/');
-    const isQuestion = url.pathname.includes('/question/') && !url.pathname.includes('/answer/');
-    const isHome = url.pathname === '/' || url.pathname === '';
-    const isFollow = url.pathname === '/follow' || url.pathname === '/follow/';
-    const isHot = url.pathname === '/hot' || url.pathname === '/hot/';
+    const isColumn = typeFlags.isColumn;
+    const isAnswer = typeFlags.isAnswer;
+    const isQuestion = typeFlags.isQuestion;
+    const isHome = typeFlags.isHome;
+    const isFollow = typeFlags.isFollow;
+    const isHot = typeFlags.isHot;
 
     if (!isColumn && !isAnswer && !isQuestion && !isHome && !isFollow && !isHot) {
       showError('请打开知乎文章、问题、回答、首页、关注或热榜页面', true);  // Silent - expected case
@@ -176,6 +193,7 @@ async function handleExport() {
   
   try {
     exportBtn.classList.add('loading');
+    exportBtn.setAttribute('aria-busy', 'true');
     btnText.textContent = '导出中...';
     exportBtn.disabled = true;
 
@@ -194,6 +212,7 @@ async function handleExport() {
       });
 
       exportBtn.classList.remove('loading');
+      exportBtn.removeAttribute('aria-busy');
       // No specific success class needed for styles, but we can reset text
       btnText.textContent = '导出成功!';
       
@@ -208,6 +227,7 @@ async function handleExport() {
     Logger.error('Export Error:', error);
     
     exportBtn.classList.remove('loading');
+    exportBtn.removeAttribute('aria-busy');
     btnText.textContent = '导出失败';
     
     setTimeout(() => {

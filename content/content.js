@@ -38,6 +38,25 @@
     Logger.success('所有模块已加载');
   }
 
+  // ============== Init Scheduler ==============
+  let initScheduled = false;
+  let lastInitAt = 0;
+  const INIT_MIN_INTERVAL = 800;
+
+  function scheduleFloatingBallInit(delay = 500) {
+    const now = Date.now();
+    if (initScheduled) return;
+    if (now - lastInitAt < INIT_MIN_INTERVAL) return;
+
+    initScheduled = true;
+    if (window._initTimeout) clearTimeout(window._initTimeout);
+    window._initTimeout = setTimeout(() => {
+      initScheduled = false;
+      lastInitAt = Date.now();
+      FloatingBall.init();
+    }, delay);
+  }
+
   // ============== Message Handler ==============
   Logger.info('注册消息监听器...');
   
@@ -54,7 +73,7 @@
       sendResponse(result);
     } else if (message.action === 'routeChanged') {
       Logger.info('路由改变，重新检查悬浮球状态...');
-      setTimeout(() => FloatingBall.init(), 1000);
+      scheduleFloatingBallInit(800);
     } else {
       Logger.warn('未知的消息类型:', message.action);
     }
@@ -80,8 +99,7 @@
   // ============== DOM Observer ==============
   const observer = new MutationObserver((mutations) => {
     if (PageDetector.isValidArticlePage() && !document.getElementById('zhihu-md-floating-ball')) {
-      if (window._initTimeout) clearTimeout(window._initTimeout);
-      window._initTimeout = setTimeout(() => FloatingBall.init(), 1000);
+      scheduleFloatingBallInit(800);
     }
   });
 
@@ -89,9 +107,9 @@
 
   // ============== Initialize ==============
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => FloatingBall.init());
+    document.addEventListener('DOMContentLoaded', () => scheduleFloatingBallInit(500));
   } else {
-    setTimeout(() => FloatingBall.init(), 500);
+    scheduleFloatingBallInit(500);
   }
 
   Logger.info('Content script 初始化完成!');

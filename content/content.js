@@ -29,7 +29,7 @@
   }
 
   // Check modules
-  const requiredModules = ['PageDetector', 'CONSTANTS', 'createTurndownService', 'ArticleExporter', 'QuestionExporter', 'FeedExporter', 'HotExporter', 'FloatingBall'];
+  const requiredModules = ['PageDetector', 'InitScheduler', 'CONSTANTS', 'createTurndownService', 'ArticleExporter', 'QuestionExporter', 'FeedExporter', 'HotExporter', 'FloatingBall'];
   const missingModules = requiredModules.filter(m => typeof window[m] === 'undefined');
   
   if (missingModules.length > 0) {
@@ -40,22 +40,30 @@
 
   // ============== Init Scheduler ==============
   let initScheduled = false;
-  let lastInitAt = 0;
+  let lastInitAt = null;
   const INIT_MIN_INTERVAL = 800;
 
-  function scheduleFloatingBallInit(delay = 500) {
-    const now = Date.now();
-    if (initScheduled) return;
-    if (now - lastInitAt < INIT_MIN_INTERVAL) return;
+  const scheduleFloatingBallInit = window.InitScheduler && window.InitScheduler.createInitScheduler
+    ? window.InitScheduler.createInitScheduler({
+        init: () => FloatingBall.init(),
+        minInterval: INIT_MIN_INTERVAL,
+        defaultDelay: 500
+      })
+    : function scheduleFloatingBallInit(delay = 500) {
+        const now = Date.now();
+        const remaining = lastInitAt === null ? 0 : INIT_MIN_INTERVAL - (now - lastInitAt);
+        const effectiveDelay = Math.max(delay, remaining > 0 ? remaining : 0);
 
-    initScheduled = true;
-    if (window._initTimeout) clearTimeout(window._initTimeout);
-    window._initTimeout = setTimeout(() => {
-      initScheduled = false;
-      lastInitAt = Date.now();
-      FloatingBall.init();
-    }, delay);
-  }
+        if (initScheduled) return;
+
+        initScheduled = true;
+        if (window._initTimeout) clearTimeout(window._initTimeout);
+        window._initTimeout = setTimeout(() => {
+          initScheduled = false;
+          lastInitAt = Date.now();
+          FloatingBall.init();
+        }, effectiveDelay);
+      };
 
   // ============== Message Handler ==============
   Logger.info('注册消息监听器...');

@@ -16,8 +16,40 @@ const articleTitle = document.getElementById('article-title');
 const articleAuthor = document.getElementById('article-author').querySelector('span');
 const articleType = document.getElementById('article-type').querySelector('span');     // Direct span child
 const errorMessage = document.getElementById('error-message');
+const refreshBtn = document.getElementById('refresh-btn');
 const exportBtn = document.getElementById('export-btn');
 const settingsBtn = document.getElementById('settings-btn');
+
+/**
+ * Wait for a specific duration (ms)
+ */
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Try to send a message to a tab with retries
+ * Useful when the content script might not be ready yet
+ */
+async function safeSendMessage(tabId, message, maxRetries = 2, delay = 500) {
+  let lastError;
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      if (i > 0) {
+        Logger.info(`Retrying sendMessage (${i}/${maxRetries})...`);
+        await sleep(delay);
+      }
+      return await chrome.tabs.sendMessage(tabId, message);
+    } catch (error) {
+      lastError = error;
+      // Only retry if it's a "Could not establish connection" error
+      if (error.message && error.message.includes('Could not establish connection')) {
+        continue;
+      }
+      // For other errors, throw immediately
+      throw error;
+    }
+  }
+  throw lastError;
+}
 
 /**
  * Update the status badge display
@@ -72,7 +104,7 @@ function showArticleInfo(info) {
  * @param {string} message - Error message to display
  * @param {boolean} silent - If true, don't log to console (for expected cases like non-Zhihu pages)
  */
-function showError(message, silent = false) {
+function showError(message, silent = false, showRefresh = false) {
   if (!silent) {
     Logger.debug('Show Error:', message);
   }
@@ -83,6 +115,15 @@ function showError(message, silent = false) {
   if (errorText) errorText.textContent = message;
 
   errorMessage.classList.remove('hidden');
+
+  if (refreshBtn) {
+    if (showRefresh) {
+      refreshBtn.classList.remove('hidden');
+    } else {
+      refreshBtn.classList.add('hidden');
+    }
+  }
+
   articleInfo.classList.add('hidden');
   exportBtn.disabled = true;
 }
@@ -147,7 +188,7 @@ async function init() {
     Logger.info('Sending getArticleInfo to content script...');
     
     try {
-      const response = await chrome.tabs.sendMessage(tab.id, { action: 'getArticleInfo' });
+      const response = await safeSendMessage(tab.id, { action: 'getArticleInfo' });
 
       Logger.info('Received response:', response);
 
@@ -174,7 +215,13 @@ async function init() {
     } catch (msgError) {
       // If message fails, it might be that content script isn't ready or reloaded
       Logger.warn('Message failed (Content script might be missing):', msgError);
-      showError('请刷新页面后重试');
+
+      const isConnectionError = msgError.message && msgError.message.includes('Could not establish connection');
+      if (isConnectionError) {
+        showError('请刷新知乎页面后重试', false, true); // Show refresh button
+      } else {
+        showError(msgError.message || '由于通讯错误，解析文章失败');
+      }
     }
 
   } catch (error) {
@@ -199,7 +246,7 @@ async function handleExport() {
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    const response = await chrome.tabs.sendMessage(tab.id, { action: 'exportMarkdown' });
+    const response = await safeSendMessage(tab.id, { action: 'exportMarkdown' });
 
     if (response && response.success) {
       Logger.success('Markdown generated');
@@ -251,6 +298,17 @@ if (settingsBtn) {
 // Event listeners
 if (exportBtn) {
   exportBtn.addEventListener('click', handleExport);
+}
+
+// Handle Refresh Button
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id) {
+      chrome.tabs.reload(tab.id);
+      window.close(); // Close popup after reload
+    }
+  });
 }
 
 // Initialize on popup open

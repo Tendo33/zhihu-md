@@ -29,7 +29,7 @@
   }
 
   // Check modules
-  const requiredModules = ['PageDetector', 'CONSTANTS', 'createTurndownService', 'ArticleExporter', 'QuestionExporter', 'FeedExporter', 'HotExporter', 'FloatingBall'];
+  const requiredModules = ['PageDetector', 'InitScheduler', 'CONSTANTS', 'createTurndownService', 'ArticleExporter', 'QuestionExporter', 'FeedExporter', 'HotExporter', 'FloatingBall'];
   const missingModules = requiredModules.filter(m => typeof window[m] === 'undefined');
   
   if (missingModules.length > 0) {
@@ -37,6 +37,33 @@
       } else {
     Logger.success('所有模块已加载');
   }
+
+  // ============== Init Scheduler ==============
+  let initScheduled = false;
+  let lastInitAt = null;
+  const INIT_MIN_INTERVAL = 800;
+
+  const scheduleFloatingBallInit = window.InitScheduler && window.InitScheduler.createInitScheduler
+    ? window.InitScheduler.createInitScheduler({
+        init: () => FloatingBall.init(),
+        minInterval: INIT_MIN_INTERVAL,
+        defaultDelay: 500
+      })
+    : function scheduleFloatingBallInit(delay = 500) {
+        const now = Date.now();
+        const remaining = lastInitAt === null ? 0 : INIT_MIN_INTERVAL - (now - lastInitAt);
+        const effectiveDelay = Math.max(delay, remaining > 0 ? remaining : 0);
+
+        if (initScheduled) return;
+
+        initScheduled = true;
+        if (window._initTimeout) clearTimeout(window._initTimeout);
+        window._initTimeout = setTimeout(() => {
+          initScheduled = false;
+          lastInitAt = Date.now();
+          FloatingBall.init();
+        }, effectiveDelay);
+      };
 
   // ============== Message Handler ==============
   Logger.info('注册消息监听器...');
@@ -54,7 +81,7 @@
       sendResponse(result);
     } else if (message.action === 'routeChanged') {
       Logger.info('路由改变，重新检查悬浮球状态...');
-      setTimeout(() => FloatingBall.init(), 1000);
+      scheduleFloatingBallInit(800);
     } else {
       Logger.warn('未知的消息类型:', message.action);
     }
@@ -80,8 +107,7 @@
   // ============== DOM Observer ==============
   const observer = new MutationObserver((mutations) => {
     if (PageDetector.isValidArticlePage() && !document.getElementById('zhihu-md-floating-ball')) {
-      if (window._initTimeout) clearTimeout(window._initTimeout);
-      window._initTimeout = setTimeout(() => FloatingBall.init(), 1000);
+      scheduleFloatingBallInit(800);
     }
   });
 
@@ -89,9 +115,9 @@
 
   // ============== Initialize ==============
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => FloatingBall.init());
+    document.addEventListener('DOMContentLoaded', () => scheduleFloatingBallInit(500));
   } else {
-    setTimeout(() => FloatingBall.init(), 500);
+    scheduleFloatingBallInit(500);
   }
 
   Logger.info('Content script 初始化完成!');

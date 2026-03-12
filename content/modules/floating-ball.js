@@ -16,8 +16,10 @@ const FloatingBall = {
       return document.getElementById('zhihu-md-floating-ball');
     }
 
-    const ball = document.createElement('div');
+    const ball = document.createElement('button');
     ball.id = 'zhihu-md-floating-ball';
+    ball.type = 'button';
+    ball.setAttribute('aria-label', '导出 Markdown');
     ball.innerHTML = `
       <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>

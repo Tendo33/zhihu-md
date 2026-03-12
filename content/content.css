@@ -1,5 +1,8 @@
 /* 悬浮球容器 */
 #zhihu-md-floating-ball {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 0;
   position: fixed;
   right: 24px;
   bottom: 24px;
@@ -32,6 +35,15 @@
   -webkit-user-select: none;
   touch-action: none;
   transform: translate3d(0, 0, 0); /* Force GPU acceleration */
+}
+
+#zhihu-md-floating-ball:focus-visible {
+  outline: 2px solid #93C5FD;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 /* Hover State - Normal */

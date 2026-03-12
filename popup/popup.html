@@ -30,7 +30,7 @@
     <main class="content">
       <div id="status-container">
         <!-- Status will be injected here via JS -->
-        <div id="page-status" class="status-badge loading">
+        <div id="page-status" class="status-badge loading" role="status" aria-live="polite" aria-atomic="true">
           <span class="status-dot"></span>
           <span class="status-text">正在检测页面...</span>
         </div>
@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <div id="error-message" class="state-empty hidden">
+      <div id="error-message" class="state-empty hidden" role="status" aria-live="polite" aria-atomic="true">
         <div class="empty-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
             stroke-linecap="round" stroke-linejoin="round">
@@ -88,6 +88,7 @@
   </div>
 
   <script src="../lib/logger.js"></script>
+  <script src="../lib/page-detector.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

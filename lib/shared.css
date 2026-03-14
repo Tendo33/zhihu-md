@@ -15,15 +15,17 @@
   
   --border-subtle: #BAE6FD; /* Sky 200 */
   --border-hover: #7DD3FC; /* Sky 300 */
+  --border-strong: #7DD3FC; /* Sky 300 */
 
   --text-primary: #0C4A6E; /* Sky 900 */
   --text-secondary: #0369A1; /* Sky 700 */
   --text-tertiary: #0EA5E9; /* Sky 500 */
 
   /* Accent Colors */
-  --accent: #0284C7; /* Sky 600 */
+  --accent: #0369A1; /* Sky 700 */
   --accent-inverse: #FFFFFF;
-  --accent-hover: #0369A1; /* Sky 700 */
+  --accent-hover: #075985; /* Sky 800 */
+  --accent-active: #0B4F79; /* Sky 900 */
   
   --success: #059669; /* Emerald 600 */
   --error: #DC2626; /* Red 600 */
@@ -52,6 +54,7 @@
     
     --border-subtle: #475569; /* Slate 600 */
     --border-hover: #64748B; /* Slate 500 */
+    --border-strong: #64748B; /* Slate 500 */
 
     --text-primary: #F1F5F9; /* Slate 100 */
     --text-secondary: #CBD5E1; /* Slate 300 */
@@ -60,6 +63,7 @@
     --accent: #38BDF8; /* Sky 400 */
     --accent-inverse: #0F172A;
     --accent-hover: #7DD3FC; /* Sky 300 */
+    --accent-active: #0EA5E9; /* Sky 500 */
   }
 }
 
@@ -75,4 +79,13 @@ body {
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

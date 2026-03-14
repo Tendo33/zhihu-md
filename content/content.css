@@ -1,18 +1,29 @@
 /* 悬浮球容器 */
 #zhihu-md-floating-ball {
+  --accent: #0369A1;
+  --accent-hover: #075985;
+  --accent-active: #0B4F79;
+  --accent-inverse: #FFFFFF;
+  --success: #059669;
+  --error: #DC2626;
+  --blue: #0284C7;
+  --bg-secondary: #FFFFFF;
+  --border-subtle: #BAE6FD;
+  --text-primary: #0C4A6E;
+
   -webkit-appearance: none;
   appearance: none;
   padding: 0;
   position: fixed;
   right: 24px;
   bottom: 24px;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   
   /* Zhihu Blue Theme */
   /* Zhihu Blue Theme */
-  background: #0084FF;
+  background: var(--accent);
   /* Removed border to eliminate 'light blue ring' effect */
   border: none;
   
@@ -38,10 +49,10 @@
 }
 
 #zhihu-md-floating-ball:focus-visible {
-  outline: 2px solid #93C5FD;
+  outline: 2px solid var(--blue);
   outline-offset: 3px;
   box-shadow:
-    0 0 0 4px rgba(59, 130, 246, 0.35),
+    0 0 0 4px color-mix(in oklab, var(--blue) 35%, transparent),
     0 4px 12px rgba(0, 0, 0, 0.15),
     0 8px 24px rgba(0, 0, 0, 0.1);
 }
@@ -49,7 +60,7 @@
 /* Hover State - Normal */
 #zhihu-md-floating-ball:hover {
   transform: translateY(-4px) scale(1.1);
-  background: #0077E6;
+  background: var(--accent-hover);
   box-shadow: 
     0 12px 32px rgba(0, 0, 0, 0.2), 
     0 4px 12px rgba(0, 0, 0, 0.1);
@@ -58,8 +69,8 @@
 /* Active/Click State */
 #zhihu-md-floating-ball:active {
   transform: translateY(0) scale(0.95);
-  background: #0066CC;
-  box-shadow: 0 2px 8px rgba(0, 132, 255, 0.3);
+  background: var(--accent-active);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 30%, transparent);
   transition-duration: 0.1s;
 }
 
@@ -68,8 +79,8 @@
   transition: none; /* Disable transition during drag for responsiveness */
   cursor: move;
   transform: scale(1.05);
-  background: #0084FF;
-  box-shadow: 0 16px 32px rgba(0, 132, 255, 0.4);
+  background: var(--accent);
+  box-shadow: 0 16px 32px color-mix(in oklab, var(--accent) 40%, transparent);
   opacity: 0.95;
 }
 
@@ -78,7 +89,7 @@
   transform: translateX(-30%) scale(0.9);
   opacity: 0.6;
   border-radius: 0 50% 50% 0; /* Semi-circle look */
-  box-shadow: 4px 0 12px rgba(0, 132, 255, 0.2);
+  box-shadow: 4px 0 12px color-mix(in oklab, var(--accent) 20%, transparent);
   left: 0 !important; /* Ensure it sticks to left */
   right: auto !important;
 }
@@ -87,7 +98,7 @@
   transform: translateX(0) scale(1);
   opacity: 1;
   border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(0, 132, 255, 0.4);
+  box-shadow: 0 4px 16px color-mix(in oklab, var(--accent) 40%, transparent);
 }
 
 /* Docked Right - Preview visible */
@@ -95,7 +106,7 @@
   transform: translateX(30%) scale(0.9);
   opacity: 0.6;
   border-radius: 50% 0 0 50%; /* Semi-circle look */
-  box-shadow: -4px 0 12px rgba(0, 132, 255, 0.2);
+  box-shadow: -4px 0 12px color-mix(in oklab, var(--accent) 20%, transparent);
   right: 0 !important; /* Ensure it sticks to right */
   left: auto !important;
 }
@@ -104,14 +115,14 @@
   transform: translateX(0) scale(1);
   opacity: 1;
   border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(0, 132, 255, 0.4);
+  box-shadow: 0 4px 16px color-mix(in oklab, var(--accent) 40%, transparent);
 }
 
 /* Icon styling */
 #zhihu-md-floating-ball .icon {
   width: 20px;
   height: 20px;
-  color: #FFFFFF;
+  color: var(--accent-inverse);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
@@ -123,14 +134,13 @@
 /* Loading State */
 #zhihu-md-floating-ball.loading {
   pointer-events: none;
-  background: #F4F6F8;
-  border-color: #E6E8EB;
+  background: var(--bg-secondary);
 }
 
 #zhihu-md-floating-ball.loading .icon {
   animation: zhihu-md-spin 1s linear infinite;
   opacity: 1;
-  color: #0084FF;
+  color: var(--accent);
   transform: none; /* Disable hover scale during loading */
 }
 
@@ -141,22 +151,20 @@
 
 /* Success State */
 #zhihu-md-floating-ball.success {
-  background: #34D399; /* Emerald 400 */
-  border-color: #10B981;
-  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.2);
+  background: var(--success);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--success) 20%, transparent);
   transform: scale(1.1);
 }
 
 #zhihu-md-floating-ball.success .icon {
-  color: #FFFFFF;
+  color: var(--accent-inverse);
   transform: scale(1.2);
 }
 
 /* Error State */
 #zhihu-md-floating-ball.error {
-  background: #F87171; /* Red 400 */
-  border-color: #EF4444;
-  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2);
+  background: var(--error);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--error) 20%, transparent);
   animation: zhihu-md-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
 }
 
@@ -168,22 +176,22 @@
 }
 
 #zhihu-md-floating-ball.error .icon {
-  color: #FFFFFF;
+  color: var(--accent-inverse);
 }
 
 /* Tooltip */
 #zhihu-md-floating-ball .tooltip {
   position: absolute;
-  right: 52px; /* Position to the left */
+  right: 60px; /* Position to the left */
   top: 50%;
   transform: translateY(-50%) translateX(8px);
   padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #0F172A; /* Slate 900 */
+  background: color-mix(in oklab, var(--bg-secondary) 90%, transparent);
+  color: var(--text-primary);
   font-size: 11px;
   font-weight: 500;
   border-radius: 6px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid var(--border-subtle);
   white-space: nowrap;
   
   opacity: 0;
@@ -207,4 +215,27 @@
 #zhihu-md-floating-ball.docked-left .tooltip,
 #zhihu-md-floating-ball.docked-right .tooltip {
   display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  #zhihu-md-floating-ball {
+    --accent: #38BDF8;
+    --accent-hover: #7DD3FC;
+    --accent-active: #0EA5E9;
+    --accent-inverse: #0F172A;
+    --success: #059669;
+    --error: #DC2626;
+    --bg-secondary: #1E293B;
+    --border-subtle: #475569;
+    --text-primary: #F1F5F9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #zhihu-md-floating-ball,
+  #zhihu-md-floating-ball .icon,
+  #zhihu-md-floating-ball .tooltip {
+    transition: none !important;
+    animation: none !important;
+  }
 }

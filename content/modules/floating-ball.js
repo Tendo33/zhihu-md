@@ -42,8 +42,13 @@ const FloatingBall = {
     let isDragging = false;
     let startX, startY;
     let initialLeft, initialTop;
+    let ballWidth = 0;
+    let ballHeight = 0;
     let hasMoved = false;
     let dockTimeout;
+    let rafId = null;
+    let latestLeft = 0;
+    let latestTop = 0;
 
     const clearDockedState = () => {
       ball.classList.remove('docked-left', 'docked-right');
@@ -68,6 +73,8 @@ const FloatingBall = {
       startY = e.clientY;
       initialLeft = rect.left;
       initialTop = rect.top;
+      ballWidth = rect.width || ball.offsetWidth;
+      ballHeight = rect.height || ball.offsetHeight;
 
       ball.style.right = 'auto';
       ball.style.bottom = 'auto';
@@ -78,6 +85,17 @@ const FloatingBall = {
 
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
+    };
+
+    const scheduleMove = (newLeft, newTop) => {
+      latestLeft = newLeft;
+      latestTop = newTop;
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        ball.style.left = `${latestLeft}px`;
+        ball.style.top = `${latestTop}px`;
+      });
     };
 
     const onMouseMove = (e) => {
@@ -93,14 +111,13 @@ const FloatingBall = {
       let newLeft = initialLeft + dx;
       let newTop = initialTop + dy;
 
-      const maxLeft = window.innerWidth - ball.offsetWidth;
-      const maxTop = window.innerHeight - ball.offsetHeight;
+      const maxLeft = window.innerWidth - ballWidth;
+      const maxTop = window.innerHeight - ballHeight;
 
       newLeft = Math.max(0, Math.min(newLeft, maxLeft));
       newTop = Math.max(0, Math.min(newTop, maxTop));
 
-      ball.style.left = `${newLeft}px`;
-      ball.style.top = `${newTop}px`;
+      scheduleMove(newLeft, newTop);
     };
 
     const onMouseUp = (e) => {
@@ -110,6 +127,10 @@ const FloatingBall = {
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
 
       if (hasMoved) {
         this.handleSnapAndDock(ball);
@@ -131,6 +152,8 @@ const FloatingBall = {
       startY = touch.clientY;
       initialLeft = rect.left;
       initialTop = rect.top;
+      ballWidth = rect.width || ball.offsetWidth;
+      ballHeight = rect.height || ball.offsetHeight;
 
       ball.style.right = 'auto';
       ball.style.bottom = 'auto';
@@ -153,20 +176,23 @@ const FloatingBall = {
       let newLeft = initialLeft + dx;
       let newTop = initialTop + dy;
 
-      const maxLeft = window.innerWidth - ball.offsetWidth;
-      const maxTop = window.innerHeight - ball.offsetHeight;
+      const maxLeft = window.innerWidth - ballWidth;
+      const maxTop = window.innerHeight - ballHeight;
 
       newLeft = Math.max(0, Math.min(newLeft, maxLeft));
       newTop = Math.max(0, Math.min(newTop, maxTop));
 
-      ball.style.left = `${newLeft}px`;
-      ball.style.top = `${newTop}px`;
+      scheduleMove(newLeft, newTop);
     };
 
     const onTouchEnd = (e) => {
       if (!isDragging) return;
       isDragging = false;
       ball.classList.remove('dragging');
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
       if (hasMoved) {
         this.handleSnapAndDock(ball);
       }
@@ -245,8 +271,10 @@ const FloatingBall = {
         if (result.floatingBallPosition) {
           const { x, y } = result.floatingBallPosition;
 
-          const maxLeft = window.innerWidth - 40;
-          const maxTop = window.innerHeight - 40;
+          const ballWidth = ball.offsetWidth || 44;
+          const ballHeight = ball.offsetHeight || 44;
+          const maxLeft = window.innerWidth - ballWidth;
+          const maxTop = window.innerHeight - ballHeight;
 
           let validX = Math.max(0, Math.min(x, maxLeft));
           let validY = Math.max(0, Math.min(y, maxTop));
@@ -256,9 +284,10 @@ const FloatingBall = {
           ball.style.left = `${validX}px`;
           ball.style.top = `${validY}px`;
 
-          if (validX <= 5) {
+          const dockThreshold = 5;
+          if (validX <= dockThreshold) {
             setTimeout(() => ball.classList.add('docked-left'), 800);
-          } else if (validX >= window.innerWidth - 45) {
+          } else if (validX >= window.innerWidth - ballWidth - dockThreshold) {
             setTimeout(() => ball.classList.add('docked-right'), 800);
           }
         }

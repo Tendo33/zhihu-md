@@ -15,30 +15,30 @@
     <div class="section">
       <div class="option-item">
         <div class="option-content">
-          <div class="option-label">悬浮导出按钮</div>
-          <div class="option-desc">在知乎文章页面显示快捷导出悬浮球。</div>
+          <div class="option-label" id="label-showFloatingBall">悬浮导出按钮</div>
+          <div class="option-desc" id="desc-showFloatingBall">在知乎文章页面显示快捷导出悬浮球。</div>
         </div>
         <label class="switch">
-          <input type="checkbox" id="showFloatingBall">
+          <input type="checkbox" id="showFloatingBall" aria-labelledby="label-showFloatingBall" aria-describedby="desc-showFloatingBall">
           <span class="slider"></span>
         </label>
       </div>
 
       <div class="option-item">
         <div class="option-content">
-          <div class="option-label">最大下载回答数</div>
-          <div class="option-desc">从问题页面下载回答的最大数量 (1-50)。</div>
+          <div class="option-label" id="label-maxAnswerCount">最大下载回答数</div>
+          <div class="option-desc" id="desc-maxAnswerCount">从问题页面下载回答的最大数量 (1-50)。</div>
         </div>
-        <input type="number" id="maxAnswerCount" min="1" max="50" value="20" class="number-input">
+        <input type="number" id="maxAnswerCount" min="1" max="50" value="20" class="number-input" aria-labelledby="label-maxAnswerCount" aria-describedby="desc-maxAnswerCount">
       </div>
 
       <div class="option-item">
         <div class="option-content">
-          <div class="option-label">下载图片到本地</div>
-          <div class="option-desc">将文章中的图片下载到本地，而非使用远程链接。导出时会创建包含 .md 文件和 images 文件夹的 ZIP 包。</div>
+          <div class="option-label" id="label-downloadImages">下载图片到本地</div>
+          <div class="option-desc" id="desc-downloadImages">将文章中的图片下载到本地，而非使用远程链接。导出时会创建包含 .md 文件和 images 文件夹的 ZIP 包。</div>
         </div>
         <label class="switch">
-          <input type="checkbox" id="downloadImages">
+          <input type="checkbox" id="downloadImages" aria-labelledby="label-downloadImages" aria-describedby="desc-downloadImages">
           <span class="slider"></span>
         </label>
       </div>
@@ -49,7 +49,7 @@
     </div>
   </div>
   
-  <div id="status" class="status-msg">设置已保存</div>
+  <div id="status" class="status-msg" role="status" aria-live="polite" aria-atomic="true">设置已保存</div>
 
   <script src="options.js"></script>
 </body>

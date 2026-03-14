@@ -66,6 +66,7 @@ function updateStatus(type, text) {
  */
 function showArticleInfo(info) {
   articleTitle.textContent = info.title;
+  articleTitle.setAttribute('title', info.title || '');
   articleAuthor.textContent = info.author || '未知作者';
 
   // Handle different page types

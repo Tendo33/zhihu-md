@@ -2,8 +2,8 @@
 
 <div align="center">
 
-将知乎内容尽可能完整地导出为 Markdown 的 Chrome 扩展。  
-支持专栏、回答、问题页多回答、首页推荐、关注动态和热榜导出。
+将知乎页面整理成适合继续编辑、归档和发布的 Markdown 文件。  
+当前版本支持专栏、回答、问题页多回答、首页推荐、关注动态和热榜页面导出。
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh?style=flat-square&label=Chrome%20Web%20Store)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh?authuser=0&hl=zh-CN)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black?style=flat-square)](./LICENSE)
@@ -11,85 +11,86 @@
 
 [Chrome Web Store](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh?authuser=0&hl=zh-CN)
 •
-[功能特性](#功能特性)
+[使用说明](./docs/usage.md)
 •
-[界面截图](#界面截图)
+[架构文档](./docs/architecture.md)
 •
-[快速开始](#快速开始)
+[导出链路](./docs/request-lifecycle.md)
 •
-[使用说明](#使用说明)
+[开发维护](./docs/development.md)
 •
-[项目结构](#项目结构)
+[常见问题](./docs/troubleshooting.md)
 •
 [隐私说明](./PRIVACY.md)
-•
-[License](./LICENSE)
 
 </div>
 
 ## 项目简介
 
-知乎上有很多值得保存的内容，但复制出来往往很乱：
+知乎内容直接复制到编辑器时，通常会遇到这些问题：
 
-- 公式会丢
-- 图片链接不干净
-- 代码块格式容易坏
-- 问题页、首页流、热榜这类页面很难整理
+- 正文结构被打散
+- 公式、代码块、表格和链接卡片不好处理
+- 图片链接混杂缩略图参数，不适合后续归档
+- 问题页、信息流、热榜这类聚合页面很难一次性整理
 
-这个项目的目标很直接：把你眼前的知乎页面整理成一份能继续写、继续存、继续发布的 Markdown 文件。
+`Zhihu to Markdown` 的目标很明确：把你当前已经加载在浏览器里的知乎内容，尽可能稳定地转换为可继续编辑的 Markdown 文件。
 
-它不是爬虫，不做账号绕过，也不试图拿到你看不到的内容。它做的事情只有一件：把当前页面中已经加载出来的知乎内容，尽量干净地导出下来。
+它不是爬虫，不绕过权限，也不访问你当前页面之外的隐藏内容。扩展只处理浏览器里已经展示出来的页面内容，并将结果下载到本地。
 
-## 功能特性
+## 当前能力
 
 ### 支持的页面类型
 
-- 专栏文章：`https://zhuanlan.zhihu.com/p/...`
-- 单条回答：`https://www.zhihu.com/question/.../answer/...`
-- 问题页：批量导出多个回答
-- 首页推荐：导出信息流内容
-- 关注动态：导出关注页内容
-- 热榜页：导出热榜标题、链接和热度信息
+| 页面类型 | URL 示例 | 导出方式 | 结果概览 |
+| --- | --- | --- | --- |
+| 专栏文章 | `https://zhuanlan.zhihu.com/p/...` | 弹窗 / 悬浮球 | 单个 Markdown 文件 |
+| 单条回答 | `https://www.zhihu.com/question/.../answer/...` | 弹窗 / 悬浮球 | 单个 Markdown 文件 |
+| 问题页 | `https://www.zhihu.com/question/...` | 悬浮球优先 | 批量整理多个回答 |
+| 首页推荐 | `https://www.zhihu.com/` | 悬浮球优先 | 导出信息流列表 |
+| 关注动态 | `https://www.zhihu.com/follow` | 悬浮球优先 | 导出关注页信息流 |
+| 热榜页 | `https://www.zhihu.com/hot` | 悬浮球优先 | 导出热榜清单 |
 
-### 导出效果
+### Markdown 转换特性
 
-- 保留正文结构，输出为标准 Markdown
 - 自动生成 YAML Front Matter
-- 公式转为 `$...$` / `$$...$$`
-- 代码块保留语言标识
-- 知乎链接卡片降级为普通 Markdown 链接
-- 图片可使用远程链接，也可以导出为本地图片包
-- 自动清理非法文件名字符，减少下载失败
+- 保留标题层级、段落、列表和引用
+- 数学公式转换为 `$...$` 或 `$$...$$`
+- 代码块保留 fenced code block 语法并尝试识别语言
+- 链接卡片降级为普通 Markdown 链接
+- 表格转换为 Markdown 表格
+- 图片可保留远程链接，也可打包下载到本地 ZIP
+- 文件名会清理非法字符，减少下载失败
 
-### 使用体验
+### 交互能力
 
-- 弹出窗口中直接识别当前页面类型
-- 可选页面悬浮导出按钮
-- 问题页支持设置最大回答导出数量
-- 首页、关注页会自动滚动加载后再导出
-- 热榜页可以快速整理成清单文档
+- 弹窗会识别当前页面类型并展示标题、作者、页面类别
+- 可选右下角悬浮导出按钮
+- 悬浮球支持拖拽、靠边停靠、位置记忆
+- 设置项会持久化到 `chrome.storage.sync`
+- 悬浮球位置保存在 `chrome.storage.local`
 
 ## 界面截图
 
-### 1. 弹出面板
+### 弹出面板
 
-<img src="assets/popup.png" alt="Popup Screenshot" width="200">
+<img src="assets/popup.png" alt="Popup Screenshot" width="220">
 
-### 2. 导出结果示例
+### 导出结果示例
 
 原始页面：
 
 <img src="assets/export_origin.png" alt="Original Zhihu Page" width="500">
 
-导出后的 Markdown 结果：
+导出后的 Markdown：
 
 <img src="assets/export-result.png" alt="Markdown Export Result" width="720">
 
-### 3. 设置页面
+### 设置页面
 
 <img src="assets/options.png" alt="Options Screenshot" width="500">
 
-### 4. 页面悬浮球
+### 页面悬浮球
 
 <img src="assets/floating-ball.png" alt="Floating Ball Screenshot" width="240">
 
@@ -97,17 +98,17 @@
 
 ### 方式一：从 Chrome Web Store 安装
 
-直接安装即可：
+直接安装：
 
 <a href="https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh?authuser=0&hl=zh-CN">
   <img src="https://img.shields.io/badge/Install%20from-Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Install from Chrome Web Store">
 </a>
 
-安装完成后：
+安装后：
 
-1. 打开任意支持的知乎页面
-2. 点击浏览器工具栏里的扩展图标
-3. 点击 `导出 Markdown`
+1. 打开一个支持的知乎页面。
+2. 点击浏览器工具栏中的扩展图标。
+3. 在弹窗里查看页面状态并执行导出，或直接点击页面右下角悬浮球导出。
 
 ### 方式二：开发者模式加载
 
@@ -119,7 +120,7 @@ cd zhihu-md
 然后在 Chrome 中：
 
 1. 打开 `chrome://extensions/`
-2. 打开右上角的“开发者模式”
+2. 启用右上角“开发者模式”
 3. 点击“加载已解压的扩展程序”
 4. 选择当前项目根目录
 
@@ -127,125 +128,157 @@ cd zhihu-md
 
 ### 导出专栏或单条回答
 
-进入文章页或回答页后，点击扩展图标即可直接导出当前内容。
+进入文章页或回答页后，可以直接通过弹窗或悬浮球导出。
 
 适合这些场景：
 
-- 收藏自己写过的内容
-- 整理资料到 Obsidian、Typora、Notion
-- 迁移到博客、知识库或 GitHub 仓库
+- 备份自己写过的内容
+- 迁移到 Obsidian、Typora、Notion 等编辑器
+- 二次整理到博客、知识库或 GitHub 仓库
 
 ### 导出问题页多个回答
 
-进入问题页后，扩展会自动向下滚动并收集回答，再导出为单个 Markdown 文件。
+问题页的批量导出逻辑由 `QuestionExporter` 负责：
 
-导出结果会按回答顺序整理，包含：
+- 自动滚动页面，尽量加载更多回答
+- 最多导出 `1-50` 条回答，默认 `20`
+- 结果按回答顺序分节整理
+- 每条回答包含作者、创建时间、编辑时间和正文
 
-- 回答作者
-- 创建时间
-- 编辑时间
-- 回答正文
+复杂页面建议优先使用悬浮球触发导出，这条链路会根据页面类型自动切换到对应导出器。
 
 ### 导出首页推荐或关注动态
 
-如果你想把一段时间内刷到的内容保存下来，这两个页面会比较有用。
+信息流页面的导出逻辑由 `FeedExporter` 负责：
 
-扩展会在页面中自动加载内容，然后按顺序导出为 Markdown 列表，适合做：
+- 自动滚动页面加载更多条目
+- 尝试展开“阅读全文”内容
+- 基于标题去重
+- 输出作者、时间、原始链接和正文摘录
+
+适合做：
 
 - 日常阅读归档
-- 选题收集
+- 选题池整理
 - 热门内容回顾
 
 ### 导出热榜
 
-热榜导出更偏清单型结果，适合快速保存标题、链接和热度信息，后续再做二次整理。
+热榜页导出由 `HotExporter` 负责，结果更偏清单型：
+
+- 提取排名、标题、链接、热度信息
+- 输出为适合二次整理的 Markdown 列表
+- 如果页面结构有变化，会回退到问题链接扫描逻辑
 
 ## 配置项
 
-扩展提供独立设置页，目前支持以下选项：
+| 配置项 | 说明 | 默认值 | 存储位置 |
+| --- | --- | --- | --- |
+| 悬浮导出按钮 | 是否显示右下角悬浮球 | 开启 | `chrome.storage.sync` |
+| 最大下载回答数 | 问题页和信息流导出的最大条数，范围 `1-50` | `20` | `chrome.storage.sync` |
+| 下载图片到本地 | 将文章中的图片打包到 ZIP 中 | 关闭 | `chrome.storage.sync` |
+| 悬浮球位置 | 记录拖拽后的位置 | 自动写入 | `chrome.storage.local` |
 
-| 配置项 | 说明 | 默认值 |
-| --- | --- | --- |
-| 悬浮导出按钮 | 在知乎页面右下角显示快捷导出按钮 | 开启 |
-| 最大下载回答数 | 问题页最多导出多少条回答，范围 `1-50` | `20` |
-| 下载图片到本地 | 导出时将图片打包到本地，而不是保留远程链接 | 关闭 |
+### 图片下载模式
 
-### 关于图片下载
+启用“下载图片到本地”后：
 
-开启“下载图片到本地”后，导出结果不是单独的 `.md` 文件，而是一个 ZIP 包，里面通常包含：
-
-- 1 个 Markdown 文件
-- 1 个 `images/` 目录
-
-这样离线查看会更方便，也更适合归档。
+- 单篇文章 / 回答导出会生成 ZIP 包
+- ZIP 中包含一个 Markdown 文件和一个 `images/` 目录
+- Markdown 中的图片链接会改写为本地相对路径
+- 后台脚本会逐张拉取图片并自行组装 ZIP 文件
 
 ## 输出格式示例
 
-单篇文章或单条回答导出时，文件顶部会自动附带元信息：
+单篇内容默认会生成 Front Matter：
 
 ```yaml
 ---
 title: "示例标题"
 url: https://www.zhihu.com/question/...
 author: 作者名
-date: 2026-03-26
+date: 2026-03-31
 created: 2025-12-01
 edited: 2025-12-03
 ---
 ```
 
-问题页多回答导出时，会额外记录回答数量，并按章节整理每条回答。
+问题页多回答导出会额外记录：
 
-## 适合谁用
+- `answer_count`
+- 每条回答的章节标题
+- 作者与时间信息
 
-- 想把知乎内容整理进本地知识库的人
-- 想备份自己文章和回答的人
-- 想把知乎内容二次编辑成博客或文档的人
-- 想快速归档首页推荐、关注流或热榜的人
+首页、关注页和热榜页会生成按条目组织的清单型文档。
+
+## 文档索引
+
+- [docs/README.md](./docs/README.md): 文档导航与阅读顺序
+- [docs/usage.md](./docs/usage.md): 使用手册与导出结果说明
+- [docs/architecture.md](./docs/architecture.md): 模块划分与职责
+- [docs/request-lifecycle.md](./docs/request-lifecycle.md): 从点击导出到文件落地的全链路
+- [docs/development.md](./docs/development.md): 本地开发、测试、打包和发布维护
+- [docs/troubleshooting.md](./docs/troubleshooting.md): 常见问题与排查建议
+- [MANIFEST_UPDATE.md](./MANIFEST_UPDATE.md): 版本发布前的清单更新说明
 
 ## 项目结构
 
 ```text
 zhihu-md/
-├── manifest.json                  # Chrome 扩展清单
+├── manifest.json
 ├── background/
-│   └── background.js              # 下载与图片打包逻辑
+│   └── background.js
 ├── content/
-│   ├── content.js                 # 内容脚本入口
-│   ├── content.css                # 页面注入样式
+│   ├── content.js
+│   ├── content.css
 │   └── modules/
-│       ├── constants.js           # 共享常量与工具函数
-│       ├── detector.js            # 页面类型识别
-│       ├── floating-ball.js       # 悬浮导出按钮
-│       ├── turndown-rules.js      # Markdown 转换规则
+│       ├── constants.js
+│       ├── detector.js
+│       ├── floating-ball.js
+│       ├── turndown-rules.js
 │       └── exporters/
-│           ├── article.js         # 专栏 / 回答导出
-│           ├── question.js        # 问题页多回答导出
-│           ├── feed.js            # 首页 / 关注页导出
-│           └── hot.js             # 热榜导出
+│           ├── article.js
+│           ├── question.js
+│           ├── feed.js
+│           └── hot.js
 ├── popup/
-│   ├── popup.html                 # 弹出面板
-│   ├── popup.css                  # 弹出面板样式
-│   └── popup.js                   # 弹出面板逻辑
+│   ├── popup.html
+│   ├── popup.css
+│   └── popup.js
 ├── options/
-│   ├── options.html               # 设置页
-│   ├── options.css                # 设置页样式
-│   └── options.js                 # 设置项持久化
+│   ├── options.html
+│   ├── options.css
+│   └── options.js
 ├── lib/
-│   ├── turndown.min.js            # HTML 转 Markdown 依赖
-│   ├── logger.js                  # 日志工具
-│   ├── init-scheduler.js          # 初始化调度
-│   ├── page-detector.js           # 页面识别辅助
-│   └── shared.css                 # 共享样式
-├── icons/                         # 扩展图标
+│   ├── init-scheduler.js
+│   ├── logger.js
+│   ├── page-detector.js
+│   ├── shared.css
+│   └── turndown.min.js
 ├── scripts/
-│   └── package.js                 # 打包脚本
-├── dist/                          # 打包产物
-├── PRIVACY.md                     # 隐私说明
+│   ├── package.js
+│   └── test-init-scheduler.js
+├── assets/
+├── icons/
+├── docs/
+├── MANIFEST_UPDATE.md
+├── PRIVACY.md
 └── README.md
 ```
 
 ## 本地开发
+
+### 安装依赖
+
+```bash
+npm install
+```
+
+### 运行测试
+
+```bash
+node scripts/test-init-scheduler.js
+```
 
 ### 打包扩展
 
@@ -253,23 +286,26 @@ zhihu-md/
 npm run package
 ```
 
-执行后会在 `dist/` 下生成可上传到 Chrome Web Store 的 ZIP 包。
+打包后会在 `dist/` 目录生成可上传到 Chrome Web Store 的 ZIP 文件。
+
+更多开发和发布细节见 [docs/development.md](./docs/development.md)。
 
 ## 已知限制
 
-- 只能导出当前页面已经加载出来的内容
-- 付费内容、折叠内容或未展开内容，能否导出取决于页面当前是否可见
+- 扩展只能导出当前页面已经加载出来的内容
+- 付费内容、折叠内容或未展开内容，是否可导出取决于当前页面是否可见
 - 默认不抓取评论区
-- 页面结构如果被知乎改动，部分选择器可能需要更新
-- 首页和关注页属于动态信息流，导出结果会受当时页面加载状态影响
+- 复杂页面的批量导出依赖页面结构，知乎改版后可能需要更新选择器
+- 首页推荐、关注动态和热榜属于动态页面，导出结果会受滚动加载状态影响
+- 图片本地打包模式只用于单篇文章和回答导出，不适用于批量信息流整理
 
 ## 隐私说明
 
-这个扩展只在 `*.zhihu.com` 页面工作，使用到的权限也比较克制：
+扩展只在 `*.zhihu.com` 页面运行，当前实际权限为：
 
-- `activeTab`：读取当前标签页内容
-- `downloads`：保存导出的文件
-- `storage`：保存扩展设置
+- `activeTab`
+- `downloads`
+- `storage`
 
 详细说明见 [PRIVACY.md](./PRIVACY.md)。
 

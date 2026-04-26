@@ -6,8 +6,8 @@ function saveOptions() {
   const maxAnswerCount = parseInt(document.getElementById('maxAnswerCount').value, 10);
   const downloadImages = document.getElementById('downloadImages').checked;
 
-  // Validate range
-  const validCount = Math.min(50, Math.max(1, maxAnswerCount || 20));
+  // Validate: 0 means unlimited, otherwise must be >= 1
+  const validCount = Math.max(0, isNaN(maxAnswerCount) ? 20 : maxAnswerCount);
   document.getElementById('maxAnswerCount').value = validCount;
 
   chrome.storage.sync.set({

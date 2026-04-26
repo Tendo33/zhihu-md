@@ -30,7 +30,7 @@ const CONSTANTS = {
   // Default settings
   DEFAULTS: {
     MAX_ANSWER_COUNT: 20,
-    SCROLL_TIMEOUT: 30000,
+    SCROLL_TIMEOUT: 60000,
     SCROLL_INTERVAL: 1000
   }
 };

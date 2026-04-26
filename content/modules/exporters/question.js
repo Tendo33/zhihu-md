@@ -64,6 +64,33 @@ const QuestionExporter = {
   },
 
   /**
+   * Try to read the total answer count declared on the question page.
+   * Zhihu renders something like "123 个回答" in a heading near the list.
+   * Returns the parsed number, or 0 if not found.
+   */
+  getPageDeclaredAnswerCount() {
+    const candidates = [
+      '.QuestionAnswers-answers h4',
+      '.List-headerText',
+      '.QuestionAnswerStatus',
+    ];
+    for (const sel of candidates) {
+      const el = document.querySelector(sel);
+      if (el) {
+        const m = el.textContent.match(/(\d[\d,]*)\s*个回答/);
+        if (m) return parseInt(m[1].replace(/,/g, ''), 10);
+      }
+    }
+    // Fallback: scan all visible text nodes near the answer list
+    const allH4 = document.querySelectorAll('h4');
+    for (const h of allH4) {
+      const m = h.textContent.match(/(\d[\d,]*)\s*个回答/);
+      if (m) return parseInt(m[1].replace(/,/g, ''), 10);
+    }
+    return 0;
+  },
+
+  /**
    * Scroll page to load more answers
    * @param {number} targetCount 
    * @returns {Promise<number>}
@@ -96,10 +123,18 @@ const QuestionExporter = {
         // Use default
       }
 
-      await this.scrollToLoadAnswers(maxAnswerCount);
+      // 0 = unlimited: use the count declared on the page, or scroll to end
+      const pageDeclared = this.getPageDeclaredAnswerCount();
+      const targetCount = maxAnswerCount === 0
+        ? (pageDeclared > 0 ? pageDeclared : Infinity)
+        : maxAnswerCount;
+
+      await this.scrollToLoadAnswers(targetCount);
 
       const answerItems = document.querySelectorAll('.AnswerItem');
-      const answersToProcess = Array.from(answerItems).slice(0, maxAnswerCount);
+      const answersToProcess = maxAnswerCount === 0
+        ? Array.from(answerItems)
+        : Array.from(answerItems).slice(0, maxAnswerCount);
 
       if (answersToProcess.length === 0) {
         return { success: false, error: '未找到任何回答' };

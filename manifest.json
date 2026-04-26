@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Zhihu to Markdown",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "将知乎专栏/问答页面内容转换为 Markdown 格式并下载",
   "permissions": [
     "activeTab",

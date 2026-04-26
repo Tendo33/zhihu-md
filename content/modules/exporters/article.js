@@ -234,11 +234,6 @@ date: ${date}`;
     }
 
     try {
-      // Start image collection if downloading images
-      if (downloadImages) {
-        startImageCollection();
-      }
-
       const clonedContainer = this.preprocessContainer(container);
       const turndownService = createTurndownService(downloadImages);
       
@@ -249,8 +244,9 @@ date: ${date}`;
 
       const filename = cleanFilename(title || 'zhihu-article') + '.md';
 
-      // Get collected images if in download mode
-      const images = downloadImages ? stopImageCollection() : [];
+      const images = downloadImages && turndownService.imageCollector
+        ? turndownService.imageCollector.images
+        : [];
 
       return {
         success: true,
@@ -262,9 +258,6 @@ date: ${date}`;
         }
       };
     } catch (error) {
-      if (downloadImages) {
-        stopImageCollection();
-      }
       return { success: false, error: '导出过程中发生错误: ' + error.message };
     }
   }

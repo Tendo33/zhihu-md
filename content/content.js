@@ -76,9 +76,23 @@
       Logger.info('返回文章信息:', result);
       sendResponse(result);
     } else if (message.action === 'exportMarkdown') {
-      const result = ArticleExporter.exportMarkdown();
-      Logger.info('返回导出结果:', result.success ? '成功' : '失败');
-      sendResponse(result);
+      const downloadImages = message.downloadImages || false;
+      const pageType = PageDetector.detectPageType();
+
+      (async () => {
+        let result;
+        if (pageType === 'question') {
+          result = await QuestionExporter.exportMultipleAnswers();
+        } else if (pageType === 'home' || pageType === 'follow') {
+          result = await FeedExporter.exportFeedItems(pageType);
+        } else if (pageType === 'hot') {
+          result = await HotExporter.exportHotList();
+        } else {
+          result = await ArticleExporter.exportMarkdown(downloadImages);
+        }
+        Logger.info('返回导出结果:', result.success ? '成功' : '失败');
+        sendResponse(result);
+      })();
     } else if (message.action === 'routeChanged') {
       Logger.info('路由改变，重新检查悬浮球状态...');
       scheduleFloatingBallInit(800);

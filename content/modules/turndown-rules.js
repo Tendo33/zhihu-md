@@ -3,42 +3,10 @@
  * Custom Turndown rules for converting Zhihu HTML to Markdown
  */
 
-// Global image collector for download mode
-let imageCollector = null;
-
 /**
- * Start collecting images for download
- * @returns {Object} Image collector with images array and methods
- */
-function startImageCollection() {
-  imageCollector = {
-    images: [],
-    addImage(url, filename) {
-      this.images.push({ url, filename });
-      return `images/${filename}`;
-    },
-    getImages() {
-      return this.images;
-    },
-    clear() {
-      this.images = [];
-    }
-  };
-  return imageCollector;
-}
-
-/**
- * Stop collecting images and return collected images
- * @returns {Array} Collected images
- */
-function stopImageCollection() {
-  const images = imageCollector ? imageCollector.getImages() : [];
-  imageCollector = null;
-  return images;
-}
-
-/**
- * Configure Turndown with custom rules for Zhihu
+ * Configure Turndown with custom rules for Zhihu.
+ * When downloadImages is true, collected image metadata is available via
+ * turndownService.imageCollector.images after conversion.
  * @param {boolean} downloadImages - Whether to use local image paths
  * @returns {TurndownService}
  */
@@ -48,6 +16,12 @@ function createTurndownService(downloadImages = false) {
     codeBlockStyle: 'fenced',
     bulletListMarker: '-'
   });
+
+  // Attach a per-instance image collector when download mode is enabled
+  const collector = downloadImages
+    ? { images: [], addImage(url, filename) { this.images.push({ url, filename }); return `images/${filename}`; } }
+    : null;
+  turndownService.imageCollector = collector;
 
   // Rule: Math formulas - extract LaTeX from data-tex attribute
   turndownService.addRule('zhihuMath', {
@@ -83,17 +57,13 @@ function createTurndownService(downloadImages = false) {
       }
       
       // If download mode is enabled, collect image and use local path
-      if (downloadImages && imageCollector) {
-        // Generate unique filename from URL
+      if (downloadImages && collector) {
         const urlParts = cleanSrc.split('/');
         let filename = urlParts[urlParts.length - 1].split('?')[0];
-        
-        // Ensure unique filename
         const ext = filename.includes('.') ? '' : '.jpg';
-        const index = imageCollector.images.length + 1;
+        const index = collector.images.length + 1;
         filename = `img_${index.toString().padStart(3, '0')}_${filename}${ext}`;
-        
-        const localPath = imageCollector.addImage(cleanSrc, filename);
+        const localPath = collector.addImage(cleanSrc, filename);
         return `![${alt}](${localPath})`;
       }
       
@@ -108,7 +78,6 @@ function createTurndownService(downloadImages = false) {
              (node.nodeName === 'DIV' && node.classList.contains('highlight'));
     },
     replacement: function(content, node) {
-      let code = '';
       let language = '';
 
       const codeElement = node.querySelector('code') || node;
@@ -125,7 +94,7 @@ function createTurndownService(downloadImages = false) {
         }
       }
 
-      code = codeElement.textContent || '';
+      const code = codeElement.textContent || '';
       
       return `\n\n\`\`\`${language}\n${code.trim()}\n\`\`\`\n\n`;
     }
@@ -254,6 +223,4 @@ function createTurndownService(downloadImages = false) {
 // Export
 if (typeof window !== 'undefined') {
   window.createTurndownService = createTurndownService;
-  window.startImageCollection = startImageCollection;
-  window.stopImageCollection = stopImageCollection;
 }

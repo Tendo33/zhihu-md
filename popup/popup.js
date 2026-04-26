@@ -147,25 +147,7 @@ async function init() {
 
     Logger.info('Current URL:', tab.url);
 
-    const typeFlags = window.PageTypeUtils && window.PageTypeUtils.checkUrlType
-      ? window.PageTypeUtils.checkUrlType(tab.url)
-      : (() => {
-        try {
-          const url = new URL(tab.url);
-          const pathname = url.pathname;
-          return {
-            isZhihu: url.hostname.endsWith('zhihu.com'),
-            isColumn: pathname.startsWith('/p/'),
-            isAnswer: pathname.includes('/question/') && pathname.includes('/answer/'),
-            isQuestion: pathname.includes('/question/') && !pathname.includes('/answer/'),
-            isHome: pathname === '/' || pathname === '',
-            isFollow: pathname === '/follow' || pathname === '/follow/',
-            isHot: pathname === '/hot' || pathname === '/hot/'
-          };
-        } catch {
-          return { isZhihu: false };
-        }
-      })();
+    const typeFlags = window.PageTypeUtils.checkUrlType(tab.url);
 
     if (!typeFlags || !typeFlags.isZhihu) {
       showError('此页面不是知乎页面', true);  // Silent - expected case
@@ -232,6 +214,16 @@ async function init() {
 }
 
 /**
+ * Read user settings from storage
+ * @returns {Promise<{downloadImages: boolean, maxAnswerCount: number}>}
+ */
+function getSettings() {
+  return new Promise(resolve => {
+    chrome.storage.sync.get({ downloadImages: false, maxAnswerCount: 20 }, resolve);
+  });
+}
+
+/**
  * Handle export button click
  */
 async function handleExport() {
@@ -247,21 +239,31 @@ async function handleExport() {
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    const response = await safeSendMessage(tab.id, { action: 'exportMarkdown' });
+    const settings = await getSettings();
+
+    const response = await safeSendMessage(tab.id, {
+      action: 'exportMarkdown',
+      downloadImages: settings.downloadImages
+    });
 
     if (response && response.success) {
       Logger.success('Markdown generated');
       
-      // Send to background script for download
-      await chrome.runtime.sendMessage({
+      const messageData = {
         action: 'download',
         filename: response.data.filename,
         content: response.data.content
-      });
+      };
+
+      if (response.data.images && response.data.images.length > 0) {
+        messageData.images = response.data.images;
+        messageData.downloadImages = true;
+      }
+
+      await chrome.runtime.sendMessage(messageData);
 
       exportBtn.classList.remove('loading');
       exportBtn.removeAttribute('aria-busy');
-      // No specific success class needed for styles, but we can reset text
       btnText.textContent = '导出成功!';
       
       setTimeout(() => {

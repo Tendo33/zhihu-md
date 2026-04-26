@@ -15,7 +15,7 @@ const HotExporter = {
       const hotItems = document.querySelectorAll('.HotList-item, .HotItem, [class*="HotItem"]');
 
       if (hotItems.length === 0) {
-        const altItems = document.querySelectorAll('.HotList .HotItem-content, .css-1xgfyz0');
+      const altItems = document.querySelectorAll('.HotList .HotItem-content');
         if (altItems.length === 0) {
           return { success: false, error: '未找到热榜内容，请确保在热榜页面' };
         }

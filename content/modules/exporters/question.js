@@ -69,34 +69,10 @@ const QuestionExporter = {
    * @returns {Promise<number>}
    */
   async scrollToLoadAnswers(targetCount) {
-    const startTime = Date.now();
-    const maxTime = CONSTANTS.DEFAULTS.SCROLL_TIMEOUT;
-    let lastCount = 0;
-    let noChangeCount = 0;
-
-    while (Date.now() - startTime < maxTime) {
-      const currentAnswers = document.querySelectorAll('.AnswerItem');
-      const currentCount = currentAnswers.length;
-
-      if (currentCount >= targetCount) {
-        return currentCount;
-      }
-
-      if (currentCount === lastCount) {
-        noChangeCount++;
-        if (noChangeCount >= 3) {
-          return currentCount;
-        }
-      } else {
-        noChangeCount = 0;
-      }
-      lastCount = currentCount;
-
-      window.scrollTo(0, document.body.scrollHeight);
-      await new Promise(resolve => setTimeout(resolve, CONSTANTS.DEFAULTS.SCROLL_INTERVAL));
-    }
-
-    return document.querySelectorAll('.AnswerItem').length;
+    return scrollToLoadItems(
+      () => document.querySelectorAll('.AnswerItem').length,
+      targetCount
+    );
   },
 
   /**

@@ -1,11 +1,13 @@
 // Saves options to chrome.storage
+const Logger = createLogger('[Zhihu-MD Options]');
+
 function saveOptions() {
   const showFloatingBall = document.getElementById('showFloatingBall').checked;
   const maxAnswerCount = parseInt(document.getElementById('maxAnswerCount').value, 10);
   const downloadImages = document.getElementById('downloadImages').checked;
 
-  // Validate range
-  const validCount = Math.min(50, Math.max(1, maxAnswerCount || 20));
+  // Validate: 0 means unlimited, otherwise must be >= 1
+  const validCount = Math.max(0, isNaN(maxAnswerCount) ? 20 : maxAnswerCount);
   document.getElementById('maxAnswerCount').value = validCount;
 
   chrome.storage.sync.set({
@@ -13,7 +15,7 @@ function saveOptions() {
     maxAnswerCount: validCount,
     downloadImages: downloadImages
   }, () => {
-    // Update status to let user know options were saved.
+    Logger.info('设置已保存:', { showFloatingBall, maxAnswerCount: validCount, downloadImages });
     const status = document.getElementById('status');
     status.classList.add('show');
     setTimeout(() => {
@@ -22,14 +24,13 @@ function saveOptions() {
   });
 }
 
-// Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
 function restoreOptions() {
   chrome.storage.sync.get({
-    showFloatingBall: true,  // Default value
-    maxAnswerCount: 20,      // Default value
-    downloadImages: false    // Default value - use remote links
+    showFloatingBall: true,
+    maxAnswerCount: 20,
+    downloadImages: false
   }, (items) => {
+    Logger.info('已读取设置:', items);
     document.getElementById('showFloatingBall').checked = items.showFloatingBall;
     document.getElementById('maxAnswerCount').value = items.maxAnswerCount;
     document.getElementById('downloadImages').checked = items.downloadImages;

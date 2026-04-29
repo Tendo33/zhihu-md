@@ -30,7 +30,7 @@ const CONSTANTS = {
   // Default settings
   DEFAULTS: {
     MAX_ANSWER_COUNT: 20,
-    SCROLL_TIMEOUT: 30000,
+    SCROLL_TIMEOUT: 60000,
     SCROLL_INTERVAL: 1000
   }
 };
@@ -82,4 +82,49 @@ if (typeof window !== 'undefined') {
   window.querySelectorAny = querySelectorAny;
   window.cleanFilename = cleanFilename;
   window.normalizeUrl = normalizeUrl;
+}
+
+/**
+ * Scroll page downward until a selector returns >= targetCount elements,
+ * or until no new elements appear 3 times in a row, or until timeout.
+ * @param {function(): number} getCount - Returns current count of target elements
+ * @param {number} targetCount
+ * @returns {Promise<number>} Final count of elements found
+ */
+async function scrollToLoadItems(getCount, targetCount) {
+  const startTime = Date.now();
+  let lastCount = 0;
+  let noChangeCount = 0;
+
+  while (Date.now() - startTime < CONSTANTS.DEFAULTS.SCROLL_TIMEOUT) {
+    const currentCount = getCount();
+
+    if (currentCount >= targetCount) {
+      return currentCount;
+    }
+
+    if (currentCount === lastCount) {
+      noChangeCount++;
+      if (noChangeCount >= 3) {
+        return currentCount;
+      }
+    } else {
+      noChangeCount = 0;
+    }
+    lastCount = currentCount;
+
+    window.scrollTo(0, document.body.scrollHeight);
+    await new Promise(resolve => setTimeout(resolve, CONSTANTS.DEFAULTS.SCROLL_INTERVAL));
+  }
+
+  return getCount();
+}
+
+// Export for different module systems
+if (typeof window !== 'undefined') {
+  window.CONSTANTS = CONSTANTS;
+  window.querySelectorAny = querySelectorAny;
+  window.cleanFilename = cleanFilename;
+  window.normalizeUrl = normalizeUrl;
+  window.scrollToLoadItems = scrollToLoadItems;
 }

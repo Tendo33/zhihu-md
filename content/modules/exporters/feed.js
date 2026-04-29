@@ -10,38 +10,11 @@ const FeedExporter = {
    * @returns {Promise<number>}
    */
   async scrollToLoadFeedItems(targetCount) {
-    const startTime = Date.now();
-    const maxTime = CONSTANTS.DEFAULTS.SCROLL_TIMEOUT;
-    let lastCount = 0;
-    let noChangeCount = 0;
-
-    while (Date.now() - startTime < maxTime) {
-      let currentItems = document.querySelectorAll('.TopstoryItem');
-      if (currentItems.length === 0) {
-        currentItems = document.querySelectorAll('.Feed > .ContentItem, .ContentItem');
-      }
-      const currentCount = currentItems.length;
-
-      if (currentCount >= targetCount) {
-        return currentCount;
-      }
-
-      if (currentCount === lastCount) {
-        noChangeCount++;
-        if (noChangeCount >= 3) {
-          return currentCount;
-        }
-      } else {
-        noChangeCount = 0;
-      }
-      lastCount = currentCount;
-
-      window.scrollTo(0, document.body.scrollHeight);
-      await new Promise(resolve => setTimeout(resolve, CONSTANTS.DEFAULTS.SCROLL_INTERVAL));
-    }
-
-    const items = document.querySelectorAll('.TopstoryItem');
-    return items.length > 0 ? items.length : document.querySelectorAll('.ContentItem').length;
+    return scrollToLoadItems(() => {
+      const items = document.querySelectorAll('.TopstoryItem');
+      if (items.length > 0) return items.length;
+      return document.querySelectorAll('.Feed > .ContentItem, .ContentItem').length;
+    }, targetCount);
   },
 
   /**

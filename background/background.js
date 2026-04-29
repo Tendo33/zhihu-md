@@ -11,6 +11,19 @@ Logger.info('==========================================');
 Logger.info('Background service worker 开始加载...');
 Logger.info('==========================================');
 
+// CRC-32 lookup table (built once at module load)
+const CRC32_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let j = 0; j < 8; j++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    table[i] = c;
+  }
+  return table;
+})();
+
 // Listen for download requests
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   Logger.info('收到消息:', message);
@@ -115,37 +128,33 @@ async function handleDownloadWithImages(filename, content, images) {
 }
 
 /**
- * Download all images and return as array of {filename, data}
+ * Download all images in parallel and return as array of {filename, data}
  * @param {Array} images 
  * @returns {Promise<Array>}
  */
 async function downloadImages(images) {
-  const results = [];
-  
-  for (const img of images) {
-    try {
+  const results = await Promise.allSettled(
+    images.map(async (img) => {
       Logger.debug(`下载图片: ${img.url.substring(0, 50)}...`);
-      
       const response = await fetch(img.url);
-      if (!response.ok) {
-        Logger.warn(`图片下载失败: ${img.url}`);
-        continue;
-      }
-      
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();
       const arrayBuffer = await blob.arrayBuffer();
-      
-      results.push({
-        filename: img.filename,
-        data: new Uint8Array(arrayBuffer)
-      });
-    } catch (error) {
-      Logger.warn(`图片下载错误: ${img.url}`, error);
+      return { filename: img.filename, data: new Uint8Array(arrayBuffer) };
+    })
+  );
+
+  const successful = [];
+  results.forEach((result, i) => {
+    if (result.status === 'fulfilled') {
+      successful.push(result.value);
+    } else {
+      Logger.warn(`图片下载失败: ${images[i].url}`, result.reason);
     }
-  }
-  
-  Logger.info(`成功下载 ${results.length}/${images.length} 张图片`);
-  return results;
+  });
+
+  Logger.info(`成功下载 ${successful.length}/${images.length} 张图片`);
+  return successful;
 }
 
 /**
@@ -259,26 +268,14 @@ function createZip(files) {
 }
 
 /**
- * Calculate CRC-32 checksum
+ * Calculate CRC-32 checksum using pre-built lookup table
  * @param {Uint8Array} data 
  * @returns {number}
  */
 function crc32(data) {
   let crc = 0xFFFFFFFF;
-  
-  // CRC-32 lookup table
-  const table = new Uint32Array(256);
-  for (let i = 0; i < 256; i++) {
-    let c = i;
-    for (let j = 0; j < 8; j++) {
-      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-    }
-    table[i] = c;
-  }
-  
   for (let i = 0; i < data.length; i++) {
-    crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    crc = CRC32_TABLE[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
   }
-  
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }

@@ -5,15 +5,15 @@
 
 const CONSTANTS = {
   SELECTORS: {
-    COLUMN_CONTAINER: ['.Post-RichText', '.RichText.ztext.Post-RichText'],
-    ANSWER_CONTAINER: ['.AnswerItem .RichText', '[data-za-detail-view-id="{id}"]'],
+    COLUMN_CONTAINER: ['.Post-RichText', '.RichText.ztext.Post-RichText', 'article .RichText.ztext', '[data-za-detail-view-name="Article"] .RichText'],
+    ANSWER_CONTAINER: ['[data-za-detail-view-path-module="AnswerItem"] .RichText.ztext', '[data-za-detail-view-name="AnswerItem"] .RichText.ztext', '.AnswerItem .RichText.ztext', '[data-za-detail-view-path-module="AnswerItem"] .RichText', '.AnswerItem .RichText', '[class*="RichText"]'],
     TITLE: {
       COLUMN: ['.Post-Title', 'h1.Post-Title'],
-      ANSWER: ['.QuestionHeader-title']
+      ANSWER: ['.QuestionHeader-title', 'h1[data-zop-title]', 'h1.QuestionHeader-mainTitle', 'h1']
     },
     AUTHOR: {
       COLUMN: ['.AuthorInfo-name', '.UserLink-link'],
-      ANSWER: ['.AnswerItem .AuthorInfo-name', '.AnswerItem .UserLink-link']
+      ANSWER: ['[data-za-detail-view-path-module="AnswerItem"] .AuthorInfo-name', '.AnswerItem .AuthorInfo-name', '.AnswerItem .UserLink-link', '[data-za-detail-view-path-module="AnswerItem"] [class*="AuthorInfo"] a']
     },
     UNWANTED: [
       '.ContentItem-actions',    // Action buttons
@@ -55,12 +55,14 @@ function querySelectorAny(parent, selectors) {
  * @returns {string}
  */
 function cleanFilename(title) {
-  return title
+  const cleaned = String(title || 'zhihu-article')
+    .replace(/[\u0000-\u001f\u007f]/g, '')
     .replace(/[/\\:*?"<>|]/g, '_')  // Replace illegal chars
     .replace(/\s+/g, '_')            // Replace spaces
     .replace(/_+/g, '_')             // Collapse multiple underscores
     .replace(/^_|_$/g, '')           // Trim underscores
     .substring(0, 100);              // Limit length
+  return cleaned || 'zhihu-article';
 }
 
 /**

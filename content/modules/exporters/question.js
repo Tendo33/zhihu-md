@@ -11,8 +11,7 @@ const QuestionExporter = {
    * @returns {Object|null}
    */
   processAnswerContent(answerItem, turndownService) {
-    const authorEl = answerItem.querySelector('.AuthorInfo-name') ||
-      answerItem.querySelector('.UserLink-link');
+    const authorEl = answerItem.querySelector('.AuthorInfo-name, [class*="AuthorInfo"] a, .UserLink-link');
     const author = authorEl?.textContent?.trim() || '匿名用户';
 
     let createdTime = '';
@@ -43,7 +42,7 @@ const QuestionExporter = {
       }
     }
 
-    const contentEl = answerItem.querySelector('.RichText.ztext');
+    const contentEl = answerItem.querySelector('.RichText.ztext, .RichText, [class*="RichText"]');
     if (!contentEl) return null;
 
     const clonedContent = contentEl.cloneNode(true);
@@ -97,7 +96,7 @@ const QuestionExporter = {
    */
   async scrollToLoadAnswers(targetCount) {
     return scrollToLoadItems(
-      () => document.querySelectorAll('.AnswerItem').length,
+      () => document.querySelectorAll('.AnswerItem, [data-za-detail-view-path-module="AnswerItem"]').length,
       targetCount
     );
   },
@@ -131,7 +130,7 @@ const QuestionExporter = {
 
       await this.scrollToLoadAnswers(targetCount);
 
-      const answerItems = document.querySelectorAll('.AnswerItem');
+      const answerItems = document.querySelectorAll('.AnswerItem, [data-za-detail-view-path-module="AnswerItem"]');
       const answersToProcess = maxAnswerCount === 0
         ? Array.from(answerItems)
         : Array.from(answerItems).slice(0, maxAnswerCount);

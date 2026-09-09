@@ -9,7 +9,7 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 40px 20px;
+  padding: clamp(20px, 5vw, 40px) 20px;
 }
 
 .container {
@@ -19,7 +19,7 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(12, 74, 110, 0.12);
   display: flex;
   flex-direction: column;
 }
@@ -46,7 +46,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 32px;
+  padding: 18px 32px;
   border-bottom: 1px solid var(--border-subtle);
   transition: background-color var(--duration-fast) var(--ease-smooth);
   gap: 16px;
@@ -75,7 +75,8 @@ h1 {
 
 .option-desc {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  opacity: .82;
   line-height: 1.5;
 }
 
@@ -146,16 +147,17 @@ input:focus-visible + .slider {
   color: var(--text-primary);
   font-size: 14px;
   text-align: center;
-  transition: all var(--duration-fast);
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
 .number-input:focus {
-  outline: none;
   border-color: var(--text-tertiary);
   background: var(--bg-card);
 }
 
 .number-input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--bg-secondary), 0 0 0 4px var(--blue);
 }
 
@@ -228,3 +230,7 @@ input:focus-visible + .slider {
     text-align: left;
   }
 }
+
+/* Series control and focus rules */
+.switch input:focus-visible + .slider { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+.option-item:focus-within { background-color: var(--bg-card); }

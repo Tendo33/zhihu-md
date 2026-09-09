@@ -17,19 +17,18 @@ const ArticleExporter = {
       
       if (answerMatch) {
         const answerId = answerMatch[1];
-        const idSelector = `[data-za-detail-view-id="${answerId}"]`;
-        const answerElement = document.querySelector(idSelector) ||
-          document.querySelector('.AnswerItem');
-        return answerElement?.querySelector('.RichText') || answerElement;
+        const idSelector = `[data-za-detail-view-id="${answerId}"], [data-za-detail-view-path-module="AnswerItem"][data-za-detail-view-path*="${answerId}"]`;
+        const answerElement = document.querySelector(idSelector) || document.querySelector('.AnswerItem');
+        return answerElement?.querySelector('.RichText.ztext, .RichText, [class*="RichText"]') || answerElement;
       } else {
-        return document.querySelector('.AnswerItem .RichText');
+        return querySelectorAny(document, CONSTANTS.SELECTORS.ANSWER_CONTAINER);
       }
     } else if (pageType === 'question') {
-      const expandedAnswer = document.querySelector('.AnswerItem .RichText.ztext');
+      const expandedAnswer = querySelectorAny(document, CONSTANTS.SELECTORS.ANSWER_CONTAINER);
       if (expandedAnswer) {
         return expandedAnswer;
       }
-      return document.querySelector('.AnswerItem .RichText');
+      return expandedAnswer;
     }
     
     return null;
@@ -42,9 +41,9 @@ const ArticleExporter = {
    */
   getTitle(pageType) {
     if (pageType === 'column') {
-      return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.COLUMN)?.textContent?.trim();
+      return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.COLUMN)?.textContent?.trim() || document.querySelector('meta[property="og:title"]')?.content?.trim();
     } else if (pageType === 'answer' || pageType === 'question') {
-      return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.ANSWER)?.textContent?.trim();
+      return querySelectorAny(document, CONSTANTS.SELECTORS.TITLE.ANSWER)?.textContent?.trim() || document.querySelector('meta[property="og:title"]')?.content?.trim();
     }
     return document.title;
   },
@@ -58,7 +57,7 @@ const ArticleExporter = {
     if (pageType === 'column') {
       return querySelectorAny(document, CONSTANTS.SELECTORS.AUTHOR.COLUMN)?.textContent?.trim();
     } else if (pageType === 'answer' || pageType === 'question') {
-      const answerItem = document.querySelector('.AnswerItem');
+      const answerItem = document.querySelector('[data-za-detail-view-path-module="AnswerItem"]') || document.querySelector('.AnswerItem');
       if (answerItem) {
         return querySelectorAny(answerItem, ['.AuthorInfo-name', '.UserLink-link'])?.textContent?.trim();
       }
@@ -85,7 +84,10 @@ const ArticleExporter = {
         if (editedMatch) editedTime = editedMatch[1].trim();
       }
     } else if (pageType === 'answer') {
-      const answerItem = document.querySelector('.AnswerItem');
+      const answerId = window.location.pathname.match(/\/answer\/(\d+)/)?.[1];
+      const answerItem = (answerId && document.querySelector(`[data-za-detail-view-id="${answerId}"]`)) ||
+        document.querySelector('[data-za-detail-view-path-module="AnswerItem"]') ||
+        document.querySelector('.AnswerItem');
       if (answerItem) {
         const timeEl = answerItem.querySelector('.ContentItem-time');
         if (timeEl) {

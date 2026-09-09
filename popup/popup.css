@@ -6,7 +6,7 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  width: clamp(280px, 90vw, 360px);
+  width: min(360px, 100vw);
   min-height: 200px;
   font-size: 14px;
 }
@@ -61,6 +61,9 @@ body {
   white-space: nowrap;
 }
 
+.logo-copy { display:flex; flex-direction:column; min-width:0; gap:2px; }
+.logo-subtitle { font-size:12px; line-height:1.2; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
 .icon-btn {
   background: transparent;
   border: none;
@@ -73,7 +76,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition: background-color var(--duration-fast) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 .icon-btn:hover {
@@ -86,14 +89,14 @@ body {
 }
 
 .icon-btn:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   background: var(--bg-hover);
 }
 /* Main Content */
 .content {
   flex: 1;
-  padding: 20px;
+  padding: var(--space-5);
   background: var(--bg-secondary);
 }
 
@@ -112,10 +115,10 @@ body {
   border-radius: 20px;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition: background-color var(--duration-normal) var(--ease-smooth), border-color var(--duration-normal) var(--ease-smooth);
   max-width: 100%;
 }
 
@@ -164,7 +167,10 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 16px;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition: background-color var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-smooth);
 }
 
 .article-title {
@@ -222,6 +228,8 @@ body {
   gap: 12px;
 }
 
+.state-empty p { font-size:13px; line-height:1.5; max-width:28ch; }
+
 .empty-icon {
   width: 48px;
   height: 48px;
@@ -243,7 +251,8 @@ body {
 
 .btn {
   width: 100%;
-  padding: 12px;
+  min-height:44px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 500;
@@ -252,7 +261,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all var(--duration-fast) var(--ease-smooth);
+  transition: background-color var(--duration-fast) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
   border: 1px solid transparent;
 }
 
@@ -320,7 +329,7 @@ body {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -334,4 +343,10 @@ body {
 
 .btn.loading .btn-icon {
   animation: spin 1s linear infinite;
+}
+
+@media (max-width: 320px) {
+  .header { padding-inline:16px; }
+  .content { padding:16px; }
+  .footer { padding-inline:16px; }
 }

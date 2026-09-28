@@ -3,7 +3,10 @@
  * Handles export for home page and follow page feeds
  */
 
-const FeedExporter = {
+import { CONSTANTS, normalizeUrl, scrollToLoadItems } from '../constants.js';
+import { createTurndownService } from '../turndown-rules.js';
+
+export const FeedExporter = {
   /**
    * Scroll to load more feed items
    * @param {number} targetCount 
@@ -198,7 +201,3 @@ ${item.content}
   }
 };
 
-// Export
-if (typeof window !== 'undefined') {
-  window.FeedExporter = FeedExporter;
-}

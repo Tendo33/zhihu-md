@@ -65,7 +65,8 @@
 ### 交互能力
 
 - 弹窗会识别当前页面类型并展示标题、作者、页面类别
-- 可选右下角悬浮导出按钮
+- 弹窗可以下载 Markdown，也可以把 Markdown 复制到剪贴板
+- 可选右下角悬浮按钮：点击下载，右键复制
 - 悬浮球支持拖拽、靠边停靠、位置记忆
 - 设置项会持久化到 `chrome.storage.sync`
 - 悬浮球位置保存在 `chrome.storage.local`
@@ -115,6 +116,8 @@
 ```bash
 git clone https://github.com/Tendo33/zhihu-md.git
 cd zhihu-md
+npm install
+npm run build
 ```
 
 然后在 Chrome 中：
@@ -122,7 +125,7 @@ cd zhihu-md
 1. 打开 `chrome://extensions/`
 2. 启用右上角“开发者模式”
 3. 点击“加载已解压的扩展程序”
-4. 选择当前项目根目录
+4. 选择 `dist/unpacked`
 
 ## 使用说明
 

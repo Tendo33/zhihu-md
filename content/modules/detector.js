@@ -3,13 +3,15 @@
  * Detects the type of Zhihu page (column, answer, question, home, follow, hot)
  */
 
-const PageDetector = {
+import { checkUrlType, detectPageTypeFromPathname } from '../../lib/page-detector.js';
+
+export const PageDetector = {
   /**
    * Detect page type based on URL pathname
    * @returns {'column'|'answer'|'question'|'hot'|'follow'|'home'|null}
    */
   detectPageType() {
-    return window.PageTypeUtils.detectPageTypeFromPathname(window.location.pathname);
+    return detectPageTypeFromPathname(window.location.pathname);
   },
 
   /**
@@ -26,11 +28,7 @@ const PageDetector = {
    * @returns {Object} Page type flags
    */
   checkUrlType(url) {
-    return window.PageTypeUtils.checkUrlType(url);
+    return checkUrlType(url);
   }
 };
 
-// Export for different module systems
-if (typeof window !== 'undefined') {
-  window.PageDetector = PageDetector;
-}

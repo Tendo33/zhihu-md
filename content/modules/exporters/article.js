@@ -3,7 +3,11 @@
  * Handles export for single column articles and answers
  */
 
-const ArticleExporter = {
+import { CONSTANTS, cleanFilename, querySelectorAny } from '../constants.js';
+import { PageDetector } from '../detector.js';
+import { createTurndownService } from '../turndown-rules.js';
+
+export const ArticleExporter = {
   /**
    * Get article content container based on page type
    * @param {string} pageType 
@@ -265,7 +269,3 @@ date: ${date}`;
   }
 };
 
-// Export
-if (typeof window !== 'undefined') {
-  window.ArticleExporter = ArticleExporter;
-}

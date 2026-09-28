@@ -1,80 +1,36 @@
 /**
- * Content script entry point for Zhihu-md extension
- * Orchestrates modules and handles message routing
+ * Content script entry point for Zhihu-md extension.
  */
 
-(function() {
-  'use strict';
+import { createLogger } from '../lib/logger.js';
+import { createInitScheduler } from '../lib/init-scheduler.js';
+import { ArticleExporter } from './modules/exporters/article.js';
+import { QuestionExporter } from './modules/exporters/question.js';
+import { FeedExporter } from './modules/exporters/feed.js';
+import { HotExporter } from './modules/exporters/hot.js';
+import { FloatingBall } from './modules/floating-ball.js';
+import { PageDetector } from './modules/detector.js';
 
-  // ============== Logger System ==============
-  const Logger = createLogger('[Zhihu-MD Content]');
+const Logger = createLogger('[Zhihu-MD Content]');
 
-  Logger.info('==========================================');
-  Logger.info('Content script 开始加载...');
-  Logger.info('当前URL:', window.location.href);
-  Logger.info('==========================================');
+Logger.info('Content script 开始加载...', window.location.href);
 
-  // Prevent multiple injections
-  if (window.__zhihuMdInjected) {
-    Logger.warn('脚本已经注入过，跳过重复注入');
-    return;
-  }
+if (window.__zhihuMdInjected) {
+  Logger.warn('脚本已经注入过，跳过重复注入');
+} else {
   window.__zhihuMdInjected = true;
 
-  // Check TurndownService
-  if (typeof TurndownService === 'undefined') {
-    Logger.error('TurndownService 未加载！');
-  } else {
-    Logger.success('TurndownService 已加载');
-  }
+  const scheduleFloatingBallInit = createInitScheduler({
+    init: () => FloatingBall.init(),
+    minInterval: 800,
+    defaultDelay: 500
+  });
 
-  // Check modules
-  const requiredModules = ['PageDetector', 'InitScheduler', 'CONSTANTS', 'createTurndownService', 'ArticleExporter', 'QuestionExporter', 'FeedExporter', 'HotExporter', 'FloatingBall'];
-  const missingModules = requiredModules.filter(m => typeof window[m] === 'undefined');
-  
-  if (missingModules.length > 0) {
-    Logger.error('缺少模块:', missingModules.join(', '));
-      } else {
-    Logger.success('所有模块已加载');
-  }
-
-  // ============== Init Scheduler ==============
-  let initScheduled = false;
-  let lastInitAt = null;
-  const INIT_MIN_INTERVAL = 800;
-
-  const scheduleFloatingBallInit = window.InitScheduler && window.InitScheduler.createInitScheduler
-    ? window.InitScheduler.createInitScheduler({
-        init: () => FloatingBall.init(),
-        minInterval: INIT_MIN_INTERVAL,
-        defaultDelay: 500
-      })
-    : function scheduleFloatingBallInit(delay = 500) {
-        const now = Date.now();
-        const remaining = lastInitAt === null ? 0 : INIT_MIN_INTERVAL - (now - lastInitAt);
-        const effectiveDelay = Math.max(delay, remaining > 0 ? remaining : 0);
-
-        if (initScheduled) return;
-
-        initScheduled = true;
-        if (window._initTimeout) clearTimeout(window._initTimeout);
-        window._initTimeout = setTimeout(() => {
-          initScheduled = false;
-          lastInitAt = Date.now();
-          FloatingBall.init();
-        }, effectiveDelay);
-      };
-
-  // ============== Message Handler ==============
-  Logger.info('注册消息监听器...');
-  
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     Logger.info('收到消息:', message);
-    
+
     if (message.action === 'getArticleInfo') {
-      const result = ArticleExporter.getArticleInfo();
-      Logger.info('返回文章信息:', result);
-      sendResponse(result);
+      sendResponse(ArticleExporter.getArticleInfo());
     } else if (message.action === 'exportMarkdown') {
       const downloadImages = message.downloadImages || false;
       const pageType = PageDetector.detectPageType();
@@ -99,13 +55,10 @@
     } else {
       Logger.warn('未知的消息类型:', message.action);
     }
-    
+
     return true;
   });
-  
-  Logger.success('消息监听器注册成功!');
 
-  // ============== Storage Change Handler ==============
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'sync' && changes.showFloatingBall) {
@@ -118,16 +71,19 @@
     });
   }
 
-  // ============== DOM Observer ==============
-  const observer = new MutationObserver((mutations) => {
+  // The button is a direct child of document.body. Watching the whole subtree
+  // wakes this callback on every feed mutation, which only matters when the
+  // button itself has been removed.
+  const observer = new MutationObserver(() => {
     if (PageDetector.isValidArticlePage() && !document.getElementById('zhihu-md-floating-ball')) {
       scheduleFloatingBallInit(800);
     }
   });
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  if (document.body) {
+    observer.observe(document.body, { childList: true });
+  }
 
-  // ============== Initialize ==============
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => scheduleFloatingBallInit(500));
   } else {
@@ -135,4 +91,4 @@
   }
 
   Logger.info('Content script 初始化完成!');
-})();
+}

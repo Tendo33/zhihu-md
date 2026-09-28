@@ -3,7 +3,10 @@
  * Handles UI interactions and communication with content script
  */
 
-// ============== Logger System ==============
+import { createLogger } from '../lib/logger.js';
+import { checkUrlType } from '../lib/page-detector.js';
+import { copyTextLater } from '../lib/clipboard.js';
+
 const Logger = createLogger('[Zhihu-MD Popup]');
 
 Logger.info('Popup Script Loaded');
@@ -18,6 +21,7 @@ const articleType = document.getElementById('article-type').querySelector('span'
 const errorMessage = document.getElementById('error-message');
 const refreshBtn = document.getElementById('refresh-btn');
 const exportBtn = document.getElementById('export-btn');
+const copyBtn = document.getElementById('copy-btn');
 const settingsBtn = document.getElementById('settings-btn');
 
 /**
@@ -97,7 +101,7 @@ function showArticleInfo(info) {
 
   articleInfo.classList.remove('hidden');
   errorMessage.classList.add('hidden'); // Ensure error is hidden
-  exportBtn.disabled = false;
+  setExportActionsEnabled(true);
 }
 
 /**
@@ -126,7 +130,12 @@ function showError(message, silent = false, showRefresh = false) {
   }
 
   articleInfo.classList.add('hidden');
-  exportBtn.disabled = true;
+  setExportActionsEnabled(false);
+}
+
+function setExportActionsEnabled(enabled) {
+  exportBtn.disabled = !enabled;
+  if (copyBtn) copyBtn.disabled = !enabled;
 }
 
 /**
@@ -147,7 +156,7 @@ async function init() {
 
     Logger.info('Current URL:', tab.url);
 
-    const typeFlags = window.PageTypeUtils.checkUrlType(tab.url);
+    const typeFlags = checkUrlType(tab.url);
 
     if (!typeFlags || !typeFlags.isZhihu) {
       showError('此页面不是知乎页面', true);  // Silent - expected case
@@ -235,7 +244,7 @@ async function handleExport() {
     exportBtn.classList.add('loading');
     exportBtn.setAttribute('aria-busy', 'true');
     btnText.textContent = '导出中...';
-    exportBtn.disabled = true;
+    setExportActionsEnabled(false);
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -268,7 +277,7 @@ async function handleExport() {
       
       setTimeout(() => {
         btnText.textContent = '导出 Markdown';
-        exportBtn.disabled = false;
+        setExportActionsEnabled(true);
       }, 2000);
     } else {
       throw new Error(response?.error || '导出失败');
@@ -282,9 +291,35 @@ async function handleExport() {
     
     setTimeout(() => {
       btnText.textContent = '导出 Markdown';
-      exportBtn.disabled = false;
+      setExportActionsEnabled(true);
     }, 2000);
   }
+}
+
+function handleCopy() {
+  const btnText = copyBtn.querySelector('span');
+  setExportActionsEnabled(false);
+  btnText.textContent = '复制中...';
+  const pending = copyTextLater(async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const response = await safeSendMessage(tab.id, {
+      action: 'exportMarkdown',
+      downloadImages: false
+    });
+    if (!response || !response.success) throw new Error(response?.error || '复制失败');
+    return response.data.content;
+  });
+  pending.then(() => {
+    btnText.textContent = '已复制';
+  }).catch((error) => {
+    Logger.error('Copy Error:', error);
+    btnText.textContent = '复制失败';
+  }).finally(() => {
+    setTimeout(() => {
+      btnText.textContent = '复制 Markdown';
+      setExportActionsEnabled(true);
+    }, 1600);
+  });
 }
 
 // Handle Settings Navigation
@@ -301,6 +336,9 @@ if (settingsBtn) {
 // Event listeners
 if (exportBtn) {
   exportBtn.addEventListener('click', handleExport);
+}
+if (copyBtn) {
+  copyBtn.addEventListener('click', handleCopy);
 }
 
 // Handle Refresh Button

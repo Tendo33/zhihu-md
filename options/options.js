@@ -1,4 +1,5 @@
-// Saves options to chrome.storage
+import { createLogger } from '../lib/logger.js';
+
 const Logger = createLogger('[Zhihu-MD Options]');
 
 function saveOptions() {

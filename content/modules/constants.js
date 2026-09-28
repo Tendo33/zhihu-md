@@ -78,14 +78,6 @@ function normalizeUrl(href) {
   return `https://www.zhihu.com/${href}`;
 }
 
-// Export for different module systems
-if (typeof window !== 'undefined') {
-  window.CONSTANTS = CONSTANTS;
-  window.querySelectorAny = querySelectorAny;
-  window.cleanFilename = cleanFilename;
-  window.normalizeUrl = normalizeUrl;
-}
-
 /**
  * Scroll page downward until a selector returns >= targetCount elements,
  * or until no new elements appear 3 times in a row, or until timeout.
@@ -122,11 +114,10 @@ async function scrollToLoadItems(getCount, targetCount) {
   return getCount();
 }
 
-// Export for different module systems
-if (typeof window !== 'undefined') {
-  window.CONSTANTS = CONSTANTS;
-  window.querySelectorAny = querySelectorAny;
-  window.cleanFilename = cleanFilename;
-  window.normalizeUrl = normalizeUrl;
-  window.scrollToLoadItems = scrollToLoadItems;
-}
+export {
+  CONSTANTS,
+  querySelectorAny,
+  cleanFilename,
+  normalizeUrl,
+  scrollToLoadItems,
+};

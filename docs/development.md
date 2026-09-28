@@ -23,22 +23,19 @@ npm install
 1. 打开 `chrome://extensions/`
 2. 开启“开发者模式”
 3. 选择“加载已解压的扩展程序”
-4. 指向仓库根目录
+4. 指向 `dist/unpacked`
 
-### 代码修改后
-
-- 修改内容脚本、弹窗、设置页或后台脚本后，通常需要刷新扩展
-- 如果是页面注入逻辑变更，最好同时刷新知乎页面
+内容脚本、弹窗和后台都由 esbuild 打成单独的包。改完源码后先执行 `npm run build`，再在 `chrome://extensions` 里刷新扩展。页面注入逻辑变更时同时刷新知乎页面。
 
 ## 常用命令
 
 ### 运行测试
 
 ```bash
-node scripts/test-init-scheduler.js
+npm test
 ```
 
-当前仓库内已有的自动化测试主要覆盖 `lib/init-scheduler.js` 的调度逻辑。
+`npm test` 覆盖页面分类、悬浮球调度、文件名和 Front Matter、ZIP 字节结构，以及公式、代码块、表格、链接卡片的 HTML 夹具。`npm run test:detector` 仍只跑页面分类。
 
 ### 打包产物
 
@@ -48,8 +45,8 @@ npm run package
 
 这个命令会：
 
-1. 清空并重建 `dist/`
-2. 拷贝清单、前台页面、内容脚本、后台脚本、图标、文档
+1. 用 esbuild 把内容脚本、弹窗、设置页和后台打进 `dist/unpacked/`
+2. 带上样式、图标、清单和说明
 3. 生成 `dist/zhihu-to-markdown-v<version>.zip`
 
 ## 关键文件说明
@@ -65,21 +62,9 @@ npm run package
 - `background`
 - `options_ui`
 
-### `scripts/package.js`
+### `scripts/build.js`
 
-打包脚本会尝试包含这些内容：
-
-- `manifest.json`
-- `popup/`
-- `options/`
-- `content/`
-- `background/`
-- `lib/`
-- `icons/`
-- `README.md`
-- `MANIFEST_UPDATE.md`
-
-如果某个文件不存在，脚本会跳过并给出提示。
+构建产物里的清单只注入一个 `content/content.js`。弹窗和设置页也各自只引用打好的脚本。本地加载请选择 `dist/unpacked`，不要选择仓库根目录。
 
 ## 新功能开发建议
 

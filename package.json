@@ -1,9 +1,12 @@
 {
   "name": "zhihu-to-markdown",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "将知乎专栏/问答页面内容转换为 Markdown 格式并下载",
+  "type": "module",
   "scripts": {
-    "package": "node scripts/package.js",
+    "build": "node scripts/build.js",
+    "package": "node scripts/build.js && node scripts/package.js",
+    "test": "node scripts/test-page-detector.js && node scripts/test-init-scheduler.js && node scripts/test-filename.js && node scripts/test-zip.js && node scripts/test-markdown.js",
     "test:detector": "node scripts/test-page-detector.js"
   },
   "keywords": [
@@ -12,5 +15,9 @@
     "markdown"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.25.10",
+    "linkedom": "^0.18.12"
+  }
 }

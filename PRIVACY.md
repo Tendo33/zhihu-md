@@ -1,6 +1,6 @@
 # Privacy Policy for Zhihu-md
 
-**Last Updated: March 31, 2026**
+**Last Updated: September 28, 2026**
 
 Zhihu-md ("we", "us", or "our") is a browser extension for exporting currently visible Zhihu content into Markdown files. This policy explains what the extension can access, how data is processed, and what is stored locally.
 
@@ -22,6 +22,7 @@ The extension uses page data only to:
 - Read the visible article, answer, question list, feed items, or hot list items
 - Convert visible HTML into Markdown
 - Download the generated Markdown file, or a ZIP package when local image download is enabled
+- Copy the generated Markdown to your device clipboard when you choose Copy
 
 All of this processing happens locally in your browser.
 
@@ -30,6 +31,7 @@ All of this processing happens locally in your browser.
 The current extension manifest requests only these permissions:
 
 - `activeTab`: Access the currently active Zhihu tab so the extension can read the visible page content you choose to export
+- `clipboardWrite`: Write the Markdown you asked to copy onto your device clipboard
 - `downloads`: Save generated Markdown files or ZIP packages to your device
 - `storage`: Save extension settings such as floating button visibility, answer count limit, image download preference, and floating button position
 

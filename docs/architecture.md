@@ -6,9 +6,9 @@
 
 1. 清单层：`manifest.json`
 2. 前台交互层：`popup/`、`options/`
-3. 内容抓取层：`content/content.js` 和 `content/modules/`
-4. 公共工具层：`lib/`
-5. 文件输出层：`background/background.js`
+3. 内容抓取层：`content/content.js` 和 `content/modules/`，构建后收成一个内容脚本
+4. 公共工具层：`lib/`，页面分类、日志、ZIP 都是可单独测试的模块
+5. 文件输出层：`background/background.js`，ZIP 字节由 `lib/zip.js` 生成
 
 ## 顶层结构
 
@@ -35,7 +35,7 @@ scripts/*
 - `popup/popup.html`
 - `options/options.html`
 - `background/background.js`
-- 注入到知乎页面的内容脚本与样式
+- 注入到知乎页面的内容脚本与样式。源码按模块书写，`npm run build` 后清单里只保留一个 `content/content.js`
 
 ### `popup/`
 

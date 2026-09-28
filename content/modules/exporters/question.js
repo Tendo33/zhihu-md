@@ -3,7 +3,12 @@
  * Handles export for multiple answers on question pages
  */
 
-const QuestionExporter = {
+import { ArticleExporter } from './article.js';
+import { CONSTANTS, cleanFilename, scrollToLoadItems } from '../constants.js';
+import { PageDetector } from '../detector.js';
+import { createTurndownService } from '../turndown-rules.js';
+
+export const QuestionExporter = {
   /**
    * Process a single answer element and extract content
    * @param {Element} answerItem 
@@ -205,7 +210,3 @@ ${answer.content}
   }
 };
 
-// Export
-if (typeof window !== 'undefined') {
-  window.QuestionExporter = QuestionExporter;
-}

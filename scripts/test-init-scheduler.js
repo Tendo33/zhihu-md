@@ -1,6 +1,5 @@
-const assert = require('assert');
-
-const { createInitScheduler } = require('../lib/init-scheduler');
+import assert from 'assert';
+import { createInitScheduler } from '../lib/init-scheduler.js';
 
 function createFakeTimers() {
   let now = 0;

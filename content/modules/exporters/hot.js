@@ -3,7 +3,9 @@
  * Handles export for Zhihu hot list page
  */
 
-const HotExporter = {
+import { normalizeUrl } from '../constants.js';
+
+export const HotExporter = {
   /**
    * Export hot list items from /hot page
    * @returns {Promise<Object>}
@@ -108,7 +110,3 @@ count: ${items.length}
   }
 };
 
-// Export
-if (typeof window !== 'undefined') {
-  window.HotExporter = HotExporter;
-}

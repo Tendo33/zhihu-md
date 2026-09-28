@@ -3,9 +3,22 @@
  * Handles the floating export button UI and interactions
  */
 
-const FloatingBall = {
+import { ArticleExporter } from './exporters/article.js';
+import { FeedExporter } from './exporters/feed.js';
+import { HotExporter } from './exporters/hot.js';
+import { QuestionExporter } from './exporters/question.js';
+import { PageDetector } from './detector.js';
+import { copyTextLater } from '../../lib/clipboard.js';
+import { floatingBallDrag } from './floating-ball-drag.js';
+
+const idleLabel = '点击下载 · 右键复制';
+
+export const FloatingBall = {
+  ...floatingBallDrag,
   ball: null,
   checkHasMoved: null,
+  busy: false,
+  operation: 0,
 
   /**
    * Create floating ball DOM element
@@ -26,273 +39,11 @@ const FloatingBall = {
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      <span class="tooltip">导出 Markdown</span>
+      <span class="tooltip">${idleLabel}</span>
     `;
 
     document.body.appendChild(ball);
     return ball;
-  },
-
-  /**
-   * Initialize drag functionality
-   * @param {HTMLElement} ball 
-   * @returns {Function} checkHasMoved function
-   */
-  initDrag(ball) {
-    let isDragging = false;
-    let startX, startY;
-    let initialLeft, initialTop;
-    let ballWidth = 0;
-    let ballHeight = 0;
-    let hasMoved = false;
-    let dockTimeout;
-    let rafId = null;
-    let latestLeft = 0;
-    let latestTop = 0;
-
-    const clearDockedState = () => {
-      ball.classList.remove('docked-left', 'docked-right');
-      if (dockTimeout) {
-        clearTimeout(dockTimeout);
-        dockTimeout = null;
-      }
-    };
-
-    const checkHasMoved = () => hasMoved;
-
-    const onMouseDown = (e) => {
-      if (e.button !== 0) return;
-
-      isDragging = true;
-      hasMoved = false;
-      ball.classList.add('dragging');
-      clearDockedState();
-
-      const rect = ball.getBoundingClientRect();
-      startX = e.clientX;
-      startY = e.clientY;
-      initialLeft = rect.left;
-      initialTop = rect.top;
-      ballWidth = rect.width || ball.offsetWidth;
-      ballHeight = rect.height || ball.offsetHeight;
-
-      ball.style.right = 'auto';
-      ball.style.bottom = 'auto';
-      ball.style.left = `${initialLeft}px`;
-      ball.style.top = `${initialTop}px`;
-
-      e.preventDefault();
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    };
-
-    const scheduleMove = (newLeft, newTop) => {
-      latestLeft = newLeft;
-      latestTop = newTop;
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        ball.style.left = `${latestLeft}px`;
-        ball.style.top = `${latestTop}px`;
-      });
-    };
-
-    const onMouseMove = (e) => {
-      if (!isDragging) return;
-
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-        hasMoved = true;
-      }
-
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
-
-      const maxLeft = window.innerWidth - ballWidth;
-      const maxTop = window.innerHeight - ballHeight;
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
-
-      scheduleMove(newLeft, newTop);
-    };
-
-    const onMouseUp = (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      ball.classList.remove('dragging');
-
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-
-      if (hasMoved) {
-        this.handleSnapAndDock(ball);
-      }
-    };
-
-    // Touch events
-    const onTouchStart = (e) => {
-      if (e.touches.length !== 1) return;
-
-      isDragging = true;
-      hasMoved = false;
-      ball.classList.add('dragging');
-      clearDockedState();
-
-      const touch = e.touches[0];
-      const rect = ball.getBoundingClientRect();
-      startX = touch.clientX;
-      startY = touch.clientY;
-      initialLeft = rect.left;
-      initialTop = rect.top;
-      ballWidth = rect.width || ball.offsetWidth;
-      ballHeight = rect.height || ball.offsetHeight;
-
-      ball.style.right = 'auto';
-      ball.style.bottom = 'auto';
-      ball.style.left = `${initialLeft}px`;
-      ball.style.top = `${initialTop}px`;
-
-      e.preventDefault();
-    };
-
-    const onTouchMove = (e) => {
-      if (!isDragging) return;
-      const touch = e.touches[0];
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-        hasMoved = true;
-      }
-
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
-
-      const maxLeft = window.innerWidth - ballWidth;
-      const maxTop = window.innerHeight - ballHeight;
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
-
-      scheduleMove(newLeft, newTop);
-    };
-
-    const onTouchEnd = (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      ball.classList.remove('dragging');
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-      if (hasMoved) {
-        this.handleSnapAndDock(ball);
-      }
-    };
-
-    ball.addEventListener('mouseenter', clearDockedState);
-
-    ball.addEventListener('mouseleave', () => {
-      if (!isDragging) {
-        const rect = ball.getBoundingClientRect();
-        const winWidth = window.innerWidth;
-        if (rect.left <= 5) {
-          dockTimeout = setTimeout(() => ball.classList.add('docked-left'), 800);
-        } else if (rect.right >= winWidth - 5) {
-          dockTimeout = setTimeout(() => ball.classList.add('docked-right'), 800);
-        }
-      }
-    });
-
-    ball.addEventListener('mousedown', onMouseDown);
-    ball.addEventListener('touchstart', onTouchStart, { passive: false });
-    ball.addEventListener('touchmove', onTouchMove, { passive: false });
-    ball.addEventListener('touchend', onTouchEnd);
-
-    return checkHasMoved;
-  },
-
-  /**
-   * Handle snap to edge and dock behavior
-   * @param {HTMLElement} ball 
-   */
-  handleSnapAndDock(ball) {
-    const rect = ball.getBoundingClientRect();
-    const winWidth = window.innerWidth;
-
-    this.savePosition(rect.left, rect.top);
-
-    const docThreshold = 30;
-    let dockedSide = null;
-
-    if (rect.left < docThreshold) {
-      ball.style.left = '0px';
-      this.savePosition(0, rect.top);
-      dockedSide = 'left';
-    } else if (winWidth - rect.right < docThreshold) {
-      ball.style.left = `${winWidth - rect.width}px`;
-      this.savePosition(winWidth - rect.width, rect.top);
-      dockedSide = 'right';
-    }
-
-    if (dockedSide) {
-      setTimeout(() => {
-        ball.classList.add(`docked-${dockedSide}`);
-      }, 800);
-    }
-  },
-
-  /**
-   * Save floating ball position
-   * @param {number} x 
-   * @param {number} y 
-   */
-  savePosition(x, y) {
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.set({ floatingBallPosition: { x, y } });
-    }
-  },
-
-  /**
-   * Restore floating ball position
-   * @param {HTMLElement} ball 
-   */
-  restorePosition(ball) {
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(['floatingBallPosition'], (result) => {
-        if (result.floatingBallPosition) {
-          const { x, y } = result.floatingBallPosition;
-
-          const ballWidth = ball.offsetWidth || 44;
-          const ballHeight = ball.offsetHeight || 44;
-          const maxLeft = window.innerWidth - ballWidth;
-          const maxTop = window.innerHeight - ballHeight;
-
-          let validX = Math.max(0, Math.min(x, maxLeft));
-          let validY = Math.max(0, Math.min(y, maxTop));
-
-          ball.style.right = 'auto';
-          ball.style.bottom = 'auto';
-          ball.style.left = `${validX}px`;
-          ball.style.top = `${validY}px`;
-
-          const dockThreshold = 5;
-          if (validX <= dockThreshold) {
-            setTimeout(() => ball.classList.add('docked-left'), 800);
-          } else if (validX >= window.innerWidth - ballWidth - dockThreshold) {
-            setTimeout(() => ball.classList.add('docked-right'), 800);
-          }
-        }
-      });
-    }
   },
 
   /**
@@ -356,11 +107,24 @@ const FloatingBall = {
    * @param {HTMLElement} ball 
    * @param {Function} checkHasMoved 
    */
+  finishBall(ball, generation, state, message) {
+    if (generation !== this.operation) return;
+    this.busy = false;
+    this.updateBallState(ball, state);
+    ball.querySelector('.tooltip').textContent = message;
+    if (state !== 'normal') {
+      setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), 1600);
+    }
+  },
+
   async handleBallClick(ball, checkHasMoved) {
+    if (this.busy) return;
     if (checkHasMoved && checkHasMoved()) {
       return;
     }
 
+    this.busy = true;
+    const generation = ++this.operation;
     this.updateBallState(ball, 'loading');
 
     const pageType = PageDetector.detectPageType();
@@ -402,25 +166,37 @@ const FloatingBall = {
 
         await chrome.runtime.sendMessage(messageData);
 
-        this.updateBallState(ball, 'success');
-        ball.querySelector('.tooltip').textContent = '导出成功!';
-
-        setTimeout(() => {
-          this.updateBallState(ball, 'normal');
-          ball.querySelector('.tooltip').textContent = '导出 Markdown';
-        }, 2000);
+        this.finishBall(ball, generation, 'success', '导出成功!');
       } else {
         throw new Error(result.error || '导出失败');
       }
     } catch (error) {
-      this.updateBallState(ball, 'error');
-      ball.querySelector('.tooltip').textContent = '导出失败';
-
-      setTimeout(() => {
-        this.updateBallState(ball, 'normal');
-        ball.querySelector('.tooltip').textContent = '导出 Markdown';
-      }, 2000);
+      this.finishBall(ball, generation, 'error', '导出失败');
     }
+  },
+
+  copyMarkdown(ball) {
+    if (this.busy) return;
+    this.busy = true;
+    const generation = ++this.operation;
+    this.updateBallState(ball, 'loading');
+    ball.querySelector('.tooltip').textContent = '复制中...';
+    const pending = copyTextLater(async () => {
+      const pageType = PageDetector.detectPageType();
+      let result;
+      if (pageType === 'question') result = await QuestionExporter.exportMultipleAnswers();
+      else if (pageType === 'home' || pageType === 'follow') result = await FeedExporter.exportFeedItems(pageType);
+      else if (pageType === 'hot') result = await HotExporter.exportHotList();
+      else result = await ArticleExporter.exportMarkdown(false);
+      if (!result || !result.success) throw new Error(result?.error || '复制失败');
+      return result.data.content;
+    });
+    pending.then(() => {
+      this.finishBall(ball, generation, 'success', '已复制');
+    }).catch((error) => {
+      console.error('[Zhihu-MD] copy failed', error);
+      this.finishBall(ball, generation, 'error', '复制失败');
+    });
   },
 
   /**
@@ -435,6 +211,11 @@ const FloatingBall = {
     newBall.addEventListener('click', (e) => {
       e.stopPropagation();
       this.handleBallClick(newBall, checkHasMoved);
+    });
+    newBall.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.copyMarkdown(newBall);
     });
 
     if (existingBall.parentNode) {
@@ -479,8 +260,3 @@ const FloatingBall = {
     }
   }
 };
-
-// Export
-if (typeof window !== 'undefined') {
-  window.FloatingBall = FloatingBall;
-}

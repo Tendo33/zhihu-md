@@ -3,6 +3,8 @@
  * Custom Turndown rules for converting Zhihu HTML to Markdown
  */
 
+import TurndownService from '../../lib/turndown.min.js';
+
 /**
  * Configure Turndown with custom rules for Zhihu.
  * When downloadImages is true, collected image metadata is available via
@@ -10,7 +12,7 @@
  * @param {boolean} downloadImages - Whether to use local image paths
  * @returns {TurndownService}
  */
-function createTurndownService(downloadImages = false) {
+export function createTurndownService(downloadImages = false) {
   const turndownService = new TurndownService({
     headingStyle: 'atx',
     codeBlockStyle: 'fenced',
@@ -158,25 +160,26 @@ function createTurndownService(downloadImages = false) {
         if (html.includes('<table')) {
           return '[Nested Table]';
         }
-        let text = turndownService.turndown(html);
+        let text = turndownService.turndown(cell);
         text = text.replace(/\|/g, '\\|');
         text = text.replace(/\n/g, '<br>');
         return text.trim();
       };
 
-      const rows = Array.from(node.rows);
+      const rows = Array.from(node.rows || node.querySelectorAll('tr'));
       if (rows.length === 0) return '';
 
       let markdown = '\n\n';
 
       const headerRow = rows[0];
-      const headers = Array.from(headerRow.cells).map(convertCell);
+      const headerCells = headerRow.cells || headerRow.querySelectorAll('th, td');
+      const headers = Array.from(headerCells).map(convertCell);
       markdown += '| ' + headers.join(' | ') + ' |\n';
       markdown += '| ' + headers.map(() => '---').join(' | ') + ' |\n';
 
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
-        const cells = Array.from(row.cells);
+        const cells = Array.from(row.cells || row.querySelectorAll('th, td'));
         const rowData = headers.map((_, index) => {
           const cell = cells[index];
           return cell ? convertCell(cell) : '';
@@ -218,9 +221,4 @@ function createTurndownService(downloadImages = false) {
   });
 
   return turndownService;
-}
-
-// Export
-if (typeof window !== 'undefined') {
-  window.createTurndownService = createTurndownService;
 }

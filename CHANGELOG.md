@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.5] - 2026-09-28
+
+### Fixed
+
+- The action popup stays 360px wide. Viewport units made Chrome collapse it into a strip, so the title, status, and buttons wrapped.
+
 ## [1.1.4] - 2026-09-28
 
 ### Changed

@@ -3,10 +3,18 @@
  * Variables are imported from ../lib/shared.css
  */
 
+/* Chrome sizes the action popup from this box. vw/vh are cyclic here and collapse it. */
+html,
+body,
+.container {
+  width: 360px;
+  min-width: 360px;
+  max-width: 360px;
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  width: min(360px, 100vw);
   min-height: 200px;
   font-size: 14px;
 }
@@ -272,7 +280,7 @@ body {
   flex-shrink: 0;
 }
 
-@media (max-width: 360px) {
+@media (max-width: 359px) {
   .header {
     padding: 12px 16px;
   }

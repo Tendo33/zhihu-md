@@ -6,7 +6,8 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  width: min(360px, 100vw);
+  width: 360px;
+  min-width: 360px;
   min-height: 200px;
   font-size: 14px;
 }

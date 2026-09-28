@@ -1,8 +1,12 @@
 # Changelog
 
-## [Unreleased]
+## [1.1.4] - 2026-09-28
 
-- Local development loads `dist/`. The Chrome Web Store zip is `build/zhihu-to-markdown-v<version>.zip`, same layout as arXiv to Markdown.
+### Changed
+
+- `npm run build` writes the unpacked extension to `dist/`. `npm run package` writes `build/zhihu-to-markdown-v<version>.zip`.
+- A `v*` tag publishes that zip with the same GitHub Release workflow as arXiv to Markdown.
+- The docs index follows the same order: usage, architecture, one click, then build and release.
 
 ## [1.1.3] - 2026-09-28
 

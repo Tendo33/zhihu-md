@@ -13,7 +13,7 @@
 
 ### Changed
 
-- Content script, popup, options, and background are bundled. Load `dist/unpacked` after `npm run build`.
+- Content script, popup, options, and background are bundled. Load `dist/` after `npm run build`. The store zip is `build/zhihu-to-markdown-v<version>.zip`.
 - The floating button only watches direct children of `document.body`.
 
 ### Fixed

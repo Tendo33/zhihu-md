@@ -118,10 +118,9 @@
 
 先检查：
 
-- 本机是否安装了 `zip` 命令
-- `dist/` 是否可写
+- 是否先执行了 `npm run build`，并且 `dist/manifest.json` 存在
+- `build/` 是否可写
 - `manifest.json` 是否为合法 JSON
-- `MANIFEST_UPDATE.md` 是否误删且你又希望它被打进包中
 
 相关代码：
 

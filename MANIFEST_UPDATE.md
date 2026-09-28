@@ -63,7 +63,7 @@
 ## 发布前建议命令
 
 ```bash
-node scripts/test-init-scheduler.js
+npm test
 npm run package
 ```
 

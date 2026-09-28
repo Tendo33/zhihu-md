@@ -9,7 +9,7 @@
 ### 步骤
 
 1. 弹窗调用 `chrome.tabs.query({ active: true, currentWindow: true })` 获取当前标签页。
-2. 用 `PageTypeUtils.checkUrlType()` 粗判页面是不是知乎页面、属于哪一类页面。
+2. 用 `lib/page-detector.js` 的 `checkUrlType()` 粗判页面是不是知乎页面、属于哪一类页面。
 3. 如果页面受支持，弹窗向内容脚本发送 `getArticleInfo`。
 4. 内容脚本在 `content/content.js` 中收到消息后调用 `ArticleExporter.getArticleInfo()`。
 5. `ArticleExporter` 读取标题、作者和页面类型，返回给弹窗。

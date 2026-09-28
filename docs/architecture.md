@@ -30,7 +30,7 @@ scripts/*
 负责声明：
 
 - Manifest V3
-- `activeTab`、`downloads`、`storage` 权限
+- `activeTab`、`clipboardWrite`、`downloads`、`storage` 权限
 - 作用域 `*://*.zhihu.com/*`
 - `popup/popup.html`
 - `options/options.html`
@@ -50,9 +50,9 @@ scripts/*
 它会：
 
 - 查询当前激活标签页
-- 用 `PageTypeUtils` 粗判页面类型
+- 用 `lib/page-detector.js` 粗判页面类型
 - 发消息给内容脚本获取标题和作者
-- 在导出按钮点击后发起导出请求
+- 提供「复制 Markdown」和「导出 Markdown」
 
 ### `options/`
 
@@ -79,11 +79,11 @@ scripts/*
 主要职责：
 
 - 防止重复注入
-- 检查依赖模块是否已挂到 `window`
+- 用 ES module 引入页面分类、导出器和悬浮球，构建后收成一个内容脚本
 - 创建悬浮球初始化调度器
 - 监听来自弹窗或后台的消息
 - 监听 `chrome.storage` 变化，实时增删悬浮球
-- 通过 `MutationObserver` 在页面结构变化后重新挂载悬浮球
+- 通过 `MutationObserver` 只监听 `document.body` 的直接子节点，在悬浮球被移走后重新挂载
 
 ### `content/modules/detector.js`
 
@@ -140,8 +140,9 @@ scripts/*
 负责页面内悬浮导出按钮：
 
 - 创建按钮节点
-- 处理拖拽与停靠
+- 拖拽和停靠在 `floating-ball-drag.js`
 - 记住位置
+- 点击下载，右键复制
 - 根据页面类型切换导出器
 - 在成功、失败、加载中切换视觉状态
 

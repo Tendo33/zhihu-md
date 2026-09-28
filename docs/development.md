@@ -122,7 +122,7 @@ npm run package
 建议执行：
 
 ```bash
-node scripts/test-init-scheduler.js
+npm test
 npm run package
 ```
 

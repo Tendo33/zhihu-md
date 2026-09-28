@@ -216,13 +216,14 @@ edited: 2025-12-03
 
 ## 文档索引
 
-- [docs/README.md](./docs/README.md): 文档导航与阅读顺序
-- [docs/usage.md](./docs/usage.md): 使用手册与导出结果说明
-- [docs/architecture.md](./docs/architecture.md): 模块划分与职责
-- [docs/request-lifecycle.md](./docs/request-lifecycle.md): 从点击导出到文件落地的全链路
-- [docs/development.md](./docs/development.md): 本地开发、测试、打包和发布维护
-- [docs/troubleshooting.md](./docs/troubleshooting.md): 常见问题与排查建议
-- [MANIFEST_UPDATE.md](./MANIFEST_UPDATE.md): 版本发布前的清单更新说明
+从 [docs/README.md](./docs/README.md) 进入。阅读顺序和 arXiv 扩展一样：使用、架构、一次点击、然后是构建和发版。
+
+- [docs/usage.md](./docs/usage.md)：使用和导出结果
+- [docs/architecture.md](./docs/architecture.md)：当前模块
+- [docs/request-lifecycle.md](./docs/request-lifecycle.md)：从点击到文件落地
+- [docs/development.md](./docs/development.md)：本地开发、`dist/` 和 `build/*.zip`
+- [docs/troubleshooting.md](./docs/troubleshooting.md)：排错
+- [CHANGELOG.md](./CHANGELOG.md)、[PRIVACY.md](./PRIVACY.md)、[MANIFEST_UPDATE.md](./MANIFEST_UPDATE.md)
 
 ## 项目结构
 
@@ -238,36 +239,26 @@ zhihu-md/
 │       ├── constants.js
 │       ├── detector.js
 │       ├── floating-ball.js
+│       ├── floating-ball-drag.js
 │       ├── turndown-rules.js
 │       └── exporters/
-│           ├── article.js
-│           ├── question.js
-│           ├── feed.js
-│           └── hot.js
 ├── popup/
-│   ├── popup.html
-│   ├── popup.css
-│   └── popup.js
 ├── options/
-│   ├── options.html
-│   ├── options.css
-│   └── options.js
 ├── lib/
-│   ├── init-scheduler.js
-│   ├── logger.js
+│   ├── clipboard.js
 │   ├── page-detector.js
-│   ├── shared.css
+│   ├── zip.js
 │   └── turndown.min.js
 ├── scripts/
-│   ├── package.js
-│   └── test-init-scheduler.js
-├── assets/
-├── icons/
+│   ├── build.js
+│   └── package.js
 ├── docs/
-├── MANIFEST_UPDATE.md
+├── CHANGELOG.md
 ├── PRIVACY.md
 └── README.md
 ```
+
+`npm run build` 之后，Chrome 加载的是 `dist/`，不是上面的源码目录。
 
 ## 本地开发
 
@@ -280,7 +271,7 @@ npm install
 ### 运行测试
 
 ```bash
-node scripts/test-init-scheduler.js
+npm test
 ```
 
 ### 打包扩展

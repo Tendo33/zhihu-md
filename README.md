@@ -125,7 +125,7 @@ npm run build
 1. 打开 `chrome://extensions/`
 2. 启用右上角“开发者模式”
 3. 点击“加载已解压的扩展程序”
-4. 选择 `dist/unpacked`
+4. 选择 `dist/`
 
 ## 使用说明
 
@@ -289,7 +289,7 @@ node scripts/test-init-scheduler.js
 npm run package
 ```
 
-打包后会在 `dist/` 目录生成可上传到 Chrome Web Store 的 ZIP 文件。
+`npm run build` 把未打包扩展输出到 `dist/`。`npm run package` 生成 `build/zhihu-to-markdown-v<version>.zip`，这个文件上传到 Chrome Web Store。
 
 更多开发和发布细节见 [docs/development.md](./docs/development.md)。
 

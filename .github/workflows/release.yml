@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build package
+        run: npm run package
+
+      - name: Read version
+        id: pkg
+        shell: bash
+        run: |
+          VERSION="$(node -p 'require("./package.json").version')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify artifact
+        shell: bash
+        run: |
+          test -f "build/zhihu-to-markdown-v${{ steps.pkg.outputs.version }}.zip"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            "build/zhihu-to-markdown-v${{ steps.pkg.outputs.version }}.zip" \
+            --generate-notes \
+            --title "Zhihu to Markdown ${{ github.ref_name }}"

@@ -23,7 +23,7 @@ npm install
 1. 打开 `chrome://extensions/`
 2. 开启“开发者模式”
 3. 选择“加载已解压的扩展程序”
-4. 指向 `dist/unpacked`
+4. 指向 `dist/`
 
 内容脚本、弹窗和后台都由 esbuild 打成单独的包。改完源码后先执行 `npm run build`，再在 `chrome://extensions` 里刷新扩展。页面注入逻辑变更时同时刷新知乎页面。
 
@@ -45,9 +45,9 @@ npm run package
 
 这个命令会：
 
-1. 用 esbuild 把内容脚本、弹窗、设置页和后台打进 `dist/unpacked/`
+1. 用 esbuild 把内容脚本、弹窗、设置页和后台打进 `dist/`
 2. 带上样式、图标、清单和说明
-3. 生成 `dist/zhihu-to-markdown-v<version>.zip`
+3. 生成 `build/zhihu-to-markdown-v<version>.zip`
 
 ## 关键文件说明
 
@@ -64,7 +64,7 @@ npm run package
 
 ### `scripts/build.js`
 
-构建产物里的清单只注入一个 `content/content.js`。弹窗和设置页也各自只引用打好的脚本。本地加载请选择 `dist/unpacked`，不要选择仓库根目录。
+构建产物里的清单只注入一个 `content/content.js`。弹窗和设置页也各自只引用打好的脚本。本地加载请选择 `dist/`，不要选择仓库根目录。商店包在 `build/`。
 
 ## 新功能开发建议
 

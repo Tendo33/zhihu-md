@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- Local development loads `dist/`. The Chrome Web Store zip is `build/zhihu-to-markdown-v<version>.zip`, same layout as arXiv to Markdown.
+
 ## [1.1.3] - 2026-09-28
 
 ### Added

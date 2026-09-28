@@ -1,31 +1,39 @@
-import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const unpacked = path.join(root, 'dist', 'unpacked');
+const require = createRequire(import.meta.url);
+const archiver = require('archiver');
 
-if (!fs.existsSync(path.join(unpacked, 'manifest.json'))) {
-  console.error('dist/unpacked is missing. Run npm run build first.');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const distDir = path.join(root, 'dist');
+const buildDir = path.join(root, 'build');
+const { version } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+const zipName = `zhihu-to-markdown-v${version}.zip`;
+const zipPath = path.join(buildDir, zipName);
+
+if (!fs.existsSync(path.join(distDir, 'manifest.json'))) {
+  console.error('dist/ is missing. Run npm run build first.');
   process.exit(1);
 }
 
-const manifest = JSON.parse(fs.readFileSync(path.join(unpacked, 'manifest.json'), 'utf8'));
-const zipName = `zhihu-to-markdown-v${manifest.version}.zip`;
-const zipPath = path.join(root, 'dist', zipName);
+fs.mkdirSync(buildDir, { recursive: true });
 
-if (process.platform === 'win32') {
-  const dest = zipPath.replace(/'/g, "''");
-  const source = `${unpacked}\\*`.replace(/'/g, "''");
-  execSync(
-    `powershell -NoProfile -Command "Compress-Archive -Path '${source}' -DestinationPath '${dest}' -Force"`,
-    { stdio: 'inherit' }
-  );
-} else {
-  execSync(`cd "${unpacked}" && zip -r "${zipPath}" .`, { stdio: 'inherit' });
-}
+const output = fs.createWriteStream(zipPath);
+const archive = archiver('zip', { zlib: { level: 9 } });
 
-const sizeKB = (fs.statSync(zipPath).size / 1024).toFixed(2);
-console.log(`\nPackage created: dist/${zipName} (${sizeKB} KB)`);
-console.log('Load dist/unpacked in chrome://extensions for local development.');
+output.on('close', () => {
+  const sizeKB = (archive.pointer() / 1024).toFixed(2);
+  console.log(`Package created: build/${zipName} (${sizeKB} KB)`);
+  console.log('Load dist/ in chrome://extensions for local development.');
+});
+
+archive.on('error', (error) => {
+  console.error(error);
+  process.exit(1);
+});
+
+archive.pipe(output);
+archive.directory(distDir, false);
+await archive.finalize();

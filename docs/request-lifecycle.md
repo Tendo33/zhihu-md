@@ -65,7 +65,7 @@
    - `downloadImages`
    - `maxAnswerCount`
 3. 根据页面类型路由：
-   - `question` -> `QuestionExporter.exportMultipleAnswers()`
+   - `question` -> `QuestionExporter.exportMultipleAnswers(downloadImages)`
    - `home` / `follow` -> `FeedExporter.exportFeedItems(pageType)`
    - `hot` -> `HotExporter.exportHotList()`
    - 其他 -> `ArticleExporter.exportMarkdown(downloadImages)`

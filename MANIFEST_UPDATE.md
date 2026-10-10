@@ -35,6 +35,7 @@
 ## 建议同步检查的文档
 
 - `README.md`
+- `CHANGELOG.md`
 - `PRIVACY.md`
 - `docs/usage.md`
 - `docs/architecture.md`

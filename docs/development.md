@@ -35,7 +35,7 @@ npm install
 npm test
 ```
 
-`npm test` 覆盖页面分类、悬浮球调度、文件名和 Front Matter、ZIP 字节结构，以及公式、代码块、表格、链接卡片的 HTML 夹具。`npm run test:detector` 仍只跑页面分类。
+`npm test` 覆盖页面分类、悬浮球调度、文件名和 Front Matter、ZIP 字节结构、公式和链接卡片等 HTML 夹具，以及热榜、回答 id、信息流和时间的 DOM 夹具。`npm run test:detector` 仍只跑页面分类。
 
 ### 打包产物
 

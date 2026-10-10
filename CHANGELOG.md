@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.6] - 2026-10-10
+
+### Fixed
+
+- Hot-list export keeps one row per item. The title no longer includes the excerpt, and the heat metric no longer includes the share control.
+- Question export loads later answers from the Zhihu question feed API. A partial file sets `truncated: true`. A limit of 0 downloads as many answers as the page declares, up to 1000.
+- Answer export uses the answer's own id and author. An empty avatar link is not the author name, and a cited answer is not the item itself.
+- Feed cards expand only 阅读全文, 展开, or 显示全部. Titles come from the card heading, and relative times such as 昨天 and 3 小时前 are kept.
+- Display math, link-card titles, raw video elements, and lazy images follow the current article markup.
+
+### Changed
+
+- Front matter quotes `title`, `url`, `author`, `created`, and `edited`.
+- Question downloads pack images when local image download is enabled. Copy still keeps remote image URLs.
+- Question subpaths such as `/question/.../log` are not treated as question pages.
+
 ## [1.1.5] - 2026-09-28
 
 ### Fixed

@@ -23,6 +23,22 @@ assert.match(markdown, /```python[\s\S]*print\(1\)[\s\S]*```/);
 assert.match(markdown, /\| 列 \|/);
 assert.match(markdown, /\[卡片\]\(https:\/\/example.com\/post\)/);
 
+const current = parseHTML(`<!doctype html><html><body><article>
+  <p><span class="ztext-math" data-tex="a+b">a+b</span></p>
+  <p>行内 <span class="ztext-math" data-tex="x">x</span> 结束</p>
+  <div class="RichText-LinkCardContainer"><a href="https://kexue.fm/archives/11910" data-text="排序不等式"><span class="LinkCard-title loading" data-text="true"></span></a></div>
+  <video src="https://vdn.example.com/a.mp4"></video>
+  <img src="data:image/svg+xml;utf8,&lt;svg&gt;&lt;/svg&gt;" data-original="https://picx.zhimg.com/v2-hash_r.jpg" alt="图">
+  <img src="data:image/svg+xml;utf8,&lt;svg&gt;&lt;/svg&gt;" alt="占位">
+</article></body></html>`);
+const currentMarkdown = createTurndownService(false).turndown(current.document.querySelector('article'));
+assert.match(currentMarkdown, /\$\$\s*a\+b\s*\$\$/);
+assert.match(currentMarkdown, /行内 \$x\$ 结束/);
+assert.match(currentMarkdown, /\[排序不等式\]\(https:\/\/kexue\.fm\/archives\/11910\)/);
+assert.match(currentMarkdown, /\[视频\]\(https:\/\/vdn\.example\.com\/a\.mp4\)/);
+assert.match(currentMarkdown, /!\[[^\]]*\]\(https:\/\/picx\.zhimg\.com\/v2-hash\.jpg/);
+assert.doesNotMatch(currentMarkdown, /data:image/);
+
 const withImages = createTurndownService(true);
 withImages.turndown(parseHTML('<!doctype html><html><body><img src="https://pic.zhimg.com/a.jpg" alt="图"></body></html>').document.body);
 assert.strictEqual(withImages.imageCollector.images.length, 1);

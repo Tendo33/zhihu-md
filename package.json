@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "package": "npm run build && node scripts/package.js",
-    "test": "node scripts/test-page-detector.js && node scripts/test-init-scheduler.js && node scripts/test-filename.js && node scripts/test-zip.js && node scripts/test-markdown.js",
+    "test": "node scripts/test-page-detector.js && node scripts/test-init-scheduler.js && node scripts/test-filename.js && node scripts/test-zip.js && node scripts/test-markdown.js && node scripts/test-zhihu-dom.js",
     "test:detector": "node scripts/test-page-detector.js"
   },
   "keywords": [

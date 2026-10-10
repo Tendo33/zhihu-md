@@ -19,8 +19,9 @@ assert.strictEqual(querySelectorAny(parent, ['.missing']), null);
 
 const frontMatter = ArticleExporter.generateFrontMatter('Say "hi"', '作者', 'https://zhuanlan.zhihu.com/p/1', '2020-01-01', '');
 assert.match(frontMatter, /title: "Say \\"hi\\""/);
-assert.match(frontMatter, /author: 作者/);
-assert.match(frontMatter, /created: 2020-01-01/);
+assert.match(frontMatter, /author: "作者"/);
+assert.match(frontMatter, /url: "https:\/\/zhuanlan\.zhihu\.com\/p\/1"/);
+assert.match(frontMatter, /created: "2020-01-01"/);
 assert.doesNotMatch(frontMatter, /edited:/);
 
 console.log('filename and front matter assertions passed');

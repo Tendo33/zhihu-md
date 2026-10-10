@@ -25,16 +25,17 @@ export function createTurndownService(downloadImages = false) {
     : null;
   turndownService.imageCollector = collector;
 
-  // Rule: Math formulas - extract LaTeX from data-tex attribute
+  // Rule: Math formulas - extract LaTeX from data-tex attribute.
+  // Display math used to live in .ztext-math-container. It is now a paragraph
+  // whose only child is the formula.
   turndownService.addRule('zhihuMath', {
     filter: function(node) {
-      return node.classList && node.classList.contains('ztext-math');
+      return node.nodeType === 1 && node.hasAttribute('data-tex') &&
+        (node.classList.contains('ztext-math') || node.children.length === 0);
     },
     replacement: function(content, node) {
       const tex = node.getAttribute('data-tex') || content;
-      const isBlock = node.parentElement?.classList?.contains('ztext-math-container') ||
-                      node.closest('.ztext-math-container');
-      if (isBlock) {
+      if (isDisplayMath(node)) {
         return `\n\n$$${tex}$$\n\n`;
       }
       return `$${tex}$`;
@@ -50,7 +51,7 @@ export function createTurndownService(downloadImages = false) {
                   node.getAttribute('data-src') ||
                   node.getAttribute('src');
       
-      if (!src) return '';
+      if (!src || src.startsWith('data:')) return '';
       
       const alt = node.getAttribute('alt') || '图片';
       let cleanSrc = src;
@@ -114,9 +115,7 @@ export function createTurndownService(downloadImages = false) {
       if (!link) return '';
       
       const href = link.getAttribute('href') || '';
-      const title = node.querySelector('.LinkCard-title')?.textContent ||
-                    link.textContent?.trim() ||
-                    '链接';
+      const title = linkCardTitle(node, link);
       
       let cleanHref = href;
       if (href.includes('link.zhihu.com')) {
@@ -142,12 +141,16 @@ export function createTurndownService(downloadImages = false) {
   // Rule: Video placeholders
   turndownService.addRule('zhihuVideo', {
     filter: function(node) {
-      return node.classList && node.classList.contains('VideoCard');
+      return node.nodeName === 'VIDEO' || (node.classList && node.classList.contains('VideoCard'));
     },
     replacement: function(content, node) {
+      if (node.nodeName === 'VIDEO') {
+        const src = node.getAttribute('src') || node.querySelector('source')?.getAttribute('src') || '';
+        return src ? `\n\n[视频](${src})\n\n` : '';
+      }
       const link = node.querySelector('a');
       const href = link?.getAttribute('href') || '';
-      return `[视频](${href})`;
+      return href ? `[视频](${href})` : '';
     }
   });
 
@@ -221,4 +224,34 @@ export function createTurndownService(downloadImages = false) {
   });
 
   return turndownService;
+}
+
+function isDisplayMath(node) {
+  if (node.parentElement?.classList?.contains('ztext-math-container') || node.closest('.ztext-math-container')) {
+    return true;
+  }
+  const parent = node.parentElement;
+  if (!parent || !/^(P|DIV|FIGURE)$/.test(parent.nodeName)) return false;
+  for (const child of parent.childNodes) {
+    if (child === node) continue;
+    if (child.nodeType === 3 && child.textContent.trim()) return false;
+    if (child.nodeType === 1) return false;
+  }
+  return true;
+}
+
+function linkCardTitle(node, link) {
+  const visible = node.querySelector('.LinkCard-title')?.textContent?.trim();
+  if (visible) return visible;
+  const candidates = [
+    link.getAttribute('data-text'),
+    node.querySelector('.LinkCard-title')?.getAttribute('data-text'),
+    link.getAttribute('title'),
+    link.textContent
+  ];
+  for (const candidate of candidates) {
+    const text = String(candidate || '').trim();
+    if (text && text !== 'true') return text;
+  }
+  return '链接';
 }

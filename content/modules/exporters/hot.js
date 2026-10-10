@@ -3,7 +3,13 @@
  * Handles export for Zhihu hot list page
  */
 
-import { normalizeUrl } from '../constants.js';
+import { extractHotFallback, extractHotItems } from '../zhihu-dom.js';
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function escapeLinkText(text) {
+  return String(text || '').replace(/[\[\]]/g, '\\$&').replace(/\s+/g, ' ').trim();
+}
 
 export const HotExporter = {
   /**
@@ -12,67 +18,19 @@ export const HotExporter = {
    */
   async exportHotList() {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const hotItems = document.querySelectorAll('.HotList-item, .HotItem, [class*="HotItem"]');
-
-      if (hotItems.length === 0) {
-      const altItems = document.querySelectorAll('.HotList .HotItem-content');
-        if (altItems.length === 0) {
-          return { success: false, error: '未找到热榜内容，请确保在热榜页面' };
-        }
+      const start = Date.now();
+      while (!document.querySelector('.HotItem') && Date.now() - start < 1500) {
+        await sleep(100);
       }
 
-      const items = [];
-
-      const hotListItems = document.querySelectorAll('.HotList-item, .HotItem, [class*="HotItem-content"]');
-
-      hotListItems.forEach((item, index) => {
-        const titleEl = item.querySelector('.HotItem-title, [class*="HotItem-title"], a[href*="/question/"]');
-        const linkEl = item.querySelector('a[href*="/question/"]') || item.querySelector('a');
-        const rankEl = item.querySelector('.HotItem-rank, .HotItem-index, [class*="index"]');
-        const metricsEl = item.querySelector('.HotItem-metrics, [class*="metrics"]');
-
-        if (titleEl || linkEl) {
-          const title = titleEl?.textContent?.trim() || linkEl?.textContent?.trim() || '未知标题';
-          const href = linkEl?.getAttribute('href') || '';
-          const fullUrl = normalizeUrl(href);
-          const rank = rankEl?.textContent?.trim() || String(index + 1);
-          const metrics = metricsEl?.textContent?.trim() || '';
-
-          items.push({
-            rank,
-            title,
-            url: fullUrl,
-            metrics
-          });
-        }
-      });
-
-      // Fallback method
-      if (items.length === 0) {
-        const allLinks = document.querySelectorAll('a[href*="/question/"]');
-        const seenUrls = new Set();
-
-        allLinks.forEach((link, index) => {
-          const href = link.getAttribute('href');
-          if (href && !seenUrls.has(href)) {
-            seenUrls.add(href);
-            const title = link.textContent?.trim() || '未知标题';
-            if (title && title.length > 5) {
-              items.push({
-                rank: String(items.length + 1),
-                title,
-                url: normalizeUrl(href),
-                metrics: ''
-              });
-            }
-          }
-        });
-      }
+      // .HotItem is the row. [class*="HotItem-content"] also matches the inner
+      // wrapper, and the row's <a> contains the excerpt, so neither can be used
+      // as the title or the item list.
+      let items = extractHotItems(document);
+      if (items.length === 0) items = extractHotFallback(document);
 
       if (items.length === 0) {
-        return { success: false, error: '未能提取热榜条目' };
+        return { success: false, error: '未找到热榜内容，请确保在热榜页面' };
       }
 
       const date = new Date().toISOString().split('T')[0];
@@ -87,21 +45,17 @@ count: ${items.length}
 
 `;
 
-      items.forEach(item => {
-        markdown += `${item.rank}. [${item.title}](${item.url})`;
-        if (item.metrics) {
-          markdown += ` - ${item.metrics}`;
-        }
+      items.forEach((item) => {
+        markdown += `${item.rank}. [${escapeLinkText(item.title)}](${item.url})`;
+        if (item.metrics) markdown += ` - ${item.metrics}`;
         markdown += '\n';
       });
-
-      const filename = `知乎热榜_${date}.md`;
 
       return {
         success: true,
         data: {
           content: markdown,
-          filename: filename
+          filename: `知乎热榜_${date}.md`
         }
       };
     } catch (error) {
@@ -109,4 +63,3 @@ count: ${items.length}
     }
   }
 };
-

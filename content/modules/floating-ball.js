@@ -142,7 +142,7 @@ export const FloatingBall = {
     try {
       let result;
       if (pageType === 'question') {
-        result = await QuestionExporter.exportMultipleAnswers();
+        result = await QuestionExporter.exportMultipleAnswers(downloadImages);
       } else if (pageType === 'home' || pageType === 'follow') {
         result = await FeedExporter.exportFeedItems(pageType);
       } else if (pageType === 'hot') {

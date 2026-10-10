@@ -5,6 +5,18 @@
 
 import { CONSTANTS, normalizeUrl, scrollToLoadItems } from '../constants.js';
 import { createTurndownService } from '../turndown-rules.js';
+import {
+  cleanText,
+  findAuthorName,
+  findExpandButton,
+  findFeedLink,
+  findFeedTimeText,
+  findFeedTitle,
+  parseZhihuTime,
+  yamlQuote,
+} from '../zhihu-dom.js';
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const FeedExporter = {
   /**
@@ -27,58 +39,42 @@ export const FeedExporter = {
    * @returns {Promise<Object|null>}
    */
   async processFeedItem(feedItem, turndownService) {
-    const titleEl = feedItem.querySelector('.ContentItem-title a, [class*="ContentItem-title"] a, h2 a');
-    const authorEl = feedItem.querySelector('.AuthorInfo-name, .UserLink-link, [class*="AuthorInfo"] a');
-    const timeEl = feedItem.querySelector('.ContentItem-time, [class*="ContentItem-time"]');
-    const linkEl = feedItem.querySelector('a[href*="/question/"], a[href*="/p/"], h2 a');
+    const author = findAuthorName(feedItem) || '未知作者';
+    const linkEl = findFeedLink(feedItem);
+    const fullUrl = normalizeUrl(linkEl?.getAttribute('href') || '');
+    const parsedTime = parseZhihuTime(findFeedTimeText(feedItem));
+    const timeText = [
+      parsedTime.createdTime && `发布于 ${parsedTime.createdTime}`,
+      parsedTime.editedTime && `编辑于 ${parsedTime.editedTime}`,
+    ].filter(Boolean).join(' ');
 
-    if (!titleEl) {
-      return null;
-    }
-
-    const title = titleEl?.textContent?.trim() || '无标题';
-    const author = authorEl?.textContent?.trim() || '未知作者';
-    const href = linkEl?.getAttribute('href') || '';
-    const fullUrl = normalizeUrl(href);
-    const timeText = timeEl?.textContent?.trim() || '';
-
-    // Try to expand content
-    let expandBtn = feedItem.querySelector(
-      'button.ContentItem-more, ' +
-      'button[class*="ContentItem-more"], ' +
-      '.ContentItem-expandButton, ' +
-      '[class*="ContentItem"] button[class*="expand"], ' +
-      '.RichContent-inner button, ' +
-      '.Button--plain'
-    );
-
-    if (!expandBtn) {
-      const buttons = feedItem.querySelectorAll('button');
-      for (const btn of buttons) {
-        if (btn.textContent.includes('阅读全文') || btn.textContent.includes('展开')) {
-          expandBtn = btn;
-          break;
-        }
-      }
-    }
-
+    const expandBtn = findExpandButton(feedItem);
     if (expandBtn) {
+      const before = cleanText(feedItem.querySelector('.RichText, .RichContent-inner')).length;
       try {
         expandBtn.click();
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (e) {
-        // Ignore expand errors
+        const start = Date.now();
+        while (Date.now() - start < 1200) {
+          const after = cleanText(feedItem.querySelector('.RichText, .RichContent-inner'));
+          if (after.length > before + 20) break;
+          await sleep(100);
+        }
+      } catch {
+        // The card can already be expanded.
       }
     }
 
-    const contentEl = feedItem.querySelector('.RichText, .RichContent-inner, [class*="RichText"]');
-
+    const contentEl = feedItem.querySelector('.RichText, .RichContent-inner');
     let contentMd = '';
     if (contentEl) {
       const clonedContent = contentEl.cloneNode(true);
       clonedContent.querySelectorAll('.ContentItem-actions, noscript, .RichText-ADLinkCardContainer, button').forEach(el => el.remove());
       contentMd = turndownService.turndown(clonedContent);
     }
+
+    let title = findFeedTitle(feedItem);
+    if (!title && !contentMd) return null;
+    if (!title) title = author !== '未知作者' ? `${author}的想法` : '无标题';
 
     return {
       title,
@@ -106,7 +102,9 @@ export const FeedExporter = {
         // Use default
       }
 
-      await this.scrollToLoadFeedItems(maxItemCount);
+      const unlimited = maxItemCount === 0;
+      const targetCount = unlimited ? Number.POSITIVE_INFINITY : maxItemCount;
+      await this.scrollToLoadFeedItems(targetCount);
 
       let feedItems = document.querySelectorAll('.TopstoryItem');
       if (feedItems.length === 0) {
@@ -119,21 +117,21 @@ export const FeedExporter = {
         feedItems = document.querySelectorAll('.ContentItem');
       }
 
-      // Deduplicate by title
-      const seenTitles = new Set();
+      const seenKeys = new Set();
       const uniqueItems = [];
 
       for (const item of feedItems) {
-        const titleEl = item.querySelector('.ContentItem-title a, [class*="ContentItem-title"] a, h2 a');
-        const title = titleEl?.textContent?.trim();
-
-        if (title && !seenTitles.has(title)) {
-          seenTitles.add(title);
-          uniqueItems.push(item);
-        }
+        const title = findFeedTitle(item);
+        const href = normalizeUrl(findFeedLink(item)?.getAttribute('href') || '');
+        const hasBody = item.querySelector('.RichText, .RichContent-inner, .ContentItem-more');
+        if (!title && !href && !hasBody) continue;
+        const key = href || title;
+        if (key && seenKeys.has(key)) continue;
+        if (key) seenKeys.add(key);
+        uniqueItems.push(item);
       }
 
-      const itemsToProcess = uniqueItems.slice(0, maxItemCount);
+      const itemsToProcess = unlimited ? uniqueItems : uniqueItems.slice(0, maxItemCount);
 
       if (itemsToProcess.length === 0) {
         return { success: false, error: '未找到任何内容' };
@@ -157,8 +155,8 @@ export const FeedExporter = {
       const pageTitle = pageType === 'home' ? '知乎首页推荐' : '知乎关注动态';
 
       let markdown = `---
-title: "${pageTitle}"
-url: ${window.location.href}
+title: ${yamlQuote(pageTitle)}
+url: ${yamlQuote(window.location.href)}
 date: ${date}
 item_count: ${processedItems.length}
 ---
@@ -177,8 +175,12 @@ item_count: ${processedItems.length}
 **时间**: ${item.time}`;
         }
 
-        markdown += `  
-**链接**: [查看原文](${item.url})
+        if (item.url) {
+          markdown += `  
+**链接**: [查看原文](${item.url})`;
+        }
+
+        markdown += `
 
 ${item.content}
 

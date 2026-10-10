@@ -6,6 +6,14 @@
 import { CONSTANTS, cleanFilename, querySelectorAny } from '../constants.js';
 import { PageDetector } from '../detector.js';
 import { createTurndownService } from '../turndown-rules.js';
+import {
+  fetchAnswerRecord,
+  findAnswerItem,
+  findAuthorName,
+  formatUnixTime,
+  parseZhihuTime,
+  yamlQuote,
+} from '../zhihu-dom.js';
 
 export const ArticleExporter = {
   /**
@@ -17,22 +25,12 @@ export const ArticleExporter = {
     if (pageType === 'column') {
       return querySelectorAny(document, CONSTANTS.SELECTORS.COLUMN_CONTAINER);
     } else if (pageType === 'answer') {
-      const answerMatch = window.location.pathname.match(/\/answer\/(\d+)/);
-      
-      if (answerMatch) {
-        const answerId = answerMatch[1];
-        const idSelector = `[data-za-detail-view-id="${answerId}"], [data-za-detail-view-path-module="AnswerItem"][data-za-detail-view-path*="${answerId}"]`;
-        const answerElement = document.querySelector(idSelector) || document.querySelector('.AnswerItem');
-        return answerElement?.querySelector('.RichText.ztext, .RichText, [class*="RichText"]') || answerElement;
-      } else {
-        return querySelectorAny(document, CONSTANTS.SELECTORS.ANSWER_CONTAINER);
-      }
+      const answerId = window.location.pathname.match(/\/answer\/(\d+)/)?.[1] || '';
+      const answerElement = findAnswerItem(document, answerId);
+      if (!answerElement) return null;
+      return querySelectorAny(answerElement, ['.RichText.ztext', '.RichText']);
     } else if (pageType === 'question') {
-      const expandedAnswer = querySelectorAny(document, CONSTANTS.SELECTORS.ANSWER_CONTAINER);
-      if (expandedAnswer) {
-        return expandedAnswer;
-      }
-      return expandedAnswer;
+      return querySelectorAny(document, CONSTANTS.SELECTORS.ANSWER_CONTAINER);
     }
     
     return null;
@@ -61,10 +59,9 @@ export const ArticleExporter = {
     if (pageType === 'column') {
       return querySelectorAny(document, CONSTANTS.SELECTORS.AUTHOR.COLUMN)?.textContent?.trim();
     } else if (pageType === 'answer' || pageType === 'question') {
-      const answerItem = document.querySelector('[data-za-detail-view-path-module="AnswerItem"]') || document.querySelector('.AnswerItem');
-      if (answerItem) {
-        return querySelectorAny(answerItem, ['.AuthorInfo-name', '.UserLink-link'])?.textContent?.trim();
-      }
+      const answerId = pageType === 'answer' ? window.location.pathname.match(/\/answer\/(\d+)/)?.[1] : '';
+      const answerItem = findAnswerItem(document, answerId);
+      return findAuthorName(answerItem) || null;
     }
     return null;
   },
@@ -79,29 +76,14 @@ export const ArticleExporter = {
     let editedTime = '';
 
     if (pageType === 'column') {
-      const timeEl = document.querySelector('.Post-Header .ContentItem-time');
-      if (timeEl) {
-        const timeText = timeEl.textContent || '';
-        const createdMatch = timeText.match(/发布于\s*([^\s编]+)/);
-        const editedMatch = timeText.match(/编辑于\s*(.+)/);
-        if (createdMatch) createdTime = createdMatch[1].trim();
-        if (editedMatch) editedTime = editedMatch[1].trim();
-      }
-    } else if (pageType === 'answer') {
-      const answerId = window.location.pathname.match(/\/answer\/(\d+)/)?.[1];
-      const answerItem = (answerId && document.querySelector(`[data-za-detail-view-id="${answerId}"]`)) ||
-        document.querySelector('[data-za-detail-view-path-module="AnswerItem"]') ||
-        document.querySelector('.AnswerItem');
-      if (answerItem) {
-        const timeEl = answerItem.querySelector('.ContentItem-time');
-        if (timeEl) {
-          const timeText = timeEl.textContent || '';
-          const createdMatch = timeText.match(/发布于\s*([^\s编]+)/);
-          const editedMatch = timeText.match(/编辑于\s*(.+)/);
-          if (createdMatch) createdTime = createdMatch[1].trim();
-          if (editedMatch) editedTime = editedMatch[1].trim();
-        }
-      }
+      const timeEl = querySelectorAny(document, ['.Post-Header .ContentItem-time', '.ContentItem-time']);
+      return parseZhihuTime(timeEl?.textContent || '');
+    }
+    if (pageType === 'answer') {
+      const answerId = window.location.pathname.match(/\/answer\/(\d+)/)?.[1] || '';
+      const answerItem = findAnswerItem(document, answerId);
+      const timeEl = answerItem?.querySelector('.ContentItem-time');
+      return parseZhihuTime(timeEl?.textContent || '');
     }
 
     return { createdTime, editedTime };
@@ -119,16 +101,16 @@ export const ArticleExporter = {
   generateFrontMatter(title, author, url, createdTime = '', editedTime = '') {
     const date = new Date().toISOString().split('T')[0];
     let frontMatter = `---
-title: "${title.replace(/"/g, '\\"')}"
-url: ${url}
-author: ${author || '未知'}
+title: ${yamlQuote(title)}
+url: ${yamlQuote(url)}
+author: ${yamlQuote(author || '未知')}
 date: ${date}`;
 
     if (createdTime) {
-      frontMatter += `\ncreated: ${createdTime}`;
+      frontMatter += `\ncreated: ${yamlQuote(createdTime)}`;
     }
     if (editedTime) {
-      frontMatter += `\nedited: ${editedTime}`;
+      frontMatter += `\nedited: ${yamlQuote(editedTime)}`;
     }
 
     frontMatter += `\n---\n\n`;
@@ -231,9 +213,23 @@ date: ${date}`;
     }
 
     const title = this.getTitle(pageType);
-    const author = this.getAuthor(pageType);
-    const container = this.getContentContainer(pageType);
-    const { createdTime, editedTime } = this.getTimeInfo(pageType);
+    let author = this.getAuthor(pageType);
+    let container = this.getContentContainer(pageType);
+    let { createdTime, editedTime } = this.getTimeInfo(pageType);
+
+    if (!container && pageType === 'answer') {
+      const answerId = window.location.pathname.match(/\/answer\/(\d+)/)?.[1] || '';
+      const record = await fetchAnswerRecord(answerId);
+      if (record?.content) {
+        container = document.createElement('div');
+        container.innerHTML = record.content;
+        author = record.author?.name || author;
+        createdTime = formatUnixTime(record.created_time);
+        editedTime = record.updated_time && record.updated_time !== record.created_time
+          ? formatUnixTime(record.updated_time)
+          : '';
+      }
+    }
 
     if (!container) {
       return { success: false, error: '无法找到文章内容' };

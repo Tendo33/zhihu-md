@@ -26,5 +26,10 @@ r = run({ E2E_PLAYWRIGHT_DIR: fake, CHROME_PATH: undefined });
 assert.equal(r.status, 2); assert.match(r.stderr, /未设置 CHROME_PATH/);
 r = run({ E2E_PLAYWRIGHT_DIR: fake, CHROME_PATH: path.join(fake, 'no-such-chrome') });
 assert.equal(r.status, 2); assert.match(r.stderr, /CHROME_PATH 指向的文件不存在/);
+// batch6 ZB5-01：没有 dist/ 时提示先构建，退出 2，不带堆栈
+const fakeChrome = path.join(fake, 'chrome');
+fs.writeFileSync(fakeChrome, '');
+r = run({ E2E_PLAYWRIGHT_DIR: fake, CHROME_PATH: fakeChrome, DISPLAY: ':99', E2E_DIST: path.join(fake, 'no-dist') });
+assert.equal(r.status, 2); assert.match(r.stderr, /请先构建（npm run build）/); assert.doesNotMatch(r.stderr, /ENOENT|\n\s+at /);
 fs.rmSync(fake, { recursive: true, force: true });
-console.log('e2e preflight: missing playwright / CHROME_PATH → exit 2 passed');
+console.log('e2e preflight: missing playwright / CHROME_PATH / dist → exit 2 passed');

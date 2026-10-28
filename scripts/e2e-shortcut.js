@@ -8,7 +8,8 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const dist = path.join(root, 'dist');
+// batch6 ZB5-01：E2E_DIST 只给测试用，默认仍是仓库 dist/
+const dist = process.env.E2E_DIST || path.join(root, 'dist');
 const COMMAND = 'export-page';
 
 function loadPlaywright() {
@@ -35,8 +36,17 @@ function chromePath() {
   return p;
 }
 
+// batch6 ZB5-01：没有 dist/ 时给出中文提示并以 2 退出，不再抛 ENOENT 堆栈
+function requireDist() {
+  if (!fs.existsSync(path.join(dist, 'manifest.json'))) {
+    console.error(`e2e: 找不到 ${path.join(dist, 'manifest.json')}，请先构建（npm run build），或直接用 npm run test:e2e（会先构建）。`);
+    process.exit(2);
+  }
+}
+
 const { chromium } = loadPlaywright();
 const executablePath = chromePath(); // 先于读取 dist，环境问题最先报
+requireDist();
 const manifest = JSON.parse(fs.readFileSync(path.join(dist, 'manifest.json'), 'utf8'));
 const expected = manifest.commands[COMMAND].suggested_key.default;
 const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e-shortcut-'));

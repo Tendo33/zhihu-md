@@ -6,6 +6,7 @@
 import { createLogger } from '../lib/logger.js';
 import { checkUrlType } from '../lib/page-detector.js';
 import { copyTextLater } from '../lib/clipboard.js';
+import { describeFailure, ExportFailure } from '../lib/failure-text.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
 
@@ -15,6 +16,7 @@ Logger.info('Popup Script Loaded');
 const statusBadge = document.getElementById('page-status');
 const statusText = statusBadge.querySelector('.status-text');
 const articleInfo = document.getElementById('article-info');
+const actionFeedback = document.getElementById('action-feedback');
 const articleTitle = document.getElementById('article-title');
 const articleAuthor = document.getElementById('article-author').querySelector('span');
 const articleType = document.getElementById('article-type').querySelector('span');     // Direct span child
@@ -138,6 +140,20 @@ function showError(message, silent = false, showRefresh = false) {
   setExportActionsEnabled(false);
 }
 
+/** 导出/复制失败的具体原因：保留到下一次操作，不随按钮文字一起消失 */
+function showActionFeedback(feedback) {
+  if (!actionFeedback) return;
+  if (!feedback) {
+    actionFeedback.textContent = '';
+    actionFeedback.classList.add('hidden');
+    delete actionFeedback.dataset.reason;
+    return;
+  }
+  actionFeedback.textContent = feedback.text;
+  actionFeedback.dataset.reason = feedback.reason;
+  actionFeedback.classList.remove('hidden');
+}
+
 function setExportActionsEnabled(enabled) {
   exportBtn.disabled = !enabled;
   if (copyBtn) copyBtn.disabled = !enabled;
@@ -250,6 +266,7 @@ async function handleExport() {
     exportBtn.setAttribute('aria-busy', 'true');
     btnText.textContent = '导出中...';
     setExportActionsEnabled(false);
+    showActionFeedback(null);
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -285,7 +302,7 @@ async function handleExport() {
         setExportActionsEnabled(true);
       }, 2000);
     } else {
-      throw new Error(response?.error || '导出失败');
+      throw new ExportFailure(response);
     }
   } catch (error) {
     Logger.error('Export Error:', error);
@@ -293,6 +310,7 @@ async function handleExport() {
     exportBtn.classList.remove('loading');
     exportBtn.removeAttribute('aria-busy');
     btnText.textContent = '导出失败';
+    showActionFeedback(describeFailure(error, 'export'));
     
     setTimeout(() => {
       btnText.textContent = '导出 Markdown';
@@ -304,6 +322,7 @@ async function handleExport() {
 function handleCopy() {
   const btnText = copyBtn.querySelector('span');
   setExportActionsEnabled(false);
+  showActionFeedback(null);
   btnText.textContent = '复制中...';
   const pending = copyTextLater(async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -311,7 +330,7 @@ function handleCopy() {
       action: 'exportMarkdown',
       downloadImages: false
     });
-    if (!response || !response.success) throw new Error(response?.error || '复制失败');
+    if (!response || !response.success) throw new ExportFailure(response);
     return response.data.content;
   });
   pending.then(() => {
@@ -319,6 +338,7 @@ function handleCopy() {
   }).catch((error) => {
     Logger.error('Copy Error:', error);
     btnText.textContent = '复制失败';
+    showActionFeedback(describeFailure(error, 'copy'));
   }).finally(() => {
     setTimeout(() => {
       btnText.textContent = '复制 Markdown';

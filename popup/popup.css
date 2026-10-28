@@ -374,3 +374,16 @@ body {
   .content { padding:16px; }
   .footer { padding-inline:16px; }
 }
+
+/* Z1-01：导出/复制失败的具体原因 */
+.action-feedback {
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--zm-danger-border, #f1c4c4);
+  background: var(--zm-danger-bg, #fdf2f2);
+  color: var(--zm-danger-text, #a32020);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.action-feedback.hidden { display: none; }

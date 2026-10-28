@@ -7,6 +7,7 @@ import { createLogger } from '../lib/logger.js';
 import { checkUrlType } from '../lib/page-detector.js';
 import { copyTextLater } from '../lib/clipboard.js';
 import { describeFailure, ExportFailure } from '../lib/failure-text.js';
+import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
@@ -181,6 +182,43 @@ async function renderRecent() {
   box.classList.remove('hidden');
 }
 
+// Z3-03：快捷键没注册上（被其他扩展/浏览器占用）时给出「去设置」引导
+function renderShortcut(cmds) {
+  const g = shortcutGuide(cmds, 'export-page', navigator.userAgent, navigator.language);
+  const kbd = $('shortcut-kbd');
+  const box = $('shortcut-guide');
+  if (g.set) {
+    kbd.textContent = g.shortcut;
+    kbd.classList.remove('hidden');
+    box.classList.add('hidden');
+    box.replaceChildren();
+    return;
+  }
+  kbd.classList.add('hidden');
+  const label = document.createElement('span');
+  label.className = 'sc-label';
+  label.textContent = g.label;
+  box.replaceChildren(label, document.createTextNode(' · '));
+  if (g.url) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'shortcut-setup';
+    btn.className = 'sc-link';
+    btn.textContent = g.button;
+    btn.addEventListener('click', () => {
+      // chrome:// / edge:// 页面只能用 tabs.create 打开，且不需要 tabs 权限
+      chrome.tabs.create({ url: g.url }).catch(() => {});
+    });
+    box.append(btn);
+  } else {
+    const hint = document.createElement('span');
+    hint.className = 'sc-hint';
+    hint.textContent = g.hint;
+    box.append(hint);
+  }
+  box.classList.remove('hidden');
+}
+
 function renderFooter() {
   try {
     const v = chrome.runtime.getManifest ? chrome.runtime.getManifest().version : '';
@@ -188,9 +226,7 @@ function renderFooter() {
   } catch { /* 测试环境 */ }
   if (chrome.commands && chrome.commands.getAll) {
     chrome.commands.getAll().then((cmds) => {
-      const c = (cmds || []).find((x) => x.name === 'export-page');
-      if (c && c.shortcut) $('shortcut-kbd').textContent = c.shortcut;
-      else if (c) $('shortcut-kbd').textContent = '未设置';
+      renderShortcut(cmds);
     }).catch(() => {});
   }
 }

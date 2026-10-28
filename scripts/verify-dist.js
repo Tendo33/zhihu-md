@@ -76,7 +76,13 @@ export function verifyDist(dir) {
       }
     }
   }
-  return { missing, checked };
+  // R3 perf（复审建议 1）：dist/icons 只能有 manifest 引用的图标（构建时过滤掉了未引用的 icons/icon.png）
+  const usedIcons = new Set(manifestFiles(manifest).filter(({ where }) => /^(icons|action\.default_icon)\b/.test(where)).map(({ file }) => file.replace(/^\//, '')));
+  const iconDir = path.join(dir, 'icons');
+  const extraIcons = fs.existsSync(iconDir)
+    ? fs.readdirSync(iconDir).map((n) => `icons/${n}`).filter((f) => !usedIcons.has(f))
+    : [];
+  return { missing, checked, extraIcons };
 }
 
 // 用 fileURLToPath 解码 import.meta.url：路径含空格、中文时 URL.pathname 是百分号编码，
@@ -87,7 +93,12 @@ if (isMain) {
     console.error(`verify:dist 失败：找不到 ${manifestPath}，请先运行 npm run build`);
     process.exit(1);
   }
-  const { missing, checked } = verifyDist(dist);
+  const { missing, checked, extraIcons } = verifyDist(dist);
+  if (extraIcons.length) {
+    console.error(`verify:dist 失败：dist/icons 有 ${extraIcons.length} 个 manifest 未引用的图标`);
+    extraIcons.forEach((m) => console.error('  - ' + m));
+    process.exit(1);
+  }
   if (missing.length) {
     console.error(`verify:dist 失败：${missing.length} 个文件缺失`);
     missing.forEach((m) => console.error('  - ' + m));

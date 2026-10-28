@@ -27,6 +27,11 @@ write('content/c.css');
 write('popup/popup.js');
 r = verifyDist(dir);
 assert.deepEqual(r.missing, []);
+assert.deepEqual(r.extraIcons, []);
+// 复审建议 1：未被 manifest 引用的图标（如 icons/icon.png）出现在 dist 里要报出来
+write('icons/icon.png');
+assert.deepEqual(verifyDist(dir).extraIcons, ['icons/icon.png']);
+fs.rmSync(path.join(dir, 'icons/icon.png'));
 assert.deepEqual(htmlRefs('<img src="a.png?x=1"><a href="b.html"><script src="//x/y.js">'), ['a.png']);
 fs.rmSync(dir, { recursive: true, force: true });
 

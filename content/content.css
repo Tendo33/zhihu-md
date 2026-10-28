@@ -5,8 +5,8 @@
   --accent-hover: #0852b5;
   --accent-active: #06449a;
   --accent-inverse: #FFFFFF;
-  --success: #047857;
-  --error: #c62828;
+  --success: #0f7a3d; /* Z3-2：与 ui-v2.css --success / --danger 一致 */
+  --error: #b42318;
   --blue: #0a5fd1;
   --focus-ring: #0a5fd1;
   --bg-secondary: #FFFFFF;
@@ -30,10 +30,10 @@
   border: none;
   
   /* Neutral shadow for cleaner look */
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 8px 24px rgba(0, 0, 0, 0.1);
-    
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); /* Z3-2：mockup .fab 阴影 */
+  color: var(--accent-inverse);
+  font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  letter-spacing: 0;
   cursor: pointer;
   z-index: 2147483647;
   display: flex;
@@ -127,24 +127,33 @@
 
 /* Icon styling */
 #zhihu-md-floating-ball .icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   color: var(--accent-inverse);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
-/* Loading State */
+/* Loading State：Z3-2 保持品牌底色，外圈 3px 进度环转动 */
 #zhihu-md-floating-ball.loading {
   pointer-events: none;
-  background: var(--bg-secondary);
-  box-shadow: 0 0 0 1px var(--border-strong, #c3c9d1), 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-#zhihu-md-floating-ball.loading .icon {
+#zhihu-md-floating-ball .ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  pointer-events: none;
+}
+
+#zhihu-md-floating-ball.loading .ring {
+  border-color: var(--accent) transparent transparent transparent;
   animation: zhihu-md-spin 1s linear infinite;
-  opacity: 1;
-  color: var(--accent);
-  transform: none; /* Disable hover scale during loading */
+}
+
+#zhihu-md-floating-ball .glyph {
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 @keyframes zhihu-md-spin {
@@ -155,7 +164,6 @@
 /* Success State */
 #zhihu-md-floating-ball.success {
   background: var(--success);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--success) 20%, transparent);
 }
 
 #zhihu-md-floating-ball.success .icon {
@@ -165,7 +173,6 @@
 /* Error State */
 #zhihu-md-floating-ball.error {
   background: var(--error);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--error) 20%, transparent);
 }
 
 #zhihu-md-floating-ball.error .icon {
@@ -221,13 +228,14 @@
 /* 深色：跟随知乎自己的夜间模式（html[data-theme="dark"]），不看系统设置——
    知乎页面在系统深色下默认仍是白底，见 dev-log 偏离说明 */
 html[data-theme="dark"] #zhihu-md-floating-ball {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   --accent: #60a5fa;
   --accent-hover: #93c5fd;
   --accent-active: #3b82f6;
   --accent-inverse: #06142b;
   --blue: #60a5fa;
   --focus-ring: #60a5fa;
-  --success: #34d399;
+  --success: #4ade80;
   --error: #f87171;
   --bg-secondary: #1b1d22;
   --border-subtle: #33373e;
@@ -238,9 +246,14 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
 @media (prefers-reduced-motion: reduce) {
   #zhihu-md-floating-ball,
   #zhihu-md-floating-ball .icon,
+  #zhihu-md-floating-ball .ring,
   #zhihu-md-floating-ball .tooltip {
     transition: none !important;
     animation: none !important;
+  }
+  /* 不转圈时改为整圈半透明环，仍能看出“正在导出” */
+  #zhihu-md-floating-ball.loading .ring {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   }
 }
 

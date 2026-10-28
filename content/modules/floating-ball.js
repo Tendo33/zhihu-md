@@ -15,6 +15,14 @@ import { describeFailure } from '../../lib/failure-text.js';
 
 const idleLabel = '点击下载 · 右键复制';
 
+const GLYPH = '<span class="glyph" aria-hidden="true">M↓</span>';
+export const BALL_FACE = {
+  idle: GLYPH,
+  loading: GLYPH,
+  success: '<svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  error: '<svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>',
+};
+
 export const FloatingBall = {
   ...floatingBallDrag,
   ball: null,
@@ -35,14 +43,7 @@ export const FloatingBall = {
     ball.id = 'zhihu-md-floating-ball';
     ball.type = 'button';
     ball.setAttribute('aria-label', IDLE_LABEL);
-    ball.innerHTML = `
-      <svg class="icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-      <span class="tooltip" aria-hidden="true">${idleLabel}</span>
-    `;
+    ball.innerHTML = `<span class="ring" aria-hidden="true"></span><span class="face">${BALL_FACE.idle}</span><span class="tooltip" aria-hidden="true">${idleLabel}</span>`;
 
     document.body.appendChild(ball);
     return ball;
@@ -56,35 +57,10 @@ export const FloatingBall = {
   updateBallState(ball, state) {
     ball.classList.remove('loading', 'success', 'error');
 
-    const iconSvg = ball.querySelector('.icon');
-
-    switch (state) {
-      case 'loading':
-        ball.classList.add('loading');
-        iconSvg.innerHTML = `
-          <g stroke="currentColor" stroke-width="2">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-          </g>
-        `;
-        break;
-      case 'success':
-        ball.classList.add('success');
-        iconSvg.innerHTML = `<polyline points="20 6 9 17 4 12"></polyline>`;
-        break;
-      case 'error':
-        ball.classList.add('error');
-        iconSvg.innerHTML = `
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        `;
-        break;
-      default:
-        iconSvg.innerHTML = `
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        `;
-    }
+    if (state === 'loading' || state === 'success' || state === 'error') ball.classList.add(state);
+    const face = ball.querySelector('.face');
+    // Z3-2：导出中保留 M↓ 字形，靠外圈进度环表示；成功/失败换成勾/叹号
+    if (face) face.innerHTML = BALL_FACE[state] || BALL_FACE.idle;
   },
 
   /**

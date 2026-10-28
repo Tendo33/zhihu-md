@@ -1,6 +1,6 @@
 // Z3-03 回归 e2e：干净 profile 加载 dist，断言 commands.getAll() 里 export-page 的快捷键非空且等于 manifest 建议键。
 // 本地脚本（npm run test:e2e）：需要 Playwright + Chromium，且扩展需要有界面的浏览器（Linux 无显示器时用 xvfb-run）。
-// 仓库不新增 playwright 依赖：优先用本仓库 node_modules，否则用 E2E_PLAYWRIGHT_DIR（默认团队 tools/node_modules）。
+// 仓库不新增 playwright 依赖：优先用本仓库 node_modules，否则用 E2E_PLAYWRIGHT_DIR；CHROME_PATH 必填。
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -12,21 +12,37 @@ const dist = path.join(root, 'dist');
 const COMMAND = 'export-page';
 
 function loadPlaywright() {
-  const dirs = [root, process.env.E2E_PLAYWRIGHT_DIR || '/workspace/chrome-ext-team/tools'];
+  // batch5：不再写死本机默认目录；只认本仓库 node_modules 或显式设置的 E2E_PLAYWRIGHT_DIR
+  const dirs = [root, process.env.E2E_PLAYWRIGHT_DIR].filter(Boolean);
   for (const d of dirs) {
     try { return createRequire(path.join(d, 'package.json'))('playwright'); } catch { /* next */ }
   }
-  console.error('e2e: 找不到 playwright。设置 E2E_PLAYWRIGHT_DIR 指向含 node_modules/playwright 的目录。');
+  console.error('e2e: 找不到 playwright。本仓库不依赖 playwright，请设置 E2E_PLAYWRIGHT_DIR 指向含 node_modules/playwright 的目录，例如：\n  E2E_PLAYWRIGHT_DIR=/path/to/tools CHROME_PATH=/path/to/chrome xvfb-run -a npm run test:e2e');
   process.exit(2);
 }
 
+// batch5：CHROME_PATH 未设置或文件不存在时给出提示并以非 0 退出，不再让 Playwright 抛一长串堆栈
+function chromePath() {
+  const p = process.env.CHROME_PATH;
+  if (!p) {
+    console.error('e2e: 未设置 CHROME_PATH。请指向 Chromium/Chrome 可执行文件（例如 Playwright 下载的 chrome-linux64/chrome）。');
+    process.exit(2);
+  }
+  if (!fs.existsSync(p)) {
+    console.error(`e2e: CHROME_PATH 指向的文件不存在：${p}`);
+    process.exit(2);
+  }
+  return p;
+}
+
 const { chromium } = loadPlaywright();
+const executablePath = chromePath(); // 先于读取 dist，环境问题最先报
 const manifest = JSON.parse(fs.readFileSync(path.join(dist, 'manifest.json'), 'utf8'));
 const expected = manifest.commands[COMMAND].suggested_key.default;
 const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e-shortcut-'));
 const ctx = await chromium.launchPersistentContext(prof, {
   headless: false,
-  executablePath: process.env.CHROME_PATH || undefined,
+  executablePath,
   args: [`--disable-extensions-except=${dist}`, `--load-extension=${dist}`],
 });
 let code = 1;

@@ -73,6 +73,9 @@ const runTimers = () => { while (timers.length) timers.shift().fn(); };
   for (let i = 0; i < 5; i++) await flush();
   const exportBtn = document.getElementById('export-btn');
   assert.equal(exportBtn.disabled, false, 'ready after init');
+  // 设计建议 6：作者写进 span，不冲掉图标
+  assert.equal(document.querySelector('#article-author span').textContent, 'A');
+  assert.ok(document.querySelector('#article-author svg'), 'author icon kept');
   exportBtn.dispatchEvent(new window.Event('click'));
   for (let i = 0; i < 5; i++) await flush();
   const fb = document.getElementById('action-feedback');

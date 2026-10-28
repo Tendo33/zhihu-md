@@ -1,4 +1,4 @@
-// Z3-03：快捷键未设置引导 —— 3 种 UA × 快捷键空/非空（纯函数 + popup DOM）
+// Z3-03：快捷键未设置引导 —— 5 种 UA（Chrome/Edge/Firefox/Opera/Brave） × 快捷键空/非空（纯函数 + popup DOM）
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { parseHTML } from 'linkedom';
@@ -8,24 +8,33 @@ const UA = {
   chrome: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36',
   edge: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0',
   firefox: 'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0',
+  // batch5：Opera 的 UA 带 OPR/；Brave 的 UA 与 Chrome 完全相同
+  opera: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 OPR/124.0.0.0',
+  brave: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36',
 };
-const URLS = { chrome: 'chrome://extensions/shortcuts', edge: 'edge://extensions/shortcuts', firefox: null };
+// detectBrowser 的期望值：Opera 走默认 chrome:// 路径（真机验证前，由 Opera 自己重定向）；Brave 无法从 UA 区分，按 chrome 处理（Brave 会把 chrome:// 重定向到 brave://）
+const KIND = { chrome: 'chrome', edge: 'edge', firefox: 'firefox', opera: 'chrome', brave: 'chrome' };
+const URLS = { chrome: 'chrome://extensions/shortcuts', edge: 'edge://extensions/shortcuts', firefox: null, opera: 'chrome://extensions/shortcuts', brave: 'chrome://extensions/shortcuts' };
 const CMD = 'export-page';
 const set = [{ name: CMD, shortcut: 'Alt+Shift+K' }];
 const empty = [{ name: CMD, shortcut: '' }];
 
 // ---- 纯函数 ----
 for (const [b, ua] of Object.entries(UA)) {
-  assert.equal(detectBrowser(ua), b);
+  assert.equal(detectBrowser(ua), KIND[b], `${b} UA 识别`);
   assert.deepEqual(shortcutGuide(set, CMD, ua), { set: true, shortcut: 'Alt+Shift+K' }, `${b} 非空`);
   const g = shortcutGuide(empty, CMD, ua);
   assert.equal(g.set, false); assert.equal(g.label, '快捷键未设置'); assert.equal(g.url, URLS[b]);
   if (b === 'firefox') { assert.equal(g.button, null); assert.equal(g.hint, '在附加组件管理里设置'); }
   else { assert.equal(g.button, '去设置'); assert.equal(g.hint, null); }
-  // 固定中文：不再随 navigator.language 变（多余参数被忽略）
+  // 设计决定（2026-10-28 设计验收）：整窗 i18n 前固定中文；做 i18n 时删掉这条断言
   assert.deepEqual(shortcutGuide(empty, CMD, ua, 'en-US'), g, `${b} 英文环境仍是中文`);
 }
 assert.equal(shortcutGuide([], CMD, UA.chrome).set, false, '命令缺失也视为未设置');
+// batch5：getAll 里 shortcut 字段缺失（undefined）也视为未设置
+assert.equal(shortcutGuide([{ name: CMD }], CMD, UA.chrome).set, false, 'shortcut 为 undefined 视为未设置');
+assert.equal(shortcutGuide([{ name: CMD, shortcut: undefined }], CMD, UA.opera).url, URLS.opera);
+assert.equal(shortcutGuide(undefined, CMD, UA.chrome).set, false, 'cmds 为 undefined 不抛错');
 assert.equal(shortcutGuide([{ name: 'other', shortcut: 'Alt+Q' }], CMD, UA.chrome).set, false);
 
 // ---- popup DOM：真实 popup.js 渲染 ----
@@ -61,6 +70,7 @@ for (const [b, ua] of Object.entries(UA)) {
     assert.ok(!box.classList.contains('hidden'), `${b} 空时显示引导`);
     assert.ok(document.getElementById('shortcut-kbd').classList.contains('hidden'));
     assert.ok(document.getElementById('shortcut-prefix').classList.contains('hidden'), '未设置时隐藏重复前缀');
+    // 设计决定（2026-10-28 设计验收）：整窗 i18n 前固定中文；做 i18n 时删掉这条断言
     assert.ok(box.textContent.includes('快捷键未设置'), 'en-US 环境下也是中文');
     const sep = box.querySelector('.sc-sep');
     assert.ok(sep && sep.textContent === '·' && sep.getAttribute('aria-hidden') === 'true', '分隔点包成 aria-hidden 的 .sc-sep');
@@ -80,4 +90,4 @@ const css = fs.readFileSync(new URL('../popup/popup.css', import.meta.url), 'utf
 assert.match(css, /\.sc-guide\{[^}]*gap:4px/); assert.match(css, /\.sc-link\{[^}]*margin-left:-4px[^}]*min-height:24px/);
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.src.json', import.meta.url), 'utf8'));
 assert.ok(!manifest.permissions.includes('tabs'), '不新增 tabs 权限');
-console.log('shortcut guide: 3 UA × 空/非空 (pure + DOM) passed');
+console.log('shortcut guide: 5 UA × 空/非空 (pure + DOM) passed');

@@ -4,7 +4,8 @@
 
 ### Changed
 
-- Default export shortcut is now `Alt+Shift+K` on all platforms (was `Alt+Shift+Z`). On Windows and Linux, Chrome reserves Alt+Shift+Z for tab groups (focus previous tab group), so the old shortcut was never registered. 默认快捷键改为 Alt+Shift+K：Windows/Linux 上 Chrome 已把 Alt+Shift+Z 用于标签组，导致快捷键注册不上。
+- Default export shortcut is now `Alt+Shift+K` on all platforms (was `Alt+Shift+Z`). On Windows and Linux, Chrome reserves Alt+Shift+Z for tab groups (focus previous tab group), so the old shortcut was never registered. 默认快捷键改为 Alt+Shift+K：Windows/Linux 上 Chrome 已把 Alt+Shift+Z 用于标签组，导致快捷键注册不上。Applies to new installs only: existing users keep the shortcut they already have (e.g. Alt+Shift+Z on macOS); the popup footer shows the one in effect. 仅对新安装生效，已安装用户保留原有快捷键，以弹窗显示为准。
+- The popup footer shows「快捷键未设置 · 去设置」when no shortcut is registered; the button opens the browser shortcuts page (Chrome/Brave/Opera `chrome://extensions/shortcuts`, Edge `edge://extensions/shortcuts`; Firefox shows a text hint).
 
 ## [1.1.6] - 2026-10-10
 

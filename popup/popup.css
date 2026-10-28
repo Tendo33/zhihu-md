@@ -29,9 +29,9 @@ body { min-width: 320px; }
 /* Z3-03 快捷键未设置引导 */
 #shortcut-box{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .ft>span{white-space:nowrap}
-.sc-guide{display:inline-flex;align-items:center;gap:2px}
+.sc-guide{display:inline-flex;align-items:center;gap:4px}
 .sc-guide.hidden,#shortcut-kbd.hidden{display:none}
 .sc-label{color:var(--text-2)}
-.sc-link{min-height:24px;padding:0 4px;border:0;background:transparent;color:var(--brand-text);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;border-radius:4px}
+.sc-link{margin-left:-4px;min-height:24px;padding:0 4px;border:0;background:transparent;color:var(--brand-text);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;border-radius:4px}
 .sc-link:hover{background:var(--brand-soft)}
 .sc-link:focus-visible{outline:2px solid var(--brand);outline-offset:1px}

@@ -184,7 +184,7 @@ async function renderRecent() {
 
 // Z3-03：快捷键没注册上（被其他扩展/浏览器占用）时给出「去设置」引导
 function renderShortcut(cmds) {
-  const g = shortcutGuide(cmds, 'export-page', navigator.userAgent, navigator.language);
+  const g = shortcutGuide(cmds, 'export-page', navigator.userAgent);
   const kbd = $('shortcut-kbd');
   const box = $('shortcut-guide');
   if (g.set) {
@@ -200,7 +200,11 @@ function renderShortcut(cmds) {
   const label = document.createElement('span');
   label.className = 'sc-label';
   label.textContent = g.label;
-  box.replaceChildren(label, document.createTextNode(' · '));
+  const sep = document.createElement('span');
+  sep.className = 'sc-sep';
+  sep.setAttribute('aria-hidden', 'true');
+  sep.textContent = '·';
+  box.replaceChildren(label, sep);
   if (g.url) {
     const btn = document.createElement('button');
     btn.type = 'button';

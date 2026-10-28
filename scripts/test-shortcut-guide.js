@@ -18,13 +18,12 @@ const empty = [{ name: CMD, shortcut: '' }];
 for (const [b, ua] of Object.entries(UA)) {
   assert.equal(detectBrowser(ua), b);
   assert.deepEqual(shortcutGuide(set, CMD, ua), { set: true, shortcut: 'Alt+Shift+K' }, `${b} 非空`);
-  const g = shortcutGuide(empty, CMD, ua, 'zh-CN');
+  const g = shortcutGuide(empty, CMD, ua);
   assert.equal(g.set, false); assert.equal(g.label, '快捷键未设置'); assert.equal(g.url, URLS[b]);
   if (b === 'firefox') { assert.equal(g.button, null); assert.equal(g.hint, '在附加组件管理里设置'); }
   else { assert.equal(g.button, '去设置'); assert.equal(g.hint, null); }
-  const e = shortcutGuide(empty, CMD, ua, 'en-US');
-  assert.equal(e.label, 'Shortcut not set');
-  assert.equal(b === 'firefox' ? e.hint : e.button, b === 'firefox' ? 'Set it in Add-ons Manager' : 'Set up');
+  // 固定中文：不再随 navigator.language 变（多余参数被忽略）
+  assert.deepEqual(shortcutGuide(empty, CMD, ua, 'en-US'), g, `${b} 英文环境仍是中文`);
 }
 assert.equal(shortcutGuide([], CMD, UA.chrome).set, false, '命令缺失也视为未设置');
 assert.equal(shortcutGuide([{ name: 'other', shortcut: 'Alt+Q' }], CMD, UA.chrome).set, false);
@@ -36,7 +35,7 @@ let n = 0;
 async function renderPopup(ua, cmds) {
   const { window, document } = parseHTML(html);
   globalThis.window = window; globalThis.document = document;
-  Object.defineProperty(globalThis, 'navigator', { value: { userAgent: ua, language: 'zh-CN', clipboard: {} }, configurable: true });
+  Object.defineProperty(globalThis, 'navigator', { value: { userAgent: ua, language: 'en-US', clipboard: {} }, configurable: true });
   const created = [];
   globalThis.chrome = {
     tabs: { query: async () => [{ id: 1, url: 'https://www.zhihu.com/hot' }], sendMessage: async () => ({ success: false }), create: async (o) => { created.push(o.url); } },
@@ -62,7 +61,9 @@ for (const [b, ua] of Object.entries(UA)) {
     assert.ok(!box.classList.contains('hidden'), `${b} 空时显示引导`);
     assert.ok(document.getElementById('shortcut-kbd').classList.contains('hidden'));
     assert.ok(document.getElementById('shortcut-prefix').classList.contains('hidden'), '未设置时隐藏重复前缀');
-    assert.ok(box.textContent.includes('快捷键未设置'));
+    assert.ok(box.textContent.includes('快捷键未设置'), 'en-US 环境下也是中文');
+    const sep = box.querySelector('.sc-sep');
+    assert.ok(sep && sep.textContent === '·' && sep.getAttribute('aria-hidden') === 'true', '分隔点包成 aria-hidden 的 .sc-sep');
     const btn = document.getElementById('shortcut-setup');
     if (b === 'firefox') {
       assert.equal(btn, null, 'Firefox 不给按钮');
@@ -75,6 +76,8 @@ for (const [b, ua] of Object.entries(UA)) {
     }
   }
 }
+const css = fs.readFileSync(new URL('../popup/popup.css', import.meta.url), 'utf8');
+assert.match(css, /\.sc-guide\{[^}]*gap:4px/); assert.match(css, /\.sc-link\{[^}]*margin-left:-4px[^}]*min-height:24px/);
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.src.json', import.meta.url), 'utf8'));
 assert.ok(!manifest.permissions.includes('tabs'), '不新增 tabs 权限');
 console.log('shortcut guide: 3 UA × 空/非空 (pure + DOM) passed');

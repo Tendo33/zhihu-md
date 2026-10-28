@@ -252,7 +252,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
   color: var(--error);
   white-space: normal;
   width: max-content;
-  max-width: 280px;
+  max-width: min(280px, calc(100vw - 96px)); /* 设计建议 5 */
   line-height: 1.5;
   text-align: left;
 }

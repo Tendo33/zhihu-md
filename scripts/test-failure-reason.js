@@ -24,6 +24,8 @@ const cases = [
   ['正常长文里提到 40362 不算限流', doc(`<div class="Post-RichText"><p>错误码 40362 表示请求存在异常。${'正文'.repeat(1200)}</p></div>`, '知乎错误码 40362 解析 - 知乎'), 'https://zhuanlan.zhihu.com/p/2', 'not_loaded'],
   ['其它 JSON 错误码不算限流', doc('<pre>{"error":{"code":10003,"message":"not found"}}</pre>'), 'https://www.zhihu.com/question/1', 'not_loaded'],
   ['标题含“安全验证”的普通文章不误判', doc('<div id="root"></div>', '如何应对安全验证 - 知乎'), 'https://zhuanlan.zhihu.com/p/3', 'not_loaded'],
+  ['短回答正文含 40362 不算限流（round2 审查必须改 1）', doc('<div class="RichContent"><p>今天遇到错误码 40362，过一会就好了。</p></div>'), 'https://www.zhihu.com/question/1/answer/2', 'not_loaded'],
+  ['短文含“暂时限制本次访问”不算限流', doc('<div class="Post-RichText"><p>知乎提示“暂时限制本次访问”怎么办？</p></div>'), 'https://zhuanlan.zhihu.com/p/5', 'not_loaded'],
   ['标题以“安全验证”开头才算', doc('<div id="root"></div>', '安全验证'), 'https://www.zhihu.com/question/1', 'security_check'],
 ];
 

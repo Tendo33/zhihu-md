@@ -33,7 +33,20 @@ function chromePath() {
     console.error(`e2e: CHROME_PATH 指向的文件不存在：${p}`);
     process.exit(2);
   }
+  // batch6 ZB5-02：指向目录时 Playwright 只会抛 EACCES/spawn 堆栈，这里直接提示
+  if (fs.statSync(p).isDirectory()) {
+    console.error(`e2e: CHROME_PATH 指向的是目录，不是可执行文件：${p}\n  请指向目录里的 chrome 可执行文件（例如 .../chrome-linux64/chrome）。`);
+    process.exit(2);
+  }
   return p;
+}
+
+// batch6 ZB5-02：Linux 上没有显示器时，有界面的 Chrome 起不来；提示用 xvfb-run，而不是抛 Playwright 堆栈
+function requireDisplay() {
+  if (process.platform !== 'linux') return;
+  if (process.env.DISPLAY || process.env.WAYLAND_DISPLAY) return;
+  console.error('e2e: 没有可用的显示器（DISPLAY 未设置）。扩展需要有界面的 Chrome，请用 xvfb-run 运行，例如：\n  xvfb-run -a npm run test:e2e');
+  process.exit(2);
 }
 
 // batch6 ZB5-01：没有 dist/ 时给出中文提示并以 2 退出，不再抛 ENOENT 堆栈
@@ -46,6 +59,7 @@ function requireDist() {
 
 const { chromium } = loadPlaywright();
 const executablePath = chromePath(); // 先于读取 dist，环境问题最先报
+requireDisplay();
 requireDist();
 const manifest = JSON.parse(fs.readFileSync(path.join(dist, 'manifest.json'), 'utf8'));
 const expected = manifest.commands[COMMAND].suggested_key.default;

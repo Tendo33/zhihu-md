@@ -31,5 +31,12 @@ const fakeChrome = path.join(fake, 'chrome');
 fs.writeFileSync(fakeChrome, '');
 r = run({ E2E_PLAYWRIGHT_DIR: fake, CHROME_PATH: fakeChrome, DISPLAY: ':99', E2E_DIST: path.join(fake, 'no-dist') });
 assert.equal(r.status, 2); assert.match(r.stderr, /请先构建（npm run build）/); assert.doesNotMatch(r.stderr, /ENOENT|\n\s+at /);
+// batch6 ZB5-02：CHROME_PATH 指向目录 / 没有 DISPLAY 时提示并退出 2，不带堆栈
+r = run({ E2E_PLAYWRIGHT_DIR: fake, CHROME_PATH: fake, DISPLAY: ':99' });
+assert.equal(r.status, 2); assert.match(r.stderr, /CHROME_PATH 指向的是目录/); assert.doesNotMatch(r.stderr, /\n\s+at /);
+if (process.platform === 'linux') {
+  r = run({ E2E_PLAYWRIGHT_DIR: fake, CHROME_PATH: fakeChrome, DISPLAY: undefined, WAYLAND_DISPLAY: undefined });
+  assert.equal(r.status, 2); assert.match(r.stderr, /没有可用的显示器（DISPLAY 未设置）/); assert.match(r.stderr, /xvfb-run/); assert.doesNotMatch(r.stderr, /\n\s+at /);
+}
 fs.rmSync(fake, { recursive: true, force: true });
-console.log('e2e preflight: missing playwright / CHROME_PATH / dist → exit 2 passed');
+console.log('e2e preflight: missing playwright / CHROME_PATH / dir / DISPLAY / dist → exit 2 passed');

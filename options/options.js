@@ -44,3 +44,11 @@ document.getElementById('showFloatingBall').addEventListener('change', saveOptio
 document.getElementById('maxAnswerCount').addEventListener('change', saveOptions);
 document.getElementById('downloadImages').addEventListener('change', saveOptions);
 
+
+// Z11：版本号从 manifest 读取，不再写死
+try {
+  const versionEl = document.getElementById('app-version');
+  if (versionEl && typeof chrome !== 'undefined' && chrome.runtime?.getManifest) {
+    versionEl.textContent = `v${chrome.runtime.getManifest().version}`;
+  }
+} catch { /* 非扩展环境忽略 */ }

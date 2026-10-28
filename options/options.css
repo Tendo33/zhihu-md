@@ -233,4 +233,4 @@ input:focus-visible + .slider {
 
 /* Series control and focus rules */
 .switch input:focus-visible + .slider { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
-.option-item:focus-within { background-color: var(--bg-card); }
+/* Z12：焦点只靠开关 outline 表示，整行不再变色（与 hover 区分） */

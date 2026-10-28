@@ -51,7 +51,7 @@ npm run package
 
 ## 关键文件说明
 
-### `manifest.json`
+### `manifest.src.json`
 
 需要关注：
 
@@ -103,7 +103,7 @@ npm run package
 
 至少同步以下文件：
 
-- `manifest.json`
+- `manifest.src.json`
 - `package.json`
 - `package-lock.json`
 - `options/options.html` 页脚中的版本文案

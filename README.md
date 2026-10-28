@@ -7,7 +7,7 @@
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh?style=flat-square&label=Chrome%20Web%20Store)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh?authuser=0&hl=zh-CN)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black?style=flat-square)](./LICENSE)
-[![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](./manifest.json)
+[![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](./manifest.src.json)
 
 [Chrome Web Store](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh?authuser=0&hl=zh-CN)
 •
@@ -232,7 +232,7 @@ edited: "2025-12-03"
 
 ```text
 zhihu-md/
-├── manifest.json
+├── manifest.src.json   # 源清单，构建时输出为 dist/manifest.json
 ├── background/
 │   └── background.js
 ├── content/

@@ -4,7 +4,7 @@
 
 ## 必须同步的文件
 
-### `manifest.json`
+### `manifest.src.json`
 
 确认：
 
@@ -17,7 +17,7 @@
 
 确认：
 
-- `version` 与 `manifest.json` 保持一致
+- `version` 与 `manifest.src.json` 保持一致
 - `description` 未过时
 
 ### `package-lock.json`
@@ -45,7 +45,7 @@
 
 如果新增、删除或调整了权限：
 
-1. 更新 `manifest.json`
+1. 更新 `manifest.src.json`
 2. 更新 `PRIVACY.md`
 3. 更新 `README.md` 的权限说明
 4. 确认 Chrome Web Store 提交材料是否也需要同步

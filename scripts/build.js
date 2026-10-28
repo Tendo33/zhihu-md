@@ -37,7 +37,9 @@ copyFile('popup/popup.html');
 copyFile('options/options.css');
 copyFile('options/options.html');
 copyFile('lib/shared.css');
-copyFile('manifest.json');
+// The source manifest references unbundled modules, so it is named
+// manifest.src.json to stop Chrome from loading the repo root by mistake.
+fs.copyFileSync(path.join(root, 'manifest.src.json'), path.join(out, 'manifest.json'));
 copyFile('README.md');
 copyFile('PRIVACY.md');
 

@@ -4,7 +4,7 @@
 
 仓库当前可以分成 5 层：
 
-1. 清单层：`manifest.json`
+1. 清单层：`manifest.src.json`
 2. 前台交互层：`popup/`、`options/`
 3. 内容抓取层：`content/content.js` 和 `content/modules/`，构建后收成一个内容脚本
 4. 公共工具层：`lib/`，页面分类、日志、ZIP 都是可单独测试的模块
@@ -13,7 +13,7 @@
 ## 顶层结构
 
 ```text
-manifest.json
+manifest.src.json
 background/background.js
 content/content.js
 content/modules/*
@@ -25,7 +25,7 @@ scripts/*
 
 ## 核心职责划分
 
-### `manifest.json`
+### `manifest.src.json`
 
 负责声明：
 
@@ -214,7 +214,7 @@ scripts/*
 
 如果你第一次接手这个项目，建议按下面顺序读代码：
 
-1. `manifest.json`
+1. `manifest.src.json`
 2. `popup/popup.js`
 3. `content/content.js`
 4. `content/modules/detector.js`

@@ -7,7 +7,7 @@ import { normalizeUrl } from './constants.js';
 
 export function cleanText(node) {
   return String(node?.textContent || '')
-    .replace(/[\u200b\u200c\u200d\ufeff]/g, '')
+    .replace(/\u200b|\u200c|\u200d|\ufeff/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -23,7 +23,7 @@ export function yamlQuote(value) {
  */
 export function parseZhihuTime(text) {
   const source = String(text || '')
-    .replace(/[\u200b\u200c\u200d\ufeff]/g, '')
+    .replace(/\u200b|\u200c|\u200d|\ufeff/g, '')
     .replace(/\s+/g, ' ')
     .trim();
   const created = source.match(/发布于\s*(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}))?/);
@@ -211,7 +211,7 @@ function hotMetrics(item) {
   if (!metricsEl) return '';
   const clone = metricsEl.cloneNode(true);
   clone.querySelectorAll('button, a').forEach((el) => el.remove());
-  return cleanText(clone).replace(/[\u200b\u200c\u200d\ufeff]/g, '').replace(/分享/g, '').trim();
+  return cleanText(clone).replace(/\u200b|\u200c|\u200d|\ufeff/g, '').replace(/分享/g, '').trim();
 }
 
 export function extractHotItem(item, index) {

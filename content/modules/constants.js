@@ -56,6 +56,7 @@ function querySelectorAny(parent, selectors) {
  */
 function cleanFilename(title) {
   const cleaned = String(title || 'zhihu-article')
+    // eslint-disable-next-line no-control-regex -- 文件名里去掉控制字符是本意
     .replace(/[\u0000-\u001f\u007f]/g, '')
     .replace(/[/\\:*?"<>|]/g, '_')  // Replace illegal chars
     .replace(/\s+/g, '_')            // Replace spaces

@@ -19,7 +19,7 @@ export function normalizeZhihuHref(href = '') {
   if (/^https?:\/\/link\.zhihu\.com\//.test(value)) {
     try {
       value = new URL(value).searchParams.get('target') || value;
-    } catch {}
+    } catch { /* 不是合法 URL 时保留原值 */ }
   }
   return value;
 }

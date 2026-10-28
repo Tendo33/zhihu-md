@@ -9,7 +9,7 @@ import { extractHotFallback, extractHotItems } from '../zhihu-dom.js';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function escapeLinkText(text) {
-  return String(text || '').replace(/[\[\]]/g, '\\$&').replace(/\s+/g, ' ').trim();
+  return String(text || '').replace(/[[\]]/g, '\\$&').replace(/\s+/g, ' ').trim();
 }
 
 export const HotExporter = {

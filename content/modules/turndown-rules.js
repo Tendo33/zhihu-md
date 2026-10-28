@@ -12,6 +12,25 @@ import TurndownService from '../../lib/turndown.min.js';
  * @param {boolean} downloadImages - Whether to use local image paths
  * @returns {TurndownService}
  */
+export function normalizeZhihuHref(href = '') {
+  let value = String(href).trim();
+  if (value.startsWith('//')) value = 'https:' + value;
+  else if (value.startsWith('/')) value = 'https://www.zhihu.com' + value;
+  if (/^https?:\/\/link\.zhihu\.com\//.test(value)) {
+    try {
+      value = new URL(value).searchParams.get('target') || value;
+    } catch {}
+  }
+  return value;
+}
+
+// 代码块外：去掉只含空白的行（连续 <br> 产生），压缩多余空行；代码块原样保留
+export function tidyMarkdown(markdown) {
+  return markdown.split(/(^```[^\n]*\n[\s\S]*?^```$)/m).map((part, i) => (i % 2
+    ? part
+    : part.replace(/^[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n'))).join('');
+}
+
 export function createTurndownService(downloadImages = false) {
   const turndownService = new TurndownService({
     headingStyle: 'atx',
@@ -117,14 +136,8 @@ export function createTurndownService(downloadImages = false) {
       const href = link.getAttribute('href') || '';
       const title = linkCardTitle(node, link);
       
-      let cleanHref = href;
-      if (href.includes('link.zhihu.com')) {
-        try {
-          const url = new URL(href);
-          cleanHref = url.searchParams.get('target') || href;
-        } catch {}
-      }
-      
+      const cleanHref = normalizeZhihuHref(href);
+
       return `[${title}](${cleanHref})`;
     }
   });
@@ -199,6 +212,9 @@ export function createTurndownService(downloadImages = false) {
     filter: ['b', 'strong', 'i', 'em', 'u', 's', 'del'],
     replacement: function (content, node) {
       const tag = node.nodeName.toLowerCase();
+      if (!content.trim()) return content;
+      // 标题本身已是粗体，去掉多余的 ** 包裹
+      if ((tag === 'b' || tag === 'strong') && node.closest?.('h1, h2, h3, h4, h5, h6')) return content;
       if (tag === 'b' || tag === 'strong') return `**${content}**`;
       if (tag === 'i' || tag === 'em') return `*${content}*`;
       if (tag === 'u') return `<u>${content}</u>`;
@@ -221,6 +237,81 @@ export function createTurndownService(downloadImages = false) {
     replacement: function () {
       return '\n\n---\n\n';
     }
+  });
+
+  // 知乎参考脚注：<sup data-draft-type="reference" data-text data-url data-numero>
+  // 转成 GFM 脚注 [^n]，定义追加在本次转换结果末尾。编号在同一个 service 内递增，
+  // 问题页多个回答共用一个 service 时不会撞号。
+  const footnotes = { next: 1, pending: [], seen: new Map() };
+  turndownService.addRule('zhihuReference', {
+    filter: (node) => node.nodeName === 'SUP' && node.getAttribute('data-draft-type') === 'reference',
+    replacement: (content, node) => {
+      const text = (node.getAttribute('data-text') || '').trim();
+      const url = normalizeZhihuHref(node.getAttribute('data-url') || '');
+      if (!text && !url) return content;
+      const key = `${text}\u0000${url}`;
+      let id = footnotes.seen.get(key);
+      if (!id) {
+        id = footnotes.next++;
+        footnotes.seen.set(key, id);
+        footnotes.pending.push(`[^${id}]: ${[text, url].filter(Boolean).join(' ')}`);
+      }
+      return `[^${id}]`;
+    }
+  });
+  // 页面自带的参考文献列表与脚注定义重复，去掉
+  turndownService.addRule('zhihuReferenceList', {
+    filter: (node) => /\b(ReferenceList|RichText-references)\b/.test(node.getAttribute?.('class') || ''),
+    replacement: () => ''
+  });
+
+  // 普通上下标保留为 HTML，避免 x<sup>2</sup> 变成 x2
+  turndownService.addRule('zhihuSupSub', {
+    filter: (node) => (node.nodeName === 'SUP' || node.nodeName === 'SUB')
+      && node.getAttribute('data-draft-type') !== 'reference',
+    replacement: (content, node) => {
+      const tag = node.nodeName.toLowerCase();
+      return content.trim() ? `<${tag}>${content}</${tag}>` : '';
+    }
+  });
+  const turndown = turndownService.turndown.bind(turndownService);
+  turndownService.turndown = (input) => {
+    footnotes.pending = [];
+    footnotes.seen = new Map();
+    const markdown = tidyMarkdown(turndown(input));
+    if (!footnotes.pending.length) return markdown;
+    return `${markdown}\n\n${footnotes.pending.join('\n')}`;
+  };
+
+  // 普通链接：解开 link.zhihu.com 跳转，补全协议相对 / 站内相对地址
+  turndownService.addRule('zhihuLink', {
+    filter: (node) => node.nodeName === 'A' && node.getAttribute('href'),
+    replacement: (content, node) => {
+      const href = normalizeZhihuHref(node.getAttribute('href'));
+      if (!content.trim()) return '';
+      const title = node.getAttribute('title');
+      return `[${content}](${href}${title ? ` "${title.replace(/"/g, '\\"')}"` : ''})`;
+    }
+  });
+
+  // 知乎用 <p class="ztext-empty-paragraph"><br></p> 做空行，直接丢掉，避免输出只有空格的行
+  turndownService.addRule('zhihuEmptyParagraph', {
+    filter: (node) => node.nodeName === 'P' && /\bztext-empty-paragraph\b/.test(node.getAttribute('class') || ''),
+    replacement: () => '\n\n'
+  });
+
+  // 段落末尾的 <br> 不产生硬换行（否则会留下行尾两个空格）
+  turndownService.addRule('zhihuTrailingBreak', {
+    filter: (node) => {
+      if (node.nodeName !== 'BR') return false;
+      let next = node.nextSibling;
+      while (next) {
+        if (next.nodeType === 1 || (next.nodeType === 3 && next.textContent.trim())) return false;
+        next = next.nextSibling;
+      }
+      return true;
+    },
+    replacement: () => ''
   });
 
   return turndownService;

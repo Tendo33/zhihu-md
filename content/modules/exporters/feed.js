@@ -5,7 +5,7 @@
 
 import { failureResult } from '../../../lib/failure-reason.js';
 import { CONSTANTS, normalizeUrl, scrollToLoadItems } from '../constants.js';
-import { createTurndownService } from '../turndown-rules.js';
+import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
   cleanText,
   findAuthorName,
@@ -188,7 +188,7 @@ ${item.content}
 `;
       });
 
-      markdown = markdown.replace(/\n{3,}/g, '\n\n');
+      markdown = tidyMarkdown(markdown);
       const filename = `${pageTitle}_${date}.md`;
 
       return {

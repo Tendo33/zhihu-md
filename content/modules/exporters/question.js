@@ -7,7 +7,7 @@ import { failureResult } from '../../../lib/failure-reason.js';
 import { ArticleExporter } from './article.js';
 import { CONSTANTS, cleanFilename } from '../constants.js';
 import { PageDetector } from '../detector.js';
-import { createTurndownService } from '../turndown-rules.js';
+import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
   answerIdFromItem,
   cleanText,
@@ -219,7 +219,7 @@ ${answer.content}
 `;
       });
 
-      markdown = markdown.replace(/\n{3,}/g, '\n\n');
+      markdown = tidyMarkdown(markdown);
       const images = downloadImages && turndownService.imageCollector
         ? turndownService.imageCollector.images
         : [];

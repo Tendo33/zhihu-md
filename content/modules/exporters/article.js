@@ -6,7 +6,7 @@
 import { failureResult } from '../../../lib/failure-reason.js';
 import { CONSTANTS, cleanFilename, querySelectorAny } from '../constants.js';
 import { PageDetector } from '../detector.js';
-import { createTurndownService } from '../turndown-rules.js';
+import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
   fetchAnswerRecord,
   findAnswerItem,
@@ -243,7 +243,7 @@ date: ${date}`;
       let markdown = turndownService.turndown(clonedContainer);
       const frontMatter = this.generateFrontMatter(title, author, window.location.href, createdTime, editedTime);
       markdown = frontMatter + markdown;
-      markdown = markdown.replace(/\n{3,}/g, '\n\n');
+      markdown = tidyMarkdown(markdown);
 
       const filename = cleanFilename(title || 'zhihu-article') + '.md';
 

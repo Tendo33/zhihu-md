@@ -107,7 +107,7 @@ h1 {
   transition: background-color var(--duration-normal) var(--ease-smooth),
     border-color var(--duration-normal) var(--ease-smooth);
   border-radius: 24px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--text-tertiary); /* 设计建议 2：关闭态轨道可辨 */
 }
 
 .slider:before {
@@ -124,17 +124,13 @@ h1 {
 }
 
 input:checked + .slider {
-  background-color: var(--text-primary); /* Active track: white/light grey */
-  border-color: var(--text-primary);
+  background-color: var(--accent); /* 设计建议 1：打开态用品牌色 */
+  border-color: var(--accent);
 }
 
 input:checked + .slider:before {
   transform: translateX(20px);
   background-color: var(--accent-inverse); /* Active knob: black */
-}
-
-input:focus-visible + .slider {
-  box-shadow: 0 0 0 2px var(--bg-secondary), 0 0 0 4px var(--blue);
 }
 
 /* Number Input */
@@ -232,5 +228,10 @@ input:focus-visible + .slider {
 }
 
 /* Series control and focus rules */
-.switch input:focus-visible + .slider { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+.switch input:focus-visible + .slider { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* Z12：焦点只靠开关 outline 表示，整行不再变色（与 hover 区分） */
+
+/* 设计建议 4：深色下浅色阴影无意义 */
+@media (prefers-color-scheme: dark) {
+  .container { box-shadow: none; }
+}

@@ -3,7 +3,7 @@
  * Detects the type of Zhihu page (column, answer, question, home, follow, hot)
  */
 
-import { checkUrlType, detectPageTypeFromPathname } from '../../lib/page-detector.js';
+import { checkUrlType, detectPageTypeFromPathname, hasExportableContent } from '../../lib/page-detector.js';
 
 export const PageDetector = {
   /**
@@ -20,6 +20,14 @@ export const PageDetector = {
    */
   isValidArticlePage() {
     return this.detectPageType() !== null;
+  },
+
+  /**
+   * Whether the current page rendered exportable content (not an error/verification page)
+   * @returns {boolean}
+   */
+  hasContent() {
+    return hasExportableContent(document, this.detectPageType());
   },
 
   /**

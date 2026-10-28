@@ -231,9 +231,19 @@ export const FloatingBall = {
   /**
    * Initialize floating ball
    */
-  init() {
+  init(attempt = 0) {
     if (!PageDetector.isValidArticlePage()) {
       this.remove();
+      return;
+    }
+
+    // Wait for real content; skip error, JSON and security-check pages
+    if (!PageDetector.hasContent()) {
+      this.remove();
+      clearTimeout(this._contentRetryTimer);
+      if (attempt < 10) {
+        this._contentRetryTimer = setTimeout(() => this.init(attempt + 1), 1000);
+      }
       return;
     }
 

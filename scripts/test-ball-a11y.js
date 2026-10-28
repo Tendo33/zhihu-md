@@ -16,3 +16,6 @@ applyBallA11y(b, 'error', 'x');
 assert.equal(b.hasAttribute('aria-busy'), false);
 assert.match(b.getAttribute('aria-label'), /导出失败/);
 console.log('ball-a11y tests passed');
+assert.equal(ballA11y('success', '导出成功!').label, '导出成功。再次点击可重新导出');
+assert.equal(ballA11y('loading', '导出中...').label, '正在导出：导出中');
+console.log('ball-a11y punctuation tests passed');

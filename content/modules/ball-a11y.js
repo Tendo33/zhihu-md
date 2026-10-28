@@ -3,7 +3,10 @@
  */
 export const IDLE_LABEL = '导出 Markdown（点击下载，右键复制）';
 
+const trimEnd = (text) => String(text || '').replace(/[!！。.…\s]+$/u, '');
+
 export function ballA11y(state, message = '') {
+  message = trimEnd(message);
   switch (state) {
     case 'loading':
       return { label: `正在导出：${message || '请稍候'}`, busy: true };

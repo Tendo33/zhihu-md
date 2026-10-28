@@ -18,6 +18,13 @@ const cases = [
   ['骨架页未加载完', doc('<div id="root"><div class="Skeleton"></div></div>'), 'https://www.zhihu.com/question/1/answer/2', 'not_loaded'],
   ['正文提到安全验证/登录（不是错误页）', doc('<div class="Post-RichText"><p>系统检测到您的网络异常时会弹出安全验证；登录后查看更多。</p></div>'), 'https://zhuanlan.zhihu.com/p/1', 'not_loaded'],
   ['空白页', doc(''), '', 'not_loaded'],
+  ['40362 限流 JSON（Chrome 用 <pre> 显示）', doc('<pre>{"error":{"code":40362,"message":"您当前请求存在异常，暂时限制本次访问。如有疑问，您可以通过手机摇一摇或登录后私信知乎小管家反馈。8131ad5f"}}</pre>'), 'https://zhuanlan.zhihu.com/p/19763358', 'security_check'],
+  ['40362 限流 JSON（裸文本，无正文容器）', doc('{"error":{"code":40362,"message":"x"}}'), 'https://www.zhihu.com/question/19550225', 'security_check'],
+  ['限流文案（无 code，页面很短）', doc('<div id="root"><p>您当前请求存在异常，暂时限制本次访问</p></div>'), 'https://www.zhihu.com/question/1', 'security_check'],
+  ['正常长文里提到 40362 不算限流', doc(`<div class="Post-RichText"><p>错误码 40362 表示请求存在异常。${'正文'.repeat(1200)}</p></div>`, '知乎错误码 40362 解析 - 知乎'), 'https://zhuanlan.zhihu.com/p/2', 'not_loaded'],
+  ['其它 JSON 错误码不算限流', doc('<pre>{"error":{"code":10003,"message":"not found"}}</pre>'), 'https://www.zhihu.com/question/1', 'not_loaded'],
+  ['标题含“安全验证”的普通文章不误判', doc('<div id="root"></div>', '如何应对安全验证 - 知乎'), 'https://zhuanlan.zhihu.com/p/3', 'not_loaded'],
+  ['标题以“安全验证”开头才算', doc('<div id="root"></div>', '安全验证'), 'https://www.zhihu.com/question/1', 'security_check'],
 ];
 
 for (const [name, d, url, code] of cases) {
@@ -29,7 +36,8 @@ for (const [name, d, url, code] of cases) {
 // 文案要求：三种提示都能看出原因
 assert.match(FAILURE_MESSAGES.not_loaded, /页面未加载完/);
 assert.match(FAILURE_MESSAGES.login_required, /需要登录/);
-assert.match(FAILURE_MESSAGES.security_check, /安全验证/);
+assert.match(FAILURE_MESSAGES.security_check, /被知乎限流或需要验证/);
+assert.doesNotMatch(FAILURE_MESSAGES.security_check, /未加载完/);
 
 const res = failureResult(doc('<div class="signFlowModal"></div>'), 'https://www.zhihu.com/question/1');
 assert.deepEqual(res, { success: false, reason: 'login_required', error: FAILURE_MESSAGES.login_required });

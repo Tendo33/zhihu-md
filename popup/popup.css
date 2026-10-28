@@ -12,7 +12,7 @@ body { min-width: 320px; }
 .recent.hidden { display: none; }
 #recent-list { padding: 4px 10px; }
 .row .badge { padding: 2px 6px; }
-.row small { color: var(--text-2); flex: none; }
+.row small { color: var(--text-2); flex: none; font-size: var(--fs-xs); /* 设计验收 R3：时间 12px */ }
 /* 进度条：知乎导出没有可靠的百分比，用不确定进度 */
 .bar.indeterminate > i { width: 40%; animation: zm-indet 1.2s var(--ease) infinite; }
 @keyframes zm-indet { from { transform: translateX(-100%); } to { transform: translateX(250%); } }

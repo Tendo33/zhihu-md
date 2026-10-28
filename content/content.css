@@ -32,7 +32,7 @@
   /* Neutral shadow for cleaner look */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); /* Z3-2：mockup .fab 阴影 */
   color: var(--accent-inverse);
-  font: 600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font: 700 14px/1 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif; /* 设计验收 R3：M↓ 700/14 统一字体栈 */
   letter-spacing: 0;
   cursor: pointer;
   z-index: 2147483647;
@@ -51,12 +51,10 @@
 }
 
 #zhihu-md-floating-ball:focus-visible {
-  outline: 2px solid var(--blue);
+  /* 设计验收 R3：单层焦点环 */
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
-  box-shadow:
-    0 0 0 4px color-mix(in oklab, var(--blue) 35%, transparent),
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgb(0 0 0/.15);
 }
 
 /* Hover State - Normal */
@@ -266,6 +264,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
   white-space: normal;
   width: max-content;
   max-width: min(280px, calc(100vw - 96px)); /* 设计建议 5 */
+  box-sizing: border-box; /* Z2-01：宽度上限把内边距和边框算进去，375px 下不再左溢 */
   line-height: 1.5;
   text-align: left;
 }

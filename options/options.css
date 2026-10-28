@@ -1,3 +1,19 @@
+/* 设计验收 R3：设置页改用 lib/ui-v2.css 的 tokens（不再用旧浅蓝/深蓝硬编码配色），旧变量名映射到 v2 */
+body {
+  --text-primary: var(--text);
+  --text-secondary: var(--text-2);
+  --text-tertiary: var(--text-2);
+  --bg-primary: var(--bg);
+  --bg-card: var(--surface);
+  --bg-secondary: var(--surface-2);
+  --bg-hover: var(--state-hover);
+  --border-subtle: var(--border);
+  --accent: var(--brand);
+  --accent-inverse: var(--brand-on);
+  --blue: var(--brand);
+  --focus-ring: var(--brand);
+  font-family: var(--font-sans);
+}
 /**
  * Options Page Styles for Zhihu-md Extension
  * Variables are imported from ../lib/shared.css

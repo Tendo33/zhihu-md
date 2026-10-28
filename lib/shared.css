@@ -29,7 +29,7 @@
   --accent-active: #06449a;
   
   --success: #047857;
-  --error: #c62828;
+  --error: #b42318; /* 设计验收 R3：与 ui-v2 --danger 统一 */
   --warning: #b45309;
   --danger: var(--error);
   --blue: #0a5fd1;

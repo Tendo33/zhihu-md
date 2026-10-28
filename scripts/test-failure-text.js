@@ -21,3 +21,18 @@ for (const [name, err, action, reason, re] of cases) {
   console.log('✓', name);
 }
 console.log(`failure-text: ${cases.length} passed`);
+
+// 设计验收 R3：限流时 popup 文案用真实 40362 响应体（zhihu-r2 夹具 zhuanlan/p/2004，Chrome 以 <pre> 显示）走完整链路
+{
+  const { parseHTML } = await import('linkedom');
+  const { diagnoseFailure, failureResult } = await import('../lib/failure-reason.js');
+  const REAL_40362 = '{"error":{"code":40362,"message":"您当前请求存在异常，暂时限制本次访问。如有疑问，您可以通过手机摇一摇或登录后私信知乎小管家反馈。","name":"ERR_RATE_LIMITED"}}';
+  const { document } = parseHTML(`<!doctype html><html><head></head><body><pre>${REAL_40362}</pre></body></html>`);
+  const url = 'https://zhuanlan.zhihu.com/p/2004';
+  assert.equal(diagnoseFailure(document, url).code, 'security_check', '真实 40362 判定为 security_check');
+  const fb = describeFailure(new ExportFailure(failureResult(document, url)), 'export');
+  assert.equal(fb.reason, 'security_check');
+  assert.equal(fb.text, FAILURE_MESSAGES.security_check);
+  assert.match(fb.text, /被知乎限流或需要验证/);
+  console.log('✓ 真实 40362 夹具 → popup 文案「被知乎限流或需要验证…」');
+}

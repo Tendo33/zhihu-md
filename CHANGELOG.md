@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Default export shortcut is now `Alt+Shift+K` on all platforms (was `Alt+Shift+Z`). On Windows and Linux, Chrome reserves Alt+Shift+Z for tab groups (focus previous tab group), so the old shortcut was never registered. 默认快捷键改为 Alt+Shift+K：Windows/Linux 上 Chrome 已把 Alt+Shift+Z 用于标签组，导致快捷键注册不上。
+
 ## [1.1.6] - 2026-10-10
 
 ### Fixed

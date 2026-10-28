@@ -70,7 +70,7 @@ const runTimers = () => { while (timers.length) timers.shift().fn(); };
       reload() {},
     },
     runtime: { sendMessage: async () => dl, openOptionsPage() {}, getURL: (p) => p, getManifest: () => ({ version: '9.9.9' }) },
-    commands: { getAll: async () => [{ name: 'export-page', shortcut: 'Alt+Shift+Z' }] },
+    commands: { getAll: async () => [{ name: 'export-page', shortcut: 'Alt+Shift+K' }] },
     downloads: { show(id) { sent.push('show:' + id); } },
     storage: { sync: { get: (d, cb) => cb(d) }, local: { get: async (d) => ({ ...d, ...local }), set: async (o) => Object.assign(local, o) } },
   };

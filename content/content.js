@@ -50,7 +50,7 @@ if (window.__zhihuMdInjected) {
         sendResponse(result);
       })();
     } else if (message.action === 'triggerExport') {
-      // 快捷键 Alt+Shift+Z（Round 3）
+      // 快捷键 Alt+Shift+K（Round 3）
       if (!PageDetector.isValidArticlePage()) {
         sendResponse({ success: false, reason: 'unsupported' });
         return true;

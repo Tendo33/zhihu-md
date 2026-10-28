@@ -67,6 +67,7 @@
 - 弹窗会识别当前页面类型并展示标题、作者、页面类别
 - 弹窗可以下载 Markdown，也可以把 Markdown 复制到剪贴板
 - 可选右下角悬浮按钮：点击下载，右键复制
+- 快捷键 `Alt+Shift+K`（Windows / Linux / macOS 均为此键，macOS 上即 Option+Shift+K）导出当前页 · Shortcut `Alt+Shift+K` exports the current page. 如被其他扩展占用而显示「未设置」，可在 `chrome://extensions/shortcuts` 自行设置 · If it shows as not set, assign it at `chrome://extensions/shortcuts`
 - 悬浮球支持拖拽、靠边停靠、位置记忆
 - 设置项会持久化到 `chrome.storage.sync`
 - 悬浮球位置保存在 `chrome.storage.local`

@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import { parseHTML } from 'linkedom';
 
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.src.json', import.meta.url), 'utf8'));
-assert.equal(manifest.commands['export-page'].suggested_key.default, 'Alt+Shift+Z');
+assert.equal(manifest.commands['export-page'].suggested_key.default, 'Alt+Shift+K');
+assert.equal(manifest.commands['export-page'].suggested_key.mac, 'Alt+Shift+K');
+assert.ok(!JSON.stringify(manifest.commands).includes('Alt+Shift+Z'), 'Alt+Shift+Z 在 Win/Linux 被 Chrome 标签组占用');
 assert.ok(!manifest.permissions.includes('commands'), 'commands 不是权限');
 assert.equal(manifest.minimum_chrome_version, '111', 'color-mix 需要 Chrome 111+（复审建议 1）');
 

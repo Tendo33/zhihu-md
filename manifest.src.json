@@ -63,8 +63,8 @@
   "commands": {
     "export-page": {
       "suggested_key": {
-        "default": "Alt+Shift+Z",
-        "mac": "Alt+Shift+Z"
+        "default": "Alt+Shift+K",
+        "mac": "Alt+Shift+K"
       },
       "description": "导出当前页为 Markdown"
     }

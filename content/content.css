@@ -254,6 +254,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
   width: max-content;
   max-width: 280px;
   line-height: 1.5;
+  text-align: left;
 }
 
 /* 读屏播报区：视觉隐藏 */

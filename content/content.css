@@ -1,16 +1,17 @@
 /* 悬浮球容器 */
 #zhihu-md-floating-ball {
-  --accent: #0369A1;
-  --accent-hover: #075985;
-  --accent-active: #0B4F79;
+  /* Round 2 品牌色 #0a5fd1（深色 #60a5fa），中性色与 arXiv2MD 同一套 token */
+  --accent: #0a5fd1;
+  --accent-hover: #0852b5;
+  --accent-active: #06449a;
   --accent-inverse: #FFFFFF;
-  --success: #059669;
-  --error: #DC2626;
-  --blue: #0284C7;
-  --focus-ring: #0284C7;
+  --success: #047857;
+  --error: #c62828;
+  --blue: #0a5fd1;
+  --focus-ring: #0a5fd1;
   --bg-secondary: #FFFFFF;
-  --border-subtle: #BAE6FD;
-  --text-primary: #0C4A6E;
+  --border-subtle: #dde1e6;
+  --text-primary: #1b1d22;
 
   -webkit-appearance: none;
   appearance: none;
@@ -40,7 +41,7 @@
   justify-content: center;
   
   /* Optimize Transition */
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-radius 0.2s ease, opacity 0.2s ease;
   will-change: transform;
   
   user-select: none;
@@ -60,7 +61,7 @@
 
 /* Hover State - Normal */
 #zhihu-md-floating-ball:hover {
-  transform: translateY(-4px) scale(1.1);
+  transform: translateY(-2px);
   background: var(--accent-hover);
   box-shadow: 
     0 12px 32px rgba(0, 0, 0, 0.2), 
@@ -69,7 +70,7 @@
 
 /* Active/Click State */
 #zhihu-md-floating-ball:active {
-  transform: translateY(0) scale(0.95);
+  transform: translateY(0);
   background: var(--accent-active);
   box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 30%, transparent);
   transition-duration: 0.1s;
@@ -79,7 +80,6 @@
 #zhihu-md-floating-ball.dragging {
   transition: none; /* Disable transition during drag for responsiveness */
   cursor: move;
-  transform: scale(1.05);
   background: var(--accent);
   box-shadow: 0 16px 32px color-mix(in oklab, var(--accent) 40%, transparent);
   opacity: 0.95;
@@ -87,16 +87,19 @@
 
 /* Docked Left - Preview visible */
 #zhihu-md-floating-ball.docked-left {
-  transform: translateX(-30%) scale(0.9);
-  opacity: 0.6;
+  transform: translateX(-40%);
+  opacity: 0.85;
   border-radius: 0 50% 50% 0; /* Semi-circle look */
   box-shadow: 4px 0 12px color-mix(in oklab, var(--accent) 20%, transparent);
   left: 0 !important; /* Ensure it sticks to left */
   right: auto !important;
 }
 
-#zhihu-md-floating-ball.docked-left:hover {
-  transform: translateX(0) scale(1);
+#zhihu-md-floating-ball.docked-left:hover,
+#zhihu-md-floating-ball.docked-left:focus-visible,
+#zhihu-md-floating-ball.docked-left.loading,
+#zhihu-md-floating-ball.docked-left.error {
+  transform: translateX(0);
   opacity: 1;
   border-radius: 50%;
   box-shadow: 0 4px 16px color-mix(in oklab, var(--accent) 40%, transparent);
@@ -104,16 +107,19 @@
 
 /* Docked Right - Preview visible */
 #zhihu-md-floating-ball.docked-right {
-  transform: translateX(30%) scale(0.9);
-  opacity: 0.6;
+  transform: translateX(40%);
+  opacity: 0.85;
   border-radius: 50% 0 0 50%; /* Semi-circle look */
   box-shadow: -4px 0 12px color-mix(in oklab, var(--accent) 20%, transparent);
   right: 0 !important; /* Ensure it sticks to right */
   left: auto !important;
 }
 
-#zhihu-md-floating-ball.docked-right:hover {
-  transform: translateX(0) scale(1);
+#zhihu-md-floating-ball.docked-right:hover,
+#zhihu-md-floating-ball.docked-right:focus-visible,
+#zhihu-md-floating-ball.docked-right.loading,
+#zhihu-md-floating-ball.docked-right.error {
+  transform: translateX(0);
   opacity: 1;
   border-radius: 50%;
   box-shadow: 0 4px 16px color-mix(in oklab, var(--accent) 40%, transparent);
@@ -124,18 +130,14 @@
   width: 20px;
   height: 20px;
   color: var(--accent-inverse);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-}
-
-#zhihu-md-floating-ball:hover .icon {
-  transform: scale(1.1);
 }
 
 /* Loading State */
 #zhihu-md-floating-ball.loading {
   pointer-events: none;
   background: var(--bg-secondary);
+  box-shadow: 0 0 0 1px var(--border-strong, #c3c9d1), 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 #zhihu-md-floating-ball.loading .icon {
@@ -154,26 +156,16 @@
 #zhihu-md-floating-ball.success {
   background: var(--success);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--success) 20%, transparent);
-  transform: scale(1.1);
 }
 
 #zhihu-md-floating-ball.success .icon {
   color: var(--accent-inverse);
-  transform: scale(1.2);
 }
 
 /* Error State */
 #zhihu-md-floating-ball.error {
   background: var(--error);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--error) 20%, transparent);
-  animation: zhihu-md-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-@keyframes zhihu-md-shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 
 #zhihu-md-floating-ball.error .icon {
@@ -206,30 +198,41 @@
   backdrop-filter: blur(8px);
 }
 
-#zhihu-md-floating-ball:hover .tooltip {
+#zhihu-md-floating-ball:hover .tooltip,
+#zhihu-md-floating-ball:focus-visible .tooltip,
+#zhihu-md-floating-ball.loading .tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(-50%) translateX(0);
 }
 
 #zhihu-md-floating-ball.dragging .tooltip,
-#zhihu-md-floating-ball.docked-left .tooltip,
-#zhihu-md-floating-ball.docked-right .tooltip {
+#zhihu-md-floating-ball.docked-left:not(:hover):not(:focus-visible):not(.loading):not(.error) .tooltip,
+#zhihu-md-floating-ball.docked-right:not(:hover):not(:focus-visible):not(.loading):not(.error) .tooltip {
   display: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  #zhihu-md-floating-ball {
-    --accent: #38BDF8;
-    --accent-hover: #7DD3FC;
-    --accent-active: #0EA5E9;
-    --accent-inverse: #0F172A;
-    --success: #059669;
-    --error: #DC2626;
-    --bg-secondary: #1E293B;
-    --border-subtle: #475569;
-    --text-primary: #F1F5F9;
-  }
+/* 靠左吸边时提示放到右侧，避免出屏 */
+#zhihu-md-floating-ball.docked-left .tooltip {
+  right: auto;
+  left: 60px;
+}
+
+/* 深色：跟随知乎自己的夜间模式（html[data-theme="dark"]），不看系统设置——
+   知乎页面在系统深色下默认仍是白底，见 dev-log 偏离说明 */
+html[data-theme="dark"] #zhihu-md-floating-ball {
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --accent-active: #3b82f6;
+  --accent-inverse: #06142b;
+  --blue: #60a5fa;
+  --focus-ring: #60a5fa;
+  --success: #34d399;
+  --error: #f87171;
+  --bg-secondary: #1b1d22;
+  --border-subtle: #33373e;
+  --border-strong: #4a4f57;
+  --text-primary: #e6e8eb;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -247,4 +250,22 @@
   visibility: visible;
   transform: translateY(-50%) translateX(0);
   color: var(--error);
+  white-space: normal;
+  width: max-content;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+/* 读屏播报区：视觉隐藏 */
+#zhihu-md-live {
+  position: fixed !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
 }

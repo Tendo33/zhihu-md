@@ -10,6 +10,8 @@ import { QuestionExporter } from './exporters/question.js';
 import { PageDetector } from './detector.js';
 import { copyTextLater } from '../../lib/clipboard.js';
 import { floatingBallDrag } from './floating-ball-drag.js';
+import { applyBallA11y, IDLE_LABEL } from './ball-a11y.js';
+import { describeFailure } from '../../lib/failure-text.js';
 
 const idleLabel = '点击下载 · 右键复制';
 
@@ -32,14 +34,14 @@ export const FloatingBall = {
     const ball = document.createElement('button');
     ball.id = 'zhihu-md-floating-ball';
     ball.type = 'button';
-    ball.setAttribute('aria-label', '导出 Markdown');
+    ball.setAttribute('aria-label', IDLE_LABEL);
     ball.innerHTML = `
       <svg class="icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      <span class="tooltip">${idleLabel}</span>
+      <span class="tooltip" aria-hidden="true">${idleLabel}</span>
     `;
 
     document.body.appendChild(ball);
@@ -107,13 +109,40 @@ export const FloatingBall = {
    * @param {HTMLElement} ball 
    * @param {Function} checkHasMoved 
    */
+  /** 按钮里的子元素对读屏是“展示性”的，播报区放在按钮外面 */
+  getLiveRegion() {
+    let live = document.getElementById('zhihu-md-live');
+    if (!live) {
+      live = document.createElement('div');
+      live.id = 'zhihu-md-live';
+      live.className = 'zhihu-md-live';
+      live.setAttribute('aria-live', 'polite');
+      document.body.appendChild(live);
+    }
+    return live;
+  },
+
+  /** 提示文字、读屏播报和 aria-label 一起更新 */
+  setMessage(ball, message, state) {
+    ball.querySelector('.tooltip').textContent = message;
+    const live = this.getLiveRegion();
+    if (live) {
+      live.setAttribute('role', state === 'error' ? 'alert' : 'status');
+      live.setAttribute('aria-live', state === 'error' ? 'assertive' : 'polite');
+      live.textContent = state === 'normal' ? '' : message;
+    }
+    const current = state || (ball.classList.contains('loading') ? 'loading' : 'normal');
+    applyBallA11y(ball, current, message);
+  },
+
   finishBall(ball, generation, state, message) {
     if (generation !== this.operation) return;
     this.busy = false;
     this.updateBallState(ball, state);
-    ball.querySelector('.tooltip').textContent = message;
-    if (state !== 'normal') {
-      setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), state === 'error' ? 4000 : 1600);
+    this.setMessage(ball, message, state);
+    // 成功提示短暂停留；失败原因一直显示，直到下一次操作（Round 2：错误持续可见）
+    if (state === 'success') {
+      setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), 4000);
     }
   },
 
@@ -132,11 +161,11 @@ export const FloatingBall = {
     const downloadImages = settings.downloadImages;
 
     if (pageType === 'question' || pageType === 'home' || pageType === 'follow') {
-      ball.querySelector('.tooltip').textContent = '加载内容中...';
+      this.setMessage(ball, '加载内容中...');
     } else if (pageType === 'hot') {
-      ball.querySelector('.tooltip').textContent = '导出热榜...';
+      this.setMessage(ball, '导出热榜...');
     } else {
-      ball.querySelector('.tooltip').textContent = downloadImages ? '下载图片中...' : '导出中...';
+      this.setMessage(ball, downloadImages ? '下载图片中...' : '导出中...');
     }
 
     try {
@@ -174,7 +203,7 @@ export const FloatingBall = {
         throw new Error(result.error || '导出失败');
       }
     } catch (error) {
-      this.finishBall(ball, generation, 'error', '导出失败');
+      this.finishBall(ball, generation, 'error', describeFailure(error, 'export').text);
     }
   },
 
@@ -183,7 +212,7 @@ export const FloatingBall = {
     this.busy = true;
     const generation = ++this.operation;
     this.updateBallState(ball, 'loading');
-    ball.querySelector('.tooltip').textContent = '复制中...';
+    this.setMessage(ball, '复制中...');
     const pending = copyTextLater(async () => {
       const pageType = PageDetector.detectPageType();
       let result;
@@ -202,7 +231,7 @@ export const FloatingBall = {
       this.finishBall(ball, generation, 'success', '已复制');
     }).catch((error) => {
       console.error('[Zhihu-MD] copy failed', error);
-      this.finishBall(ball, generation, 'error', error.reason ? error.message : '复制失败');
+      this.finishBall(ball, generation, 'error', describeFailure(error, 'copy').text);
     });
   },
 
@@ -275,5 +304,7 @@ export const FloatingBall = {
     if (ball) {
       ball.remove();
     }
+    const live = document.getElementById('zhihu-md-live');
+    if (live) live.remove();
   }
 };

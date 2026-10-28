@@ -8,7 +8,8 @@ import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
 import { PageDetector } from './detector.js';
-import { copyTextLater } from '../../lib/clipboard.js';
+import { copyText, copyTextLater } from '../../lib/clipboard.js';
+import { selectionToMarkdown } from './selection-md.js';
 import { floatingBallDrag } from './floating-ball-drag.js';
 import { applyBallA11y, IDLE_LABEL } from './ball-a11y.js';
 import { describeFailure } from '../../lib/failure-text.js';
@@ -190,6 +191,30 @@ export const FloatingBall = {
   exportFromCommand() {
     const ball = document.getElementById('zhihu-md-floating-ball') || this.createFloatingBall();
     return this.handleBallClick(ball);
+  },
+
+  /** Round 3 C-3：右键菜单「复制本页 Markdown」 */
+  copyFromCommand() {
+    const ball = document.getElementById('zhihu-md-floating-ball') || this.createFloatingBall();
+    return this.copyMarkdown(ball);
+  },
+
+  /** Round 3 C-3：右键菜单「复制选中内容为 Markdown」，结果在悬浮球上反馈 */
+  copySelection(selection = window.getSelection()) {
+    const ball = document.getElementById('zhihu-md-floating-ball') || this.createFloatingBall();
+    const generation = ++this.operation;
+    const md = selectionToMarkdown(selection);
+    if (!md) {
+      this.finishBall(ball, generation, 'error', '没有选中内容，先选中一段文字再复制');
+      return Promise.resolve(false);
+    }
+    return copyText(md).then(() => {
+      this.finishBall(ball, generation, 'success', '已复制选中内容');
+      return true;
+    }).catch((error) => {
+      this.finishBall(ball, generation, 'error', describeFailure(error, 'copy').text);
+      return false;
+    });
   },
 
   copyMarkdown(ball) {

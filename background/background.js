@@ -6,6 +6,7 @@
 import { createLogger } from '../lib/logger.js';
 import { createZipWithImages } from '../lib/zip.js';
 import { recordRecent, titleFromFilename } from '../lib/recent-exports.js';
+import { createMenus, handleMenuClick, openAndWait, showLinkFailure } from './context-menu.js';
 
 const Logger = createLogger('[Zhihu-MD Background]');
 
@@ -172,4 +173,17 @@ export async function triggerExportInTab(tab) {
   const target = tab && tab.id != null ? tab : (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
   if (!target || target.id == null) return { success: false };
   return chrome.tabs.sendMessage(target.id, { action: 'triggerExport' });
+}
+
+// Round 3 C-3：右键菜单
+if (chrome.contextMenus) {
+  chrome.runtime.onInstalled.addListener(() => createMenus(chrome.contextMenus));
+  chrome.contextMenus.onClicked.addListener((info, tab) => {
+    handleMenuClick(info, tab, {
+      tabs: chrome.tabs,
+      openAndWait: (props) => openAndWait(chrome.tabs, props),
+      notifyFailure: (tabId) => showLinkFailure(chrome.action, tabId),
+    })
+      .catch((e) => Logger.warn('右键菜单操作未送达', e && e.message));
+  });
 }

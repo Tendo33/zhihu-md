@@ -57,6 +57,12 @@ if (window.__zhihuMdInjected) {
       }
       FloatingBall.exportFromCommand();
       sendResponse({ success: true });
+    } else if (message.action === 'contextCopy' || message.action === 'copySelection') {
+      // Round 3 C-3：右键菜单
+      if (message.action === 'copySelection') FloatingBall.copySelection();
+      else if (PageDetector.isValidArticlePage()) FloatingBall.copyFromCommand();
+      else { sendResponse({ success: false, reason: 'unsupported' }); return true; }
+      sendResponse({ success: true });
     } else if (message.action === 'routeChanged') {
       Logger.info('路由改变，重新检查悬浮球状态...');
       scheduleFloatingBallInit(800);

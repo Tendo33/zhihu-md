@@ -1,0 +1,161 @@
+<!doctype html>
+<!-- source: https://www.zhihu.com/question/282627359/answer/3278589663 ; cropped by scripts/crop-fixtures.js ; 知乎第三方内容裁剪片段，仅用于转换测试 -->
+<html><head><meta charset="utf-8"></head><body>
+<div class="AnswerItem" name="3278589663"><div class="RichContent"><div class="RichContent-inner"><span class="RichText ztext CopyrightRichText-richText css-1petdff"><p>哈喽嗨，亲爱的小仙女们，小伙子们！</p><p>  作为一名爱分享、爱编程的程序员小哥哥 ‍ ，</p><p>Python是我的第二语言，对我的工作效率提升巨大。</p><p>我今天要给你们分享一份</p><p>超级实用的Python代码大合集！ </p><p>让你在加班的路上越走越远，逆袭人生巅峰！ </p><h2>代码1：给照片加水印</h2><div class="highlight"><pre><code class="language-python3"><span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageFont</span><span class="p">,</span> <span class="n">ImageDraw</span>
+
+
+<span class="k">def</span> <span class="nf">watermark_Image</span><span class="p">(</span><span class="n">img_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+    <span class="n">drawing</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="n">black</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="n">font_size</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">font</span> <span class="o">=</span> <span class="n">ImageFont</span><span class="o">.</span><span class="n">truetype</span><span class="p">(</span><span class="s1">'Arial.ttf'</span><span class="p">,</span> <span class="n">font_size</span><span class="p">)</span>
+    <span class="n">drawing</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">black</span><span class="p">)</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+
+
+<span class="n">img</span> <span class="o">=</span> <span class="s1">'source.jpeg'</span>
+<span class="n">watermark_Image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="s1">'watermarked.jpeg'</span><span class="p">,</span> <span class="s1">'Python'</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span></code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1110'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-e9feb549503290f4c67fec2eb3804258_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-e9feb549503290f4c67fec2eb3804258_720w.jpg"></div><figcaption>给照片加水印</figcaption></figure><h2>代码2：修改照片的长和宽</h2><div class="highlight"><pre><code class="language-text">from PIL import Image
+
+
+def img_resize(file, height, width):
+    img = Image.open(file)
+    resize = img.resize((height, width), )
+    resize.save("resized.jpg", "JPEG", quality=100)
+
+
+img_resize("source.jpeg", 100, 100)</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='822'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-c2b02ba8ea0fa5e25b55f441c1cc8a3e_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-c2b02ba8ea0fa5e25b55f441c1cc8a3e_720w.jpg"></div><figcaption>修改照片长和宽</figcaption></figure><h2>代码3：将照片转PDF</h2><div class="highlight"><pre><code class="language-text">import os
+import img2pdf
+
+with open("test.pdf", "wb") as file:
+    file.write(img2pdf.convert([i for i in os.listdir("文件路径") if i.endswith(".jpg")]))
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='622'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-4b2e5317b2aa34670ef54333bb0cdd00_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-4b2e5317b2aa34670ef54333bb0cdd00_720w.jpg"></div><figcaption>将照片转PDF</figcaption></figure><h2>代码4：获取图像主要颜色</h2><div class="highlight"><pre><code class="language-text">from PIL import Image
+
+# 打开图片文件
+image = Image.open("./star.jpeg")
+
+# 模式P为8位深度图像
+image_p = image.convert(
+    "P", palette=Image.ADAPTIVE
+)
+# image_p.show()
+
+# 以列表形式返回图像调色板
+palette = image_p.getpalette()
+
+# 图像中使用的颜色列表,maxcolors默认256
+color_counts = sorted(image_p.getcolors(), reverse=True)
+
+# 通过颜色列表查找到真正的颜色
+colors = []
+for i in range(5):
+    palette_index = color_counts[i][1]
+    dominant_color = palette[palette_index * 3: palette_index * 3 + 3]
+    colors.append(tuple(dominant_color))
+
+# 输出颜色
+print(colors)
+# [(204, 154, 86), (230, 237, 226), (213, 213, 212), (251, 238, 206), (82, 167, 204)]
+for i, val in enumerate(colors):
+    image.paste(val, (0 + i * 320, 0, 300 + i * 320, 300))
+
+#  保存并显示图片
+image.save("star2.jpg")
+image.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1926'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-d16bb6f61f4c4a0822bb55dcaaf16961_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-d16bb6f61f4c4a0822bb55dcaaf16961_720w.jpg"></div><figcaption>获取图像主要颜色</figcaption></figure><h2>代码5：文件压缩</h2><div class="highlight"><pre><code class="language-text">import zipfile
+
+
+# 压缩文件
+def zipMyFile(file):
+    with zipfile.ZipFile(file, 'w') as zf:
+        zf.write('1.py')
+        zf.write('2.py')
+        zf.close()
+
+
+zipMyFile('test.zip')</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='918'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-23a2c72b985751e37a6d9556cc569dc4_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-23a2c72b985751e37a6d9556cc569dc4_720w.jpg"></div><figcaption>文件压缩</figcaption></figure><h2>代码6：测试网速</h2><div class="highlight"><pre><code class="language-text">from speedtest import Speedtest
+
+
+def test_speed(network):
+    print("开始测试网速，请等待")
+    download = network.download()
+    upload = network.upload()
+    print(f'下载速度：{download / (1024 * 1024)} Mbps')
+    print(f'上传速度：{upload / (1024 * 1024)} Mbps')
+    print("测试完成")
+
+
+speed = Speedtest()
+test_speed(speed)</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1014'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-4da9d5ee30081c86803ef7acc820a6ee_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-4da9d5ee30081c86803ef7acc820a6ee_720w.jpg"></div><figcaption>测试网速</figcaption></figure><p class="ztext-empty-paragraph"><br></p><h2>代码7：Emoji表情</h2><div class="highlight"><pre><code class="language-text">import emoji
+
+result = emoji.emojize('Python is :thumbs_up:')
+print(result)
+# Python is  
+
+result2 = emoji.demojize('Python is  ')
+print(result2)
+# Python is :partying_face:
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='774'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-5500f996c3d7f93eeeec08e10ee44a71_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-5500f996c3d7f93eeeec08e10ee44a71_720w.jpg"></div><figcaption>Emoji表情</figcaption></figure><p class="ztext-empty-paragraph"><br></p><h2>代码8：生成和解析二维码</h2><div class="highlight"><pre><code class="language-text">import qrcode
+import cv2
+
+
+# 生成二维码
+def make_qrcode(content):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=20,
+        border=2
+    )
+    qr.add_data(content)
+    qr.make(fit=True)
+    image = qr.make_image(fill_color='black', back_color='white')
+    image.save("qrcode.png")
+
+
+# 解析二维码
+def identify_qrcode(file):
+    qr_image = cv2.imread(file)
+    qr_detector = cv2.QRCodeDetector()
+    data, bbox, straight_qrcode = qr_detector.detectAndDecode(qr_image)
+    print(data)
+
+
+make_qrcode("Hello Python")
+identify_qrcode("qrcode.png")
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1686'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-b0560ccbc97ac392a768f511939bc126_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-b0560ccbc97ac392a768f511939bc126_720w.jpg"></div><figcaption>生成和解析二维码</figcaption></figure><h2>代码9：从视频中提取音频</h2><div class="highlight"><pre><code class="language-text">from moviepy.editor import VideoFileClip
+import os
+
+# 待转换的视频文件夹
+file_path = '文件路径1'
+# 转换后的音频文件夹
+output_path = '文件路径2'
+
+for root, dirs, files in os.walk(file_path):
+    for f in files:
+        video_file_path = os.path.join(root, f)
+        if os.path.splitext(f)[1] == '.mp4':
+            video = VideoFileClip(video_file_path)
+            audio = video.audio
+            file_name = os.path.splitext(f)[0] + '.wav'
+            audio.write_audiofile(os.path.join(output_path, file_name))</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1110'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-ce3fea833f6a69c6efab8f0bb7f1ba1a_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-ce3fea833f6a69c6efab8f0bb7f1ba1a_720w.jpg"></div><figcaption>从视频中提取音频</figcaption></figure><p class="ztext-empty-paragraph"><br></p><h2>代码10：简单网页应用</h2><div class="highlight"><pre><code class="language-text">from flask import Flask
+app = Flask(__name__)
+
+
+@app.route('/')
+def index():
+    return "Hello World, with Flask"
+
+
+@app.route('/hello/&lt;name&gt;')
+def hello(name):
+    return "Hello %s" % name
+
+
+if __name__ == '__main__':
+    app.config['JSON_AS_ASCII'] = False
+    # app.debug = True  # 设置调试模式，生产模式的时候要关掉debug
+    app.run()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1206'></svg>" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-6645b938fe4873c2ae8692d684369696_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-6645b938fe4873c2ae8692d684369696_720w.jpg"></div><figcaption>简单网页应用</figcaption></figure><p class="ztext-empty-paragraph"><br></p><p>以上就是我要分享的10个Python代码啦！</p><p class="ztext-empty-paragraph"><br></p><p>每一个都是精选中的精选</p><p>能极大提升你的工作效率</p><p>让你在编程的世界里所向披靡！ </p><p class="ztext-empty-paragraph"><br></p><p>后面会继续分享Python爬虫教程，Python办公自动化等内容，对Python语言感兴趣的可以关注我哦</p></span></div></div></div>
+</body></html>

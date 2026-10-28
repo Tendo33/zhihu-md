@@ -1,0 +1,1080 @@
+<!doctype html>
+<!-- source: https://www.zhihu.com/question/282627359/answer/2571795386 ; cropped by scripts/crop-fixtures.js ; 知乎第三方内容裁剪片段，仅用于转换测试 -->
+<html><head><meta charset="utf-8"></head><body>
+<div class="AnswerItem" name="2571795386"><div class="RichContent"><div class="RichContent-inner"><span class="RichText ztext CopyrightRichText-richText css-1petdff"><p></p><blockquote>分享<b>50个</b>最有价值的图表【python实现代码】。</blockquote><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2824' height='1122'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-6b46d9457060033fd9648ebc7f03e088_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-7fadbbbb27d12f4c4b61f995dd16c4d9_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-7fadbbbb27d12f4c4b61f995dd16c4d9_720w.jpg"></div></figure><div class="RichText-LinkCardContainer"><a href="https://mp.weixin.qq.com/s/Uu6xpOO5G597NuKGMSBKFg" data-draft-type="link-card" data-text="10W字《R ggplot2可视化教程1.0》来了!" class="LinkCard new css-1a2w32z"><span class="LinkCard-image LinkCard-image--default"></span><span class="LinkCard-contents"><span class="LinkCard-title loading" data-text="true"></span><span class="LinkCard-desc loading"></span></span></a></div><div class="RichText-LinkCardContainer"><a href="https://mp.weixin.qq.com/s/QaSmucuVsS_DR-klfpE3-Q" data-draft-type="link-card" data-text="10W字《Python可视化教程1.0》来了！" class="LinkCard new css-1a2w32z"><span class="LinkCard-image LinkCard-image--default"></span><span class="LinkCard-contents"><span class="LinkCard-title loading" data-text="true"></span><span class="LinkCard-desc loading"></span></span></a></div><h2><b>目录</b></h2><div class="highlight"><pre><code class="language-text">准备工作
+分享51个常用图表在Python中的实现，按使用场景分7大类图，目录如下：
+一、关联（Correlation）关系图
+1、散点图（Scatter plot）
+2、边界气泡图（Bubble plot with Encircling）
+3、散点图添加趋势线（Scatter plot with linear regression line of best fit）
+4、分面散点图添加趋势线（Each regression line in its own column）
+5、抖动图（Jittering with stripplot）
+6、计数图（Counts Plot）
+7、边缘直方图（Marginal Histogram）
+8、边缘箱图（Marginal Boxplot）
+9、相关性热图（Correllogram）
+10、矩阵图 （Pairwise Plot）
+
+二、偏差 （Deviation）关系图
+11、发散型柱形图 （Diverging Bars）
+12、发散型文本图（Diverging Texts）-水平方向
+13、发散型文本图（Diverging Texts）-垂直方向
+14、发散型点图（Diverging Dot Plot）
+15、带Marker的发散型棒棒糖图 （Diverging Lollipop Chart with Markers）
+16、面积图（Area Chart）
+
+三、排序 （Ranking）关系图
+17、排序柱形图（Ordered Bar Chart）
+18、棒棒糖图(Lollipop Chart)
+19、点图 （Dot Plot）
+20、坡图（Slope Chart）
+21、哑铃图（Dumbbell Plot）
+
+四、分布（Distribution）关系图
+21、连续变量堆积直方图（Stacked Histogram for Continuous Variable）
+22、类别变量堆积直方图（Stacked Histogram for Categorical Variable）
+23、密度图(Density Plot)
+24、带直方图的密度图(Density Curves with Histogram)
+25、山峰叠峦图(Joy Plot)
+26、分布点图(Distributed Dot Plot)
+27、箱图（boxplot）
+28、箱图结合点图（Dot + Box Plot）
+29、小提琴图（Violin Plot）
+30、金字塔图(Population Pyramid)
+31、分类图（Categorical Plots）
+
+五、组成（Composition）关系图
+32、华夫饼图（Waffle Chart）
+33、饼图（Pie Chart）
+34、树状图（Treemap）
+35、柱状图（Bar Chart）
+
+六、变化（Change）关系图
+36、时间序列图（Time Series Plot）
+37、波峰和波谷添加注释的时间序列图（Time Series with Peaks and Troughs Annotated）
+38、自相关和部分自相关图（Autocorrelation (ACF) and Partial Autocorrelation (PACF) Plot）
+39、交叉相关图（Cross Correlation plot）
+40、时间序列分解图（Time Series Decomposition Plot）
+41、多重时间序列图（Multiple Time Series）
+42、双坐标系时间序列图（Plotting with different scales using secondary Y axis）
+43、带误差阴影的时间序列图（Time Series with Error Bands）
+44、堆积面积图（Stacked Area Chart）
+45、非堆积面积图（Area Chart UnStacked）
+46、日历热力图（Calendar Heat Map）
+47、季节图（Seasonal Plot）
+
+七、分组（ Groups）关系图
+48、聚类树形图（Dendrogram）
+49、聚类图（Cluster Plot）
+50、安德鲁斯曲线（Andrews Curve）
+51、平行坐标图（Parallel Coordinates）
+#SCI #论文 #科研 #学术 #Python #可视化 #Matplotlib #seaborn
+#知识薯 #数据分析 #R #ggplot2 #论文配图 #编程
+
+</code></pre></div><hr><h2>推荐阅读</h2><p><a href="https://zhuanlan.zhihu.com/p/313462427" class="internal">pythonic生物人：Python可视化笔记43篇合集（建议收藏）</a></p><p><a href="https://zhuanlan.zhihu.com/p/500030938" class="internal">pythonic生物人：pydeck助数百万数据点高效可视化渲染</a></p><p><a href="https://zhuanlan.zhihu.com/p/477289092" class="internal">pythonic生物人：丰富的Python可视化“武器库”：从PyViz到Matplotlib</a></p><p><a href="https://zhuanlan.zhihu.com/p/504917890" class="internal">pythonic生物人：一图胜千言，超形象图解NumPy教程！</a></p><p><a href="https://zhuanlan.zhihu.com/p/429709268" class="internal">pythonic生物人：谁是Python/R中最强Dashboard APP开发工具？</a></p><p><a href="https://zhuanlan.zhihu.com/p/398426227" class="internal">pythonic生物人：pandas、spark、DataFrames.jl、polars、dask、data.table、datatable谁才是最快数据处理武器？？</a></p><p><a href="https://zhuanlan.zhihu.com/p/372792687" class="internal">pythonic生物人：yellowbrick牛逼，机器学习“炼丹师”、“调参侠”们有福了</a></p><p><a href="https://zhuanlan.zhihu.com/p/472596680" class="internal">pythonic生物人：从哪些方面着手提高Python？Python社区“老司机们”的这本书讲清楚了！</a></p><p><a href="https://www.zhihu.com/question/35701453/answer/2496067550" class="internal">你是如何自学R语言的？</a></p><p><a href="https://zhuanlan.zhihu.com/p/380743079" class="internal">pythonic生物人：13个高清图助快速上手Python: NumPy/Pandas/SciPy/Matplotlib？</a></p><p>❤️更多好文，欢迎关注 <span><span class="UserLink"><div class="css-1gomreu"><a class="UserLink-link" href="https://www.zhihu.com/people/placeholder">@pythonic生物人</a></div></span></span> </p><p class="ztext-empty-paragraph"><br></p><h2><b>准备工作</b></h2><p>主要是导入绘图模块，设置绘图风格。</p><div class="highlight"><pre><code class="language-text">import numpy as np
+import pandas as pd
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+warnings.filterwarnings(action='once')
+
+
+plt.style.use('seaborn-whitegrid')
+sns.set_style("whitegrid")
+print(mpl.__version__)
+print(sns.__version__)
+</code></pre></div><h2><b>一、关联（Correlation）关系图</b></h2><h2><b>1、散点图（Scatter plot）</b></h2><p>该图展示两个变量间的关系，matplotlib中使用plt.scatter()函数。当数据包含多组时，可以使用不同颜色或者形状区分。</p><div class="highlight"><pre><code class="language-text"># Import dataset
+midwest = pd.read_csv("./datasets/midwest_filter.csv")
+
+# Prepare Data
+# Create as many colors as there are unique midwest['category']
+categories = np.unique(midwest['category'])
+colors = [
+    plt.cm.Set1(i / float(len(categories) - 1)) for i in range(len(categories))
+]
+
+# Draw Plot for Each Category
+plt.figure(figsize=(10, 6), dpi=100, facecolor='w', edgecolor='k')
+
+for i, category in enumerate(categories):
+    plt.scatter('area',
+                'poptotal',
+                data=midwest.loc[midwest.category == category, :],
+                s=20,
+                c=colors[i],
+                label=str(category))
+
+# Decorations
+plt.gca().set(
+    xlim=(0.0, 0.1),
+    ylim=(0, 90000),
+)
+
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.xlabel('Area', fontdict={'fontsize': 10})
+plt.ylabel('Population', fontdict={'fontsize': 10})
+plt.title("Scatterplot of Midwest Area vs Population", fontsize=12)
+plt.legend(fontsize=10)
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='870' height='527'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-831a2c3a5cffabb1148a7c46208ed341_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-45a85d32dbe3542bd3dcbe20b52773f3_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-45a85d32dbe3542bd3dcbe20b52773f3_720w.jpg"></div></figure><p>关于散点图更详细的介绍戳：</p><ul><li><b><a href="https://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247485973&idx=1&sn=3ee0ebca5a39ea0ac735c65bd548dfb7&chksm=f90d4e4bce7ac75dbe9a651ebc4cf1d640e98fcb0be41dfa4cde67e453e71ce4b67fb578afc8&scene=21#wechat_redirect" class="wrap external">Python可视化20|Seaborn散点图&amp;&amp;折线图</a></b></li><li><b><a href="https://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247484528&idx=2&sn=48cfeb144ee621ecbbe07a81d0fab220&chksm=f90d402ece7ac93812f70a97e7374e555d38077dfe1fbb9a0506d17133c6aea891ce54a67e91&scene=21#wechat_redirect" class="wrap external">Python可视化|matplotlib10-绘制散点图scatter</a></b></li></ul><h2><b>2、边界气泡图（Bubble plot with Encircling）<a href="http://localhost:8888/notebooks/50plot20210204.ipynb#2%E3%80%81%E8%BE%B9%E7%95%8C%E6%B0%94%E6%B3%A1%E5%9B%BE%EF%BC%88Bubble-plot-with-Encircling%EF%BC%89%EF%BC%89" class="wrap external">¶</a></b></h2><p>该图也是一类散点图，只不使用边界圈住一部分点，以强调其重要性。</p><div class="highlight"><pre><code class="language-text">from matplotlib import patches
+from scipy.spatial import ConvexHull  #更多参考scipy.spatial.ConvexHull
+sns.set_style("whitegrid")
+
+# Step 1: Prepare Data
+midwest = pd.read_csv("./datasets/midwest_filter.csv")
+
+# As many colors as there are unique midwest['category']
+categories = np.unique(midwest['category'])
+colors = [
+    plt.cm.Set1(i / float(len(categories) - 1)) for i in range(len(categories))
+]
+
+# Step 2: Draw Scatterplot with unique color for each category
+fig = plt.figure(figsize=(10, 6), dpi=80, facecolor='w', edgecolor='k')
+
+for i, category in enumerate(categories):
+    plt.scatter('area',
+                'poptotal',
+                data=midwest.loc[midwest.category == category, :],
+                s='dot_size',
+                c=colors[i],
+                label=str(category),
+                edgecolors='black',
+                linewidths=.5)
+
+
+# Step 3: Encircling
+# https://stackoverflow.com/questions/44575681/how-do-i-encircle-different-data-sets-in-scatter-plot
+def encircle(x, y, ax=None, **kw):  #定义encircle函数，圈出重点关注的点
+    if not ax: ax = plt.gca()
+    p = np.c_[x, y]
+    hull = ConvexHull(p)
+    poly = plt.Polygon(p[hull.vertices, :], **kw)
+    ax.add_patch(poly)
+
+
+# Select data to be encircled
+midwest_encircle_data1 = midwest.loc[midwest.state == 'IN', :]
+encircle(midwest_encircle_data1.area,
+         midwest_encircle_data1.poptotal,
+         ec="pink",
+         fc="#74C476",
+         alpha=0.3)
+encircle(midwest_encircle_data1.area,
+         midwest_encircle_data1.poptotal,
+         ec="g",
+         fc="none",
+         linewidth=1.5)
+
+midwest_encircle_data6 = midwest.loc[midwest.state == 'WI', :]
+encircle(midwest_encircle_data6.area,
+         midwest_encircle_data6.poptotal,
+         ec="pink",
+         fc="black",
+         alpha=0.3)
+encircle(midwest_encircle_data6.area,
+         midwest_encircle_data6.poptotal,
+         ec="black",
+         fc="none",
+         linewidth=1.5,
+         linestyle='--')
+
+# Step 4: Decorations
+plt.gca().set(
+    xlim=(0.0, 0.1),
+    ylim=(0, 90000),
+)
+
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('Area', fontdict={'fontsize': 14})
+plt.ylabel('Population', fontdict={'fontsize': 14})
+plt.title("Bubble Plot with Encircling", fontsize=14)
+plt.legend(fontsize=10)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='714' height='437'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-add2cafbc97fe83537fdcdb3f14fdb82_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-6fffe1b601a75a8d8981b9b1ee2752fd_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-6fffe1b601a75a8d8981b9b1ee2752fd_720w.jpg"></div></figure><h2><b>3、散点图添加趋势线（Scatter plot with linear regression line of best fit）</b></h2><p>添加趋势线反映两个变量是正相关、负相关或者无相关关系。</p><div class="highlight"><pre><code class="language-text"># Import Data
+plt.figure(dpi=500)
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+df_select = df.loc[df.cyl.isin([4, 8]), :]
+
+# Plot
+
+gridobj = sns.lmplot(
+    x="displ",
+    y="hwy",
+    hue="cyl",
+    data=df_select,
+    height=7,
+    aspect=1.6,  #robust=True, 
+    palette='Set1',
+    scatter_kws=dict(s=60, linewidths=.7, edgecolors='black'))
+
+# Decorations
+sns.set(style="whitegrid", font_scale=1.5)
+gridobj.set(xlim=(0.5, 7.5), ylim=(10, 50))
+gridobj.fig.set_size_inches(10, 6)
+plt.title("Scatterplot with line of best fit grouped by number of cylinders")
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='719' height='442'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-c0753315b2b451ef529589d8b5da3afe_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-2790787c8bde4baa67cf4cceaa13f3df_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-2790787c8bde4baa67cf4cceaa13f3df_720w.jpg"></div></figure><p>关于添加趋势线：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247486501&idx=1&sn=a2d190442dfcee7849cbd7174847dfd0&chksm=f90d487bce7ac16d788014ea682bf7bbf46efe9061bf4c7f32cc6d9df14145441a4acbc712bb&scene=21#wechat_redirect" class="wrap external">Python可视化27|seaborn绘制线型回归图曲线</a></b></li></ul><h2><b>4、分面散点图添加趋势线（Each regression line in its own column）</b></h2><p>添加趋势线反映两个变量是正相关、负相关或者无相关关系。</p><div class="highlight"><pre><code class="language-text"># Import Data
+plt.figure(dpi=200)
+
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+df_select = df.loc[df.cyl.isin([4, 8]), :]
+
+# Each line in its own column
+gridobj = sns.lmplot(x="displ",
+                     y="hwy",
+                     data=df_select,
+                     height=7,
+                     robust=True,
+                     palette='Set1',
+                     col="cyl",
+                     scatter_kws=dict(s=60, linewidths=.7, edgecolors='black'))
+
+# Decorations
+sns.set(style="whitegrid", font_scale=1.5)
+gridobj.set(xlim=(0.5, 7.5), ylim=(10, 45))
+gridobj.fig.set_size_inches(10, 6)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='726' height='429'></svg>" data-default-watermark-src="https://pica.zhimg.com/50/v2-9db40b169c6473d45df0aeba9c088b71_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-1778d8438f5cd5bb6ddd1936bcd2104e_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-1778d8438f5cd5bb6ddd1936bcd2104e_720w.jpg"></div></figure><h2><b>5、抖动图（Jittering with stripplot）</b></h2><p>多个点具有完全相同的X和Y值, 为避免多个点相互绘制并隐藏，可稍微抖动点，以便直观地看到它们。</p><div class="highlight"><pre><code class="language-text"># Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+# Draw Stripplot
+fig, ax = plt.subplots(figsize=(10, 6), dpi=80)
+sns.stripplot(df.cty,
+              df.hwy,
+              jitter=0.25,
+              size=8,
+              ax=ax,
+              linewidth=.5,
+              palette='Set1')
+
+# Decorations
+sns.set(style="whitegrid", font_scale=1.1)
+plt.title('Use jittered plots to avoid overlapping of points')
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='685' height='437'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-a37500349e5b0b2b3b8539665a27acb4_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-78416e6b5280a05d57ace3abe341cbb5_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-78416e6b5280a05d57ace3abe341cbb5_720w.jpg"></div></figure><p>关于Seaborn.stripplot参考：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247486122&idx=1&sn=b04fb5e3759c827707aff6a8ea91be2a&chksm=f90d4ef4ce7ac7e236ebc33e4134f71d49d5c5b60170d53f5340bc5f23ea4b4528a0e78539c9&scene=21#wechat_redirect" class="wrap external">Python可视化21|Seaborn.catplot(上)-小提琴图等四类图</a></b></li></ul><h2><b>6、计数图（Counts Plot）</b></h2><p>区别于抖动图，多个点相互绘制并隐藏时，可使用点的大小区分重叠的程度，点的大小越大，周围的点的集中度就越大，重叠的越多。</p><div class="highlight"><pre><code class="language-text">#友情提示：当matplotlib&gt;=3.2出现报错ValueError: s must be a scalar, or the same size as x and y时
+# Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+df_counts = df.groupby(['hwy', 'cty']).size().reset_index(name='counts')
+# Draw Stripplot
+fig, ax = plt.subplots(figsize=(10, 6), dpi=80)
+sns.stripplot(df_counts.cty,
+              df_counts.hwy,
+              size=df_counts.counts * 2,
+              ax=ax,
+              palette='Set1')
+
+# Decorations
+sns.set(style="whitegrid", font_scale=1.1)
+plt.title('Counts Plot - Size of circle is bigger as more points overlap')
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='685' height='437'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-a9c00137d5ec303ea2ba5fe33d30bfd5_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-0a917745e1c7890be8f862411f559a65_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-0a917745e1c7890be8f862411f559a65_720w.jpg"></div></figure><p>关于Counts Plot更多介绍：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247486124&idx=1&sn=62092b311f7ebbea4d59612012b4ebca&chksm=f90d4ef2ce7ac7e48d1221b52687bab03f3f119ee351cba49e3c74376e245cc555c57d012616&scene=21#wechat_redirect" class="wrap external">Python可视化22|Seaborn.catplot(下)-boxenplot|barplot|countplot图</a></b></li></ul><h2><b>7、边缘直方图（Marginal Histogram）<a href="http://localhost:8888/notebooks/50plot20210204.ipynb#7%E3%80%81%E8%BE%B9%E7%BC%98%E7%9B%B4%E6%96%B9%E5%9B%BE%EF%BC%88Marginal-Histogram%EF%BC%89" class="wrap external">¶</a></b></h2><p>用于展示X和Y之间的关系、及X和Y的单变量分布情况，常用于数据探索分析。</p><div class="highlight"><pre><code class="language-text"># Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+
+# Create Fig and gridspec
+fig = plt.figure(figsize=(10, 6), dpi=100)
+grid = plt.GridSpec(4, 4, hspace=0.5, wspace=0.2)
+
+# Define the axes
+ax_main = fig.add_subplot(grid[:-1, :-1])
+ax_right = fig.add_subplot(grid[:-1, -1], xticklabels=[], yticklabels=[])
+ax_bottom = fig.add_subplot(grid[-1, 0:-1], xticklabels=[], yticklabels=[])
+
+# Scatterplot on main ax
+ax_main.scatter('displ',
+                'hwy',
+                s=df.cty * 4,
+                c=df.manufacturer.astype('category').cat.codes,
+                alpha=.9,
+                data=df,
+                cmap="Set1",
+                edgecolors='gray',
+                linewidths=.5)
+
+# histogram on the right
+ax_bottom.hist(df.displ,
+               40,
+               histtype='stepfilled',
+               orientation='vertical',
+               color='#098154')
+ax_bottom.invert_yaxis()
+
+# histogram in the bottom
+ax_right.hist(df.hwy,
+              40,
+              histtype='stepfilled',
+              orientation='horizontal',
+              color='#098154')
+
+# Decorations
+ax_main.set(title='Scatterplot with Histograms \n displ vs hwy',
+            xlabel='displ',
+            ylabel='hwy')
+ax_main.title.set_fontsize(10)
+for item in ([ax_main.xaxis.label, ax_main.yaxis.label] +
+             ax_main.get_xticklabels() + ax_main.get_yticklabels()):
+    item.set_fontsize(10)
+
+xlabels = ax_main.get_xticks().tolist()
+ax_main.set_xticklabels(xlabels)
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='841' height='504'></svg>" data-default-watermark-src="https://pica.zhimg.com/50/v2-9b9df7ea0bc50944ae0005824f8c06de_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-f32481b966d5a8be4ac0d68169a36ada_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-f32481b966d5a8be4ac0d68169a36ada_720w.jpg"></div></figure><p>虽然效果不错，但是画的太辛苦了，seaborn几行代码的事~~</p><div class="highlight"><pre><code class="language-text">df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+sns.set(style="whitegrid", font_scale=1.5)  #设置主题，文本大小
+g = sns.jointplot(
+    x='displ',
+    y='hwy',
+    data=df,  #输入两个绘图变量
+    color='#098154',  #修改颜色
+)
+g.fig.set_size_inches(10, 8)  #设置图尺寸
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='628' height='523'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-88b188487a81ea5787523cf73a3bca97_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-e4ae3054414848e2f636c26ea9d93f25_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-e4ae3054414848e2f636c26ea9d93f25_720w.jpg"></div></figure><p>更多关于边缘图：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247486257&idx=1&sn=803e48b2979cdc095450c1013d7a9303&chksm=f90d4f6fce7ac679709eebffe4daa7afd2fe9d291ac2ec10efc78207e5b7dc64946015fc18df&scene=21#wechat_redirect" class="wrap external">Python可视化24|seaborn绘制多变量分布图（jointplot|JointGrid）</a></b></li></ul><h2><b>8、边缘箱图（Marginal Boxplot）</b></h2><p>类似于边缘直方图，不过箱线图有助于精确定位变量的分位数。</p><div class="highlight"><pre><code class="language-text">#中间散点图，右边和下边分别绘制y轴及x轴数据的箱图，
+# Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+
+# Create Fig and gridspec
+fig = plt.figure(figsize=(10, 8), dpi=100)
+grid = plt.GridSpec(
+    4, 4, hspace=0.5, wspace=0.2
+)  #这里使用了matplotlib.pyplot.GridSpec分片figure，其实可以直接使用seaborn中的，前面讲过
+
+# Define the axes
+ax_main = fig.add_subplot(grid[:-1, :-1])
+ax_right = fig.add_subplot(grid[:-1, -1], xticklabels=[], yticklabels=[])
+ax_bottom = fig.add_subplot(grid[-1, 0:-1], xticklabels=[], yticklabels=[])
+
+# Scatterplot on main ax
+ax_main.scatter('displ',
+                'hwy',
+                s=df.cty * 5,
+                c=df.manufacturer.astype('category').cat.codes,
+                alpha=.9,
+                data=df,
+                cmap="Set1",
+                edgecolors='black',
+                linewidths=.5)
+
+# Add a graph in each part
+sns.boxplot(df.hwy, ax=ax_right, orient="v", linewidth=1, palette='Set1')
+sns.boxplot(df.displ, ax=ax_bottom, orient="h", linewidth=1, palette='Set1')
+
+# Decorations ------------------
+# Remove x axis name for the boxplot
+ax_bottom.set(xlabel='')
+ax_right.set(ylabel='')
+
+# Main Title, Xlabel and YLabel
+ax_main.set(title='Scatterplot with Histograms \n displ vs hwy',
+            xlabel='displ',
+            ylabel='hwy')
+
+# Set font size of different components
+ax_main.title.set_fontsize(12)
+for item in ([ax_main.xaxis.label, ax_main.yaxis.label] +
+             ax_main.get_xticklabels() + ax_main.get_yticklabels()):
+    item.set_fontsize(11)
+
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='844' height='661'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-896b76242cb2450457e8e00292392187_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-f4e3685cd8a26fe0031e66bda2619bd3_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-f4e3685cd8a26fe0031e66bda2619bd3_720w.jpg"></div></figure><p>更多关于边缘图</p><h2><b>9、相关性热图（Correllogram）<a href="http://localhost:8888/notebooks/50plot20210204.ipynb#9%E3%80%81%E7%9B%B8%E5%85%B3%E6%80%A7%E7%83%AD%E5%9B%BE%EF%BC%88Correllogram%EF%BC%89" class="wrap external">¶</a></b></h2><p>直观地度量给定DtaFrame (or 2D array)中所有可能的数值变量对之间的相关性差异。</p><div class="highlight"><pre><code class="language-text">df = pd.read_csv("./datasets/mtcars.csv")
+plt.figure(figsize=(12, 10), dpi=80)
+sns.heatmap(
+    df.corr(),
+    xticklabels=df.corr().columns,
+    yticklabels=df.corr().columns,
+    cmap='Set1',
+    center=0,
+    annot=True,
+    annot_kws={
+        'size': 12,
+        'weight': 'normal',
+        'color': '#253D24'
+    },
+)
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='762' height='655'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-de2f9b25067107d6c5fc80cb4e0075a2_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-141260d1525ed9a0ec2b584a132e6636_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-141260d1525ed9a0ec2b584a132e6636_720w.jpg"></div></figure><p>更多关于热图：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247485592&idx=2&sn=7ef9fe9cb918a3fc6260333dadf0edde&chksm=f90d4cc6ce7ac5d0a0c01d88d73c55bfa99de73a9fb4b9ab251d67ffc2e99a65fa600520717e&scene=21#wechat_redirect" class="wrap external">Python可视化matplotlib&amp;seborn16-相关性heatmap</a></b></li><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247485428&idx=1&sn=a3fb1786ba62fb61ce71abbf7489c19a&chksm=f90d43aace7acabc0021b497f8f53b08a22a436ab98116b7b4e4fe391eeab83a2a39804071a0&scene=21#wechat_redirect" class="wrap external">Python可视化matplotlib&amp;seborn15-聚类热图clustermap</a></b></li><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247485375&idx=1&sn=be29296af9b63a2b6379dbe89700386d&chksm=f90d43e1ce7acaf7f1507762d40178023106afd6910e2ae3f3f7bb9f14db5c289cfbf0a81922&scene=21#wechat_redirect" class="wrap external">Python可视化matplotlib&amp;seborn14-热图heatmap</a></b></li></ul><h2><b>10、矩阵图 （Pairwise Plot）</b></h2><p>数据探索阶段必备工具，用来探索各个数值型变量之间关系。</p><div class="highlight"><pre><code class="language-text">df = pd.read_csv("./datasets/iris_test.csv")
+
+# Plot
+
+sns.pairplot(df)
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='709' height='728'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-7016b14ae659c4f2f947739b9d9b50f8_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-206562c789cddf8dd982e9557a7bf18b_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-206562c789cddf8dd982e9557a7bf18b_720w.jpg"></div></figure><p>给每个特征加入分类。</p><div class="highlight"><pre><code class="language-text">df = sns.load_dataset('iris')
+
+# Plot
+plt.figure(figsize=(10, 8), dpi=80)
+sns.pairplot(df,
+             kind="scatter",
+             hue="species",
+             palette='Set1',
+             plot_kws=dict(s=80, edgecolor="white", linewidth=2.5))
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='810' height='731'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-2d7ca2939dd531f5d334533c5432765e_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-0719371d3237a7cef205137e55871fa6_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-0719371d3237a7cef205137e55871fa6_720w.jpg"></div></figure><p>更详细矩阵图教程：</p><ul><li><b><a href="https://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247486308&idx=1&sn=38351d29ff8b1591cf66549796ab02a0&chksm=f90d4f3ace7ac62c69218b6831f8602e2f318742f133a18bc35910da0b33ce8b07839e3df586&scene=21#wechat_redirect" class="wrap external">Python可视化25|seaborn绘制矩阵图</a></b></li></ul><h2><b>二、偏差 （Deviation）关系图</b></h2><h2><b>11、发散型柱形图 （Diverging Bars）<a href="http://localhost:8888/notebooks/50plot20210204.ipynb#11%E3%80%81%E5%8F%91%E6%95%A3%E5%9E%8B%E6%9F%B1%E5%BD%A2%E5%9B%BE-%EF%BC%88Diverging-Bars%EF%BC%89" class="wrap external">¶</a></b></h2><p>展示单个指标的变化的顺序和数量。</p><div class="highlight"><pre><code class="language-text">df = pd.read_csv("./datasets/mtcars.csv")
+x = df.loc[:, ['mpg']]
+df['mpg_z'] = (x - x.mean()) / x.std()
+df['colors'] = ['red' if x &lt; 0 else 'green' for x in df['mpg_z']]
+df.sort_values('mpg_z', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+plt.figure(figsize=(10, 6), dpi=80)
+plt.hlines(y=df.index,
+           xmin=0,
+           xmax=df.mpg_z,
+           color=df.colors,
+           alpha=0.8,
+           linewidth=5)
+
+# Decorations
+plt.gca().set(ylabel='$Model, xlabel='$Mileage)
+plt.yticks(df.index, df.cars, fontsize=12)
+plt.xticks(fontsize=12)
+plt.title('Diverging Bars of Car Mileage')
+plt.grid(linestyle='--', alpha=0.5)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='775' height='441'></svg>" data-default-watermark-src="https://pica.zhimg.com/50/v2-3734ef8819664eb79f38006728b841be_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-f284d77540bc14e7723244b305f550dc_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-f284d77540bc14e7723244b305f550dc_720w.jpg"></div></figure><h2><b>12、发散型文本图（Diverging Texts）-水平方向</b></h2><p>和上一个图的区别是该图在柱子上添加了数值文本。</p><div class="highlight"><pre><code class="language-text"># Prepare Data
+df = pd.read_csv("./datasets/mtcars.csv")
+#df['Species'] = 
+x = df.loc[:, ['mpg']]
+df['mpg_z'] = (x - x.mean())/x.std()
+df['colors'] = ['red' if x &lt; 0 else 'green' for x in df['mpg_z']]
+df.sort_values('mpg_z', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+plt.figure(figsize=(10,8), dpi= 80)
+plt.hlines(y=df.index, xmin=0, xmax=df.mpg_z,color=df.colors, alpha=0.8, linewidth=5)
+for x, y, tex in zip(df.mpg_z, df.index, df.mpg_z):
+    t = plt.text(x, y, round(tex, 2), horizontalalignment='right' if x &lt; 0 else 'left', 
+                 verticalalignment='center', fontdict={'color':'black' if x &lt; 0 else 'black', 'size':10})
+
+# Decorations    
+plt.yticks(df.index, df.cars, fontsize=12)
+plt.xticks(fontsize=10)
+plt.title('Diverging Text Bars of Car Mileage', fontdict={'size':15})
+plt.grid(linestyle='--', alpha=0.5)
+plt.xlim(-2.5, 2.5)
+plt.show()
+#垂直版感兴趣可以改改就可以了
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='753' height='531'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-cec977df3501546b47b9ac9def78fb4d_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-6f9fcc40fc6cbf70c145f6fecf0e4858_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-6f9fcc40fc6cbf70c145f6fecf0e4858_720w.jpg"></div></figure><h2><b>13、发散型文本图（Diverging Texts）-垂直方向</b></h2><div class="highlight"><pre><code class="language-text"># Prepare Data
+df = pd.read_csv("./datasets/mtcars.csv")
+x = df.loc[:, ['mpg']]
+df['mpg_z'] = (x - x.mean()) / x.std()
+df['colors'] = ['red' if x &lt; 0 else 'green' for x in df['mpg_z']]
+df.sort_values('mpg_z', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+plt.figure(figsize=(10, 6), dpi=80)
+plt.vlines(x=df.index,
+           ymin=0,
+           ymax=df.mpg_z,
+           color=df.colors,
+           alpha=0.8,
+           linewidth=5)
+for y, x, tex in zip(df.mpg_z, df.index, df.mpg_z):
+    t = plt.text(x,
+                 y+0.2,
+                 round(tex, 1),
+                 horizontalalignment='center',
+                 fontdict={
+                     'color': 'black' if x &lt; 0 else 'black',
+                     'size': 8
+                 })
+
+# Decorations
+plt.xticks(df.index, df.cars, fontsize=12, rotation=90)
+plt.yticks(fontsize=12)
+plt.title('Diverging Text Bars of Car Mileage', fontdict={'size': 12})
+plt.grid(linestyle='--', alpha=0.5)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='666' height='511'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-7ef1f732dc199aa495f267e5ea4e35ee_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-07a965c2095793c704c2fc74fd6631fb_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-07a965c2095793c704c2fc74fd6631fb_720w.jpg"></div></figure><h2><b>14、发散型点图（Diverging Dot Plot）</b></h2><p>与发散性文本图的区别是缺失柱子，减少了组之间的对比差异。</p><div class="highlight"><pre><code class="language-text"># Prepare Data
+df = pd.read_csv("./datasets/mtcars.csv")
+x = df.loc[:, ['mpg']]
+df['mpg_z'] = (x - x.mean()) / x.std()
+df['colors'] = ['red' if x &lt; 0 else 'darkgreen' for x in df['mpg_z']]
+df.sort_values('mpg_z', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+plt.figure(figsize=(12, 10), dpi=80)
+plt.scatter(df.mpg_z, df.index, s=250, alpha=.6, color=df.colors)
+for x, y, tex in zip(df.mpg_z, df.index, df.mpg_z):
+    t = plt.text(x,
+                 y,
+                 round(tex, 1),
+                 horizontalalignment='center',
+                 verticalalignment='center',
+                 fontdict={'color': 'black','size': '10'})
+
+# Decorations
+# Lighten borders
+plt.gca().spines["top"].set_alpha(.3)
+plt.gca().spines["bottom"].set_alpha(.3)
+plt.gca().spines["right"].set_alpha(.3)
+plt.gca().spines["left"].set_alpha(.3)
+
+plt.yticks(df.index, df.cars,fontsize=10)
+plt.xticks(fontsize=10)
+plt.title('Diverging Dotplot of Car Mileage', fontdict={'size': 15})
+plt.xlabel('$Mileage,fontsize=10)
+plt.grid(linestyle='--', alpha=0.5)
+plt.xlim(-2.5, 2.5)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='858' height='671'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-65dfaeefb432e32ff6e1bb88d6de2998_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-95186f31a34212c6f8e716fc5e9c264e_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-95186f31a34212c6f8e716fc5e9c264e_720w.jpg"></div></figure><h2><b>15、带Marker的发散型棒棒糖图 （Diverging Lollipop Chart with Markers）</b></h2><p>使用不同形状，强调重点关注的数据区域。</p><div class="highlight"><pre><code class="language-text"># Prepare Data
+df = pd.read_csv("./datasets/mtcars.csv")
+x = df.loc[:, ['mpg']]
+df['mpg_z'] = (x - x.mean()) / x.std()
+df['colors'] = 'black'
+
+# color fiat differently
+df.loc[df.cars == 'Fiat X1-9', 'colors'] = 'darkorange'
+df.sort_values('mpg_z', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+import matplotlib.patches as patches
+
+plt.figure(figsize=(10, 12), dpi=80)
+plt.hlines(y=df.index,
+           xmin=0,
+           xmax=df.mpg_z,
+           color=df.colors,
+           alpha=0.4,
+           linewidth=1)
+plt.scatter(df.mpg_z,
+            df.index,
+            color=df.colors,
+            s=[600 if x == 'Fiat X1-9' else 300 for x in df.cars],
+            alpha=0.6)
+plt.yticks(df.index, df.cars)
+plt.xticks(fontsize=12)
+
+# Annotate
+plt.annotate('Mercedes Models',
+             xy=(0.0, 11.0),
+             xytext=(1.0, 11),
+             xycoords='data',
+             fontsize=15,
+             ha='center',
+             va='center',
+             bbox=dict(boxstyle='square', fc='firebrick'),
+             arrowprops=dict(arrowstyle='-[, widthB=2.0, lengthB=1.5',
+                             lw=2.0,
+                             color='steelblue'),
+             color='white')
+
+# Add Patches
+p1 = patches.Rectangle((-2.0, -1),
+                       width=.3,
+                       height=3,
+                       alpha=.2,
+                       facecolor='red')
+p2 = patches.Rectangle((1.5, 27),
+                       width=.8,
+                       height=5,
+                       alpha=.2,
+                       facecolor='green')
+plt.gca().add_patch(p1)
+plt.gca().add_patch(p2)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+
+# Decorate
+plt.title('Diverging Bars of Car Mileage', fontdict={'size': 15})
+plt.grid(linestyle='--', alpha=0.5)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='734' height='773'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-9ad283e8754dd0f53d0ef62d45c1076e_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://pica.zhimg.com/v2-ec5f08afcef9f21e2490500b728b0702_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-ec5f08afcef9f21e2490500b728b0702_720w.jpg"></div></figure><h2><b>16、面积图（Area Chart）</b></h2><p>将曲线与坐标轴之间区域上色得面积图，面积图能够很好的展示整体与局部数据的关系，直观展示整体走势、展示不同元素的涨跌状况。</p><div class="highlight"><pre><code class="language-text"># Prepare Data
+df = pd.read_csv("./datasets/economics.csv", parse_dates=['date']).head(100)
+x = np.arange(df.shape[0])
+y_returns = (df.psavert.diff().fillna(0) / df.psavert.shift(1)).fillna(0) * 100
+
+# Plot使用plt.fill_between
+plt.figure(figsize=(10, 8), dpi=80)
+plt.fill_between(x[1:],
+                 y_returns[1:],
+                 0,
+                 where=y_returns[1:] &gt;= 0,
+                 facecolor='green',
+                 interpolate=True,
+                 alpha=0.7)
+plt.fill_between(x[1:],
+                 y_returns[1:],
+                 0,
+                 where=y_returns[1:] &lt;= 0,
+                 facecolor='red',
+                 interpolate=True,
+                 alpha=0.7)
+
+# Annotate
+plt.annotate('Peak \n1975',
+             xy=(94.0, 21.0),
+             xytext=(88.0, 28),
+             bbox=dict(boxstyle='square', fc='firebrick'),
+             arrowprops=dict(facecolor='steelblue', shrink=0.05),
+             fontsize=12,
+             color='white')
+
+# Decorations
+xtickvals = [
+    str(m)[:3].upper() + "-" + str(y)
+    for y, m in zip(df.date.dt.year, df.date.dt.month_name())
+]
+plt.gca().set_xticks(x[::6])
+plt.gca().set_xticklabels(xtickvals[::6],
+                          rotation=90,
+                          fontdict={
+                              'horizontalalignment': 'center',
+                              'verticalalignment': 'center_baseline',
+                              'size': 12
+                          })
+plt.ylim(-20, 32)
+plt.xlim(1, 100)
+plt.yticks(fontsize=12)
+plt.title("Month Economics Return %", fontsize=12)
+plt.ylabel('Monthly returns %', fontsize=12)
+plt.grid(alpha=0.5)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='691' height='580'></svg>" data-default-watermark-src="https://pica.zhimg.com/50/v2-e1fc222e5d75dbd7806df46e4e867e63_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-1b087f3bd5d3a4d7c7ea830b0f583d50_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-1b087f3bd5d3a4d7c7ea830b0f583d50_720w.jpg"></div></figure><h2><b>三、排序 （Ranking）关系图</b></h2><h2><b>17、排序柱形图（Ordered Bar Chart）</b></h2><div class="highlight"><pre><code class="language-text"># Prepare Data
+df_raw = pd.read_csv("./datasets/mpg_ggplot2.csv")
+df = df_raw[['cty',
+             'manufacturer']].groupby('manufacturer').apply(lambda x: x.mean())
+df.sort_values('cty', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+import matplotlib.patches as patches
+
+fig, ax = plt.subplots(figsize=(10, 8), facecolor='white', dpi=80)
+ax.vlines(x=df.index,
+          ymin=0,
+          ymax=df.cty,
+          color='#dc2624',
+          alpha=0.7,
+          linewidth=20)
+
+# Annotate Text
+for i, cty in enumerate(df.cty):
+    ax.text(i, cty + 0.5, round(cty, 1), horizontalalignment='center')
+
+# Title, Label, Ticks and Ylim
+ax.set_title('Bar Chart for Highway Mileage', fontdict={'size': 12})
+plt.xticks(df.index,
+           df.manufacturer.str.upper(),
+           rotation=60,
+           horizontalalignment='right',
+           fontsize=10)
+plt.yticks(fontsize=12)
+plt.ylabel('Miles Per Gallon', fontsize=12)
+plt.ylim = (0, 30)
+
+# 添加底纹
+p1 = patches.Rectangle((.57, -0.005),
+                       width=.33,
+                       height=.13,
+                       alpha=.1,
+                       facecolor='green',
+                       transform=fig.transFigure)
+p2 = patches.Rectangle((.124, -0.005),
+                       width=.446,
+                       height=.13,
+                       alpha=.1,
+                       facecolor='red',
+                       transform=fig.transFigure)
+fig.add_artist(p1)
+fig.add_artist(p2)
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='671' height='598'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-2ab6038801e87d40997693ee318a1908_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-734ad2f50b4aedecad7f44975eb097f4_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-734ad2f50b4aedecad7f44975eb097f4_720w.jpg"></div></figure><p>更多条形图介绍：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247484649&idx=1&sn=f13bf2ef31518f0cf1f2687fe63b8a13&chksm=f90d40b7ce7ac9a17cb7d702f08e92a6048103a525962ffb6a433c3aa19414d3dc6d96d5fa0c&scene=21#wechat_redirect" class="wrap external">Python可视化|matplotlib12-垂直|水平|堆积条形图详解</a></b></li></ul><h2><b>18、棒棒糖图(Lollipop Chart)</b></h2><p>将上面的柱子换做棒棒即可，效果也一样~~</p><div class="highlight"><pre><code class="language-text"># 棒棒糖图(Lollipop Chart)
+# Prepare Data
+df_raw = pd.read_csv("./datasets/mpg_ggplot2.csv")
+df = df_raw[['cty',
+             'manufacturer']].groupby('manufacturer').apply(lambda x: x.mean())
+df.sort_values('cty', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+fig, ax = plt.subplots(figsize=(10, 8), dpi=80)
+ax.vlines(x=df.index,
+          ymin=0,
+          ymax=df.cty,
+          color='#dc2624',
+          alpha=0.7,
+          linewidth=4)
+ax.scatter(x=df.index, y=df.cty, s=85, color='#dc2624', alpha=0.7)
+
+# Title, Label, Ticks and Ylim
+ax.set_title('Lollipop Chart for Highway Mileage', fontdict={'size': 12})
+
+plt.ylabel('Miles Per Gallon', fontsize=12)
+ax.set_xticks(df.index)
+ax.set_xticklabels(df.manufacturer.str.upper(),
+                   rotation=60,
+                   fontdict={
+                       'horizontalalignment': 'right',
+                       'size': 11
+                   })
+ax.set_ylim(0, 30)
+plt.yticks(fontsize=12)
+
+# Annotate
+for row in df.itertuples():
+    ax.text(row.Index,
+            row.cty + .5,
+            s=round(row.cty, 2),
+            horizontalalignment='center',
+            verticalalignment='bottom',
+            fontsize=12)
+
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='671' height='598'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-1f3f8431eb9316405ce732b65f69ed12_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-14e118b3db09fd6bc8194a2be223bfff_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-14e118b3db09fd6bc8194a2be223bfff_720w.jpg"></div></figure><h2><b>19、点图 （Dot Plot）</b></h2><p>将上面的棒棒去掉并水平放置即可，效果也一样~~ ，在水平方向展示各个指标的排名情况。</p><div class="highlight"><pre><code class="language-text"># Prepare Data
+df_raw = pd.read_csv("./datasets/mpg_ggplot2.csv")
+df = df_raw[['cty',
+             'manufacturer']].groupby('manufacturer').apply(lambda x: x.mean())
+df.sort_values('cty', inplace=True)
+df.reset_index(inplace=True)
+
+# Draw plot
+fig, ax = plt.subplots(figsize=(10, 8), dpi=80)
+ax.hlines(y=df.index,
+          xmin=11,
+          xmax=26,
+          color='gray',
+          alpha=0.7,
+          linewidth=1,
+          linestyles='dashdot')
+ax.scatter(y=df.index, x=df.cty, s=75, color='#dc2624', alpha=0.7)
+
+# Title, Label, Ticks and Ylim
+ax.set_title('Dot Plot for Highway Mileage', fontdict={'size': 12})
+
+plt.xlabel('Miles Per Gallon', fontsize=12)
+
+ax.set_yticks(df.index)
+ax.set_yticklabels(df.manufacturer.str.title(),
+                   fontdict={
+                       'horizontalalignment': 'right',
+                       'fontsize': 12
+                   })
+
+plt.xticks(fontsize=12)
+ax.set_xlim(10, 27)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='711' height='547'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-f58d4c56f7b15cd0c67a0cbd7077858a_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://pica.zhimg.com/v2-758d98ba39d6962284c335a35b10147d_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-758d98ba39d6962284c335a35b10147d_720w.jpg"></div></figure><h2><b>20、坡图（Slope Chart）</b></h2><p>很好的比较多项目两个不同时期的情况。</p><div class="highlight"><pre><code class="language-text">#comparing the ‘Before’ and ‘After’ positions of a given person/item
+import matplotlib.lines as mlines
+# Import Data
+df = pd.read_csv("./datasets/gdppercap.csv")
+
+left_label = [
+    str(c) + ', ' + str(round(y)) for c, y in zip(df.continent, df['1952'])
+]
+right_label = [
+    str(c) + ', ' + str(round(y)) for c, y in zip(df.continent, df['1957'])
+]
+klass = [
+    'red' if (y1 - y2) &lt; 0 else 'green'
+    for y1, y2 in zip(df['1952'], df['1957'])
+]
+
+
+# draw line
+# https://stackoverflow.com/questions/36470343/how-to-draw-a-line-with-matplotlib/36479941
+def newline(p1, p2, color='black'):
+    ax = plt.gca()
+    l = mlines.Line2D([p1[0], p2[0]], [p1[1], p2[1]],
+                      color='red' if p1[1] - p2[1] &gt; 0 else 'green',
+                      marker='o',
+                      markersize=6)
+    ax.add_line(l)
+    return l
+
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 8), dpi=80)
+
+# Vertical Lines
+ax.vlines(x=1,
+          ymin=500,
+          ymax=13000,
+          color='black',
+          alpha=0.7,
+          linewidth=1,
+          linestyles='dotted')
+ax.vlines(x=3,
+          ymin=500,
+          ymax=13000,
+          color='black',
+          alpha=0.7,
+          linewidth=1,
+          linestyles='dotted')
+
+# Points
+ax.scatter(y=df['1952'],
+           x=np.repeat(1, df.shape[0]),
+           s=10,
+           color='black',
+           alpha=0.7)
+ax.scatter(y=df['1957'],
+           x=np.repeat(3, df.shape[0]),
+           s=10,
+           color='black',
+           alpha=0.7)
+
+# Line Segmentsand Annotation
+for p1, p2, c in zip(df['1952'], df['1957'], df['continent']):
+    newline([1, p1], [3, p2])
+    ax.text(1 - 0.05,
+            p1,
+            c + ', ' + str(round(p1)),
+            horizontalalignment='right',
+            verticalalignment='center',
+            fontdict={'size': 14})
+    ax.text(3 + 0.05,
+            p2,
+            c + ', ' + str(round(p2)),
+            horizontalalignment='left',
+            verticalalignment='center',
+            fontdict={'size': 14})
+
+# 'Before' and 'After' Annotations
+ax.text(1 - 0.05,
+        13000,
+        'BEFORE',
+        horizontalalignment='right',
+        verticalalignment='center',
+        fontdict={
+            'size': 15,
+            'weight': 700
+        })
+ax.text(3 + 0.05,
+        13000,
+        'AFTER',
+        horizontalalignment='left',
+        verticalalignment='center',
+        fontdict={
+            'size': 15,
+            'weight': 700
+        })
+
+# Decoration
+ax.set_title("Slopechart: Comparing GDP Per Capita between 1952 vs 1957",
+             fontdict={'size': 18})
+ax.set(xlim=(0, 4), ylim=(0, 14000), ylabel='Mean GDP Per Capita')
+plt.ylabel('Mean GDP Per Capita', fontsize=15)
+ax.set_xticks([1, 3])
+ax.set_xticklabels(["1952", "1957"], fontdict={'size': 15, 'weight': 700})
+plt.yticks(np.arange(500, 13000, 2000), fontsize=12)
+
+# Lighten borders
+plt.gca().spines["top"].set_alpha(.0)
+plt.gca().spines["bottom"].set_alpha(.0)
+plt.gca().spines["right"].set_alpha(.0)
+plt.gca().spines["left"].set_alpha(.0)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='696' height='539'></svg>" data-default-watermark-src="https://pic1.zhimg.com/50/v2-03b4a7b1e9a48bc4b65a16b19aeba7c0_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-66473d31e2a7fc63400fe04625256363_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-66473d31e2a7fc63400fe04625256363_720w.jpg"></div></figure><h2><b>21、哑铃图（Dumbbell Plot）</b></h2><p>很好的比较多个项目两个不同时期的情况、更重要的是还会展示不同项目的排序信息。</p><div class="highlight"><pre><code class="language-text">#显示排序和处理前后值范围
+import matplotlib.lines as mlines
+
+# Import Data
+df = pd.read_csv("./datasets/health.csv")
+df.sort_values('pct_2014', inplace=True)
+df.reset_index(inplace=True)
+
+
+# Func to draw line segment
+def newline(p1, p2, color='black'):
+    ax = plt.gca()
+    l = mlines.Line2D([p1[0], p2[0]], [p1[1], p2[1]], color='#d5695d')
+    ax.add_line(l)
+    return l
+
+
+# Figure and Axes
+fig, ax = plt.subplots(1, 1, figsize=(10, 8), facecolor='#f8f2e4', dpi=80)
+
+# Vertical Lines
+ax.vlines(x=.05,
+          ymin=0,
+          ymax=26,
+          color='black',
+          alpha=1,
+          linewidth=1,
+          linestyles='dotted')
+ax.vlines(x=.10,
+          ymin=0,
+          ymax=26,
+          color='black',
+          alpha=1,
+          linewidth=1,
+          linestyles='dotted')
+ax.vlines(x=.15,
+          ymin=0,
+          ymax=26,
+          color='black',
+          alpha=1,
+          linewidth=1,
+          linestyles='dotted')
+ax.vlines(x=.20,
+          ymin=0,
+          ymax=26,
+          color='black',
+          alpha=1,
+          linewidth=1,
+          linestyles='dotted')
+
+# Points
+ax.scatter(y=df['index'], x=df['pct_2013'], s=50, color='#dc2624')
+ax.scatter(y=df['index'], x=df['pct_2014'], s=50, color='#e87a59')
+
+# Line Segments
+for i, p1, p2 in zip(df['index'], df['pct_2013'], df['pct_2014']):
+    newline([p1, i], [p2, i])
+
+# Decoration
+ax.set_facecolor('#f8f2e4')
+ax.set_title("Dumbell Chart: Pct Change - 2013 vs 2014", fontdict={'size': 18})
+ax.set(xlim=(0, .25), ylim=(-1, 27), ylabel='Mean GDP Per Capita')
+plt.ylabel('Mean GDP Per Capita', fontsize=15)
+plt.yticks(fontsize=15)
+ax.set_xticks([.05, .1, .15, .20])
+ax.set_xticklabels(['5%', '15%', '20%', '25%'], fontdict={'size': 15})
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='677' height='539'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-7777cdc8d5bf6ba64bac82996afcd5ba_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://pic1.zhimg.com/v2-873476105bb5641ca6ccb6ead3c31976_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-873476105bb5641ca6ccb6ead3c31976_720w.jpg"></div></figure><h2><b>四、分布（Distribution）关系图</b></h2><h2><b>21、连续变量堆积直方图（Stacked Histogram for Continuous Variable）</b></h2><p>该图展示给定连续变量的频率分布。</p><div class="highlight"><pre><code class="language-text"># Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+
+# Prepare data
+x_var = 'displ'
+groupby_var = 'class'
+df_agg = df.loc[:, [x_var, groupby_var]].groupby(groupby_var)
+vals = [df[x_var].values.tolist() for i, df in df_agg]
+
+# Draw
+plt.figure(figsize=(10, 6), dpi=80)
+colors = [plt.cm.Set1(i / float(len(vals) - 1)) for i in range(len(vals))]
+n, bins, patches = plt.hist(vals,
+                            30,
+                            stacked=True,
+                            density=False,
+                            color=colors[:len(vals)])
+
+# Decoration
+plt.legend({
+    group: col
+    for group, col in zip(
+        np.unique(df[groupby_var]).tolist(), colors[:len(vals)])
+})
+plt.title(f"Stacked Histogram of ${x_var}$ colored by ${groupby_var}$",
+          fontsize=22)
+plt.xlabel(x_var)
+plt.ylabel("Frequency")
+#plt.ylim(0, 25)
+plt.xticks(ticks=bins[::3], labels=[round(b, 1) for b in bins[::3]])
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='696' height='450'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-d441aa8960f465b4e9308dd054647463_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-20ce4e9e67cfff2b76be8fa574fa3af7_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-20ce4e9e67cfff2b76be8fa574fa3af7_720w.jpg"></div></figure><h2><b>22、类别变量堆积直方图（Stacked Histogram for Categorical Variable）</b></h2><p>该图展示给定类别变量的频率分布。</p><div class="highlight"><pre><code class="language-text"># Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+
+# Prepare data
+x_var = 'manufacturer'
+groupby_var = 'class'
+df_agg = df.loc[:, [x_var, groupby_var]].groupby(groupby_var)
+vals = [df[x_var].values.tolist() for i, df in df_agg]
+
+# Draw
+plt.figure(figsize=(10, 6), dpi=80)
+colors = [plt.cm.Set1(i / float(len(vals) - 1)) for i in range(len(vals))]
+n, bins, patches = plt.hist(vals,
+                            df[x_var].unique().__len__(),
+                            stacked=True,
+                            density=False,
+                            color=colors[:len(vals)])
+
+# Decoration
+plt.legend({
+    group: col
+    for group, col in zip(
+        np.unique(df[groupby_var]).tolist(), colors[:len(vals)])
+})
+plt.title(f"Stacked Histogram of ${x_var}$ colored by ${groupby_var}$",
+          fontsize=22)
+plt.xlabel(x_var)
+plt.ylabel("Frequency")
+plt.ylim(0, 40)
+plt.xticks(ticks=bins,
+           labels=np.unique(df[x_var]).tolist(),
+           rotation=90,
+           horizontalalignment='left')
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='682' height='525'></svg>" data-default-watermark-src="https://pica.zhimg.com/50/v2-7517d6368603f71364d9e35b4e91f864_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-efb38aff633c14512abe336c353cf432_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-efb38aff633c14512abe336c353cf432_720w.jpg"></div></figure><p>了解更多直方图：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247484871&idx=2&sn=f3192f169d83fe17942382f27a454505&chksm=f90d4199ce7ac88f03744ca422c5568d558a8a56b920a13be2bd16bd9dd7912351570221917b&scene=21#wechat_redirect" class="wrap external">Python可视化|matplotlib13-直方图（histogram）详解</a></b></li><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247486211&idx=1&sn=691088ee06d1008d70e46217c8988b71&chksm=f90d4f5dce7ac64bea72d2c08d31e4113805a564bb03f4169ab2bf2dff6158e35145ba431466&scene=21#wechat_redirect" class="wrap external">Python可视化23|seaborn.distplot单变量分布图(直方图|核密度图)</a></b></li></ul><h2><b>23、密度图(Density Plot)</b></h2><p>该图展示连续变量的分布情况。</p><div class="highlight"><pre><code class="language-text"># Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+
+# Draw Plot
+plt.figure(figsize=(10, 8), dpi=80)
+sns.kdeplot(df.loc[df['cyl'] == 4, "cty"],
+            shade=True,
+            color="#01a2d9",
+            label="Cyl=4",
+            alpha=.7)
+sns.kdeplot(df.loc[df['cyl'] == 5, "cty"],
+            shade=True,
+            color="#dc2624",
+            label="Cyl=5",
+            alpha=.7)
+sns.kdeplot(df.loc[df['cyl'] == 6, "cty"],
+            shade=True,
+            color="#C89F91",
+            label="Cyl=6",
+            alpha=.7)
+sns.kdeplot(df.loc[df['cyl'] == 8, "cty"],
+            shade=True,
+            color="#649E7D",
+            label="Cyl=8",
+            alpha=.7)
+
+# Decoration
+sns.set(style="whitegrid", font_scale=1.1)
+plt.title('Density Plot of City Mileage by n_Cylinders', fontsize=18)
+plt.legend()
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='671' height='543'></svg>" data-default-watermark-src="https://pica.zhimg.com/50/v2-d60b8b4facd6347f9e9a4fcfaf2141fc_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-08cc6dad298ee6a73f46950acbc436c8_r.jpg" data-actualsrc="https://picx.zhimg.com/50/v2-08cc6dad298ee6a73f46950acbc436c8_720w.jpg"></div></figure><h2><b>24、带直方图的密度图(Density Curves with Histogram)</b></h2><div class="highlight"><pre><code class="language-text"># Import Data
+df = pd.read_csv("./datasets/mpg_ggplot2.csv")
+
+# Draw Plot
+plt.figure(figsize=(10, 8), dpi=80)
+sns.distplot(df.loc[df['class'] == 'compact', "cty"],
+             color="#01a2d9",
+             label="Compact",
+             hist_kws={'alpha': .7},
+             kde_kws={'linewidth': 3})
+sns.distplot(df.loc[df['class'] == 'suv', "cty"],
+             color="#dc2624",
+             label="SUV",
+             hist_kws={'alpha': .7},
+             kde_kws={'linewidth': 3})
+sns.distplot(df.loc[df['class'] == 'minivan', "cty"],
+             color="g",
+             label="#C89F91",
+             hist_kws={'alpha': .7},
+             kde_kws={'linewidth': 3})
+plt.ylim(0, 0.35)
+
+# Decoration
+sns.set(style="whitegrid", font_scale=1.1)
+plt.title('Density Plot of City Mileage by Vehicle Type', fontsize=18)
+plt.legend()
+plt.show()
+</code></pre></div><p class="ztext-empty-paragraph"><br></p><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='678' height='561'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-38f310439f3cc6c35bc1c5198806ebef_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-457ac39906275c0812b142714d5db3ac_r.jpg" data-actualsrc="https://pic1.zhimg.com/50/v2-457ac39906275c0812b142714d5db3ac_720w.jpg"></div></figure><p>更多核密度图：</p><ul><li><b><a href="http://mp.weixin.qq.com/s?__biz=MzUwOTg0MjczNw==&mid=2247486211&idx=1&sn=691088ee06d1008d70e46217c8988b71&chksm=f90d4f5dce7ac64bea72d2c08d31e4113805a564bb03f4169ab2bf2dff6158e35145ba431466&scene=21#wechat_redirect" class="wrap external">Python可视化23|seaborn.distplot单变量分布图(直方图|核密度图)</a></b></li></ul><h2><b>25、山峰叠峦图(Joy Plot)</b></h2><p>该图展示大量分组之间的关系，比heatmap形象。</p><div class="highlight"><pre><code class="language-text">!pip install joypy#安装依赖包
+#每组数据绘制核密度图，R中有ggjoy
+import joypy
+# Import Data
+mpg = pd.read_csv("./datasets/mpg_ggplot2.csv")
+
+# Draw Plot
+plt.figure(figsize=(10, 6), dpi=80)
+fig, axes = joypy.joyplot(mpg,
+                          column=['hwy', 'cty'],
+                          by="class",
+                          ylim='own',
+                          colormap=plt.cm.Set1,
+                          figsize=(10, 6))
+
+# Decoration
+plt.title('Joy Plot of City and Highway Mileage by Class', fontsize=18)
+plt.show()
+</code></pre></div><figure><div class="RichText-ConditionalImagePortal"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='699' height='432'></svg>" data-default-watermark-src="https://picx.zhimg.com/50/v2-eb6d45fbf81fb6e5e9d722d60479f010_720w.jpg?source=2c26e567" class="origin_image zh-lightbox-thumb lazy" data-original="https://picx.zhimg.com/v2-ec54dd56c347cc94dbe759f6b339ddd6_r.jpg" data-actualsrc="https://pica.zhimg.com/50/v2-ec54dd56c347cc94dbe759f6b339ddd6_720w.jpg"></div></figure><h2><b>26、分布点图(Distributed Dot Plot)</b></h2><p>分布点图显示了按组划分的点的单变量分布。 点色越浅，该区域中数据点的集中度越高。 通过对中位数进行不同的着色，各组的实际位置会立即变得明显。</p></span></div></div></div>
+</body></html>

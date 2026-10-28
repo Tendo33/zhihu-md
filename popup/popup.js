@@ -165,6 +165,7 @@ async function renderRecent() {
     const b = document.createElement('span');
     b.className = `badge ${it.ok ? 'ok' : 'err'}`;
     b.setAttribute('aria-label', it.ok ? '成功' : '失败');
+    b.setAttribute('role', 'img');
     b.innerHTML = it.ok
       ? '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>'
       : '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>';

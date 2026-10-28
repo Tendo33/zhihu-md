@@ -12,7 +12,10 @@
 
 [安装](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) · [English](./README.en.md) · [使用说明](./docs/usage.md) · [常见问题](./docs/troubleshooting.md) · [隐私说明](./PRIVACY.md) · [更新日志](./CHANGELOG.md)
 
-<img src="docs/screenshots/hero-light.png" width="860" alt="知乎专栏页上的扩展弹窗">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png">
+  <img src="docs/screenshots/hero-light.png" width="860" alt="知乎专栏页上的扩展弹窗">
+</picture>
 
 </div>
 
@@ -27,7 +30,7 @@
 - **图片可打包**：开启「下载图片到本地」后，专栏、回答和问题页的下载导出会生成含 `images/` 目录的 ZIP。
 - **复制 Markdown**：弹窗、悬浮球（右键）、右键菜单都能把 Markdown 复制到剪贴板，也可以只复制选中内容。
 - **页面悬浮球**：可拖拽、靠边停靠、记住位置，可在设置里关闭。
-- **最近导出**：弹窗里列出最近保存的文件，可直接打开。
+- **最近导出**：弹窗里列出最近保存的文件，可在文件夹中显示。
 - 浅色、深色模式都支持。
 
 不是爬虫：只处理你浏览器里能看到的内容，不绕过登录或付费限制，默认不抓评论区。
@@ -74,7 +77,7 @@ npm run build
 | --- | --- |
 | 工具栏弹窗 | 显示页面类型、标题、作者；「导出 Markdown」「复制 Markdown」；最近导出 |
 | 悬浮球 | 左键下载，右键复制；问题页、信息流、热榜优先用它 |
-| 快捷键 | `Alt+Shift+K`（macOS 为 `Option+Shift+K`）导出当前页。只有新安装时 Chrome 才会自动分配；从旧版本升级、或被其他扩展占用时会显示「未设置」，请到 `chrome://extensions/shortcuts` 手动设置 |
+| 快捷键 | 导出当前页。1.1.6 起新安装默认 `Alt+Shift+K`（macOS 为 `Option+Shift+K`）。从旧版本升级时，已经分配过的快捷键（如 `Alt+Shift+Z`）保持不变，不会被自动改成 K；以前没有分配到快捷键的用户，升级后 Chrome 可能补上 K。如需修改，或快捷键被其他扩展占用，请到 `chrome://extensions/shortcuts` 设置 |
 | 右键菜单 | 「导出本页为 Markdown」「复制本页 Markdown」；选中文字时「复制选中内容为 Markdown」；知乎链接上「打开并导出这个知乎链接」 |
 
 <img src="docs/screenshots/popup.png" width="300" alt="工具栏弹窗">
@@ -102,12 +105,12 @@ npm run build
 | `contextMenus` | 提供右键菜单入口 |
 | `downloads` | 把 Markdown 或 ZIP 保存到本地 |
 | `storage` | 保存设置、悬浮球位置和最近导出记录 |
-| `*.zhihu.com` | 在知乎页面运行；问题页批量导出时请求知乎回答接口，打包时下载文中图片 |
+| `*.zhihu.com` | 在知乎页面运行；问题页批量导出时请求知乎回答接口，打包时下载文中图片（图片来自知乎图片 CDN `zhimg.com`） |
 
 ## 隐私
 
 - 扩展没有自己的服务器，不收集、不上传任何数据，没有统计或埋点。
-- 只访问知乎本身，所有转换都在你的浏览器里完成。
+- 只访问知乎及其图片 CDN（`zhimg.com`，仅在打包图片时），所有转换都在你的浏览器里完成。
 - 详见 [PRIVACY.md](./PRIVACY.md)。
 
 ## 常见问题

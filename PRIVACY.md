@@ -35,14 +35,15 @@ The current extension manifest requests only these permissions:
 
 - `activeTab`: Access the currently active Zhihu tab so the extension can read the visible page content you choose to export
 - `clipboardWrite`: Write the Markdown you asked to copy onto your device clipboard
-- `downloads`: Save generated Markdown files or ZIP packages to your device
+- `contextMenus`: Add right-click menu items (export page, copy page, copy selection, open and export a Zhihu link)
+- `downloads`: Save generated Markdown files or ZIP packages to your device, and show a saved file in its folder when you ask
 - `storage`: Save extension settings such as floating button visibility, answer count limit, image download preference, and floating button position
 
 The extension also declares host access for:
 
 - `*://*.zhihu.com/*`
 
-This limits content-script execution to Zhihu pages.
+This limits content-script execution to Zhihu pages. When local image packaging is enabled, images are fetched from Zhihu's image CDN (`*.zhimg.com`), which is not part of the declared host access.
 
 ## 4. Local Storage
 
@@ -51,7 +52,8 @@ The extension stores the following settings locally through Chrome storage APIs:
 - `showFloatingBall`
 - `maxAnswerCount`
 - `downloadImages`
-- `floatingBallPosition`
+- `floatingBallPosition` (`chrome.storage.local`)
+- `recentExports` (`chrome.storage.local`): a list of up to 20 recent exports (title, success flag, time) shown in the popup; it never leaves your browser
 
 These settings are used only to preserve your preferences and UI state. We do not transmit them to our own servers.
 

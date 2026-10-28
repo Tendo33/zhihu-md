@@ -12,7 +12,10 @@
 
 [Install](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) · [中文说明](./README.md) · [Usage (zh)](./docs/usage.md) · [Troubleshooting (zh)](./docs/troubleshooting.md) · [Privacy](./PRIVACY.md) · [Changelog](./CHANGELOG.md)
 
-<img src="docs/screenshots/hero-light.png" width="860" alt="Extension popup on a Zhihu column page">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png">
+  <img src="docs/screenshots/hero-light.png" width="860" alt="Extension popup on a Zhihu column page">
+</picture>
 
 </div>
 
@@ -27,7 +30,7 @@
 - **Optional image bundling**: with "下载图片到本地" on, downloads of columns, answers and question pages become a ZIP with an `images/` folder.
 - **Copy Markdown**: from the popup, the floating ball (right-click) or the context menu; you can also copy just the selection.
 - **Floating ball**: draggable, snaps to the edge, remembers its position; can be turned off.
-- **Recent exports** in the popup, with an Open button.
+- **Recent exports** in the popup, each with a button to show the file in its folder.
 - Light and dark themes.
 
 Not a crawler: it only handles what your browser already shows, does not bypass login or paywalls, and skips comments.
@@ -74,7 +77,7 @@ Open `chrome://extensions`, enable Developer mode, click "Load unpacked" and pic
 | --- | --- |
 | Toolbar popup | Page type, title, author; Export / Copy Markdown; recent exports |
 | Floating ball | Left-click downloads, right-click copies; preferred for question, feed and hot pages |
-| Shortcut | `Alt+Shift+K` (`Option+Shift+K` on macOS) exports the current page. Chrome only assigns it on a fresh install; after an upgrade or a conflict it shows "not set", so set it at `chrome://extensions/shortcuts` |
+| Shortcut | Exports the current page. From 1.1.6, fresh installs default to `Alt+Shift+K` (`Option+Shift+K` on macOS). On upgrade, a shortcut you already had (e.g. `Alt+Shift+Z`) is kept and is not switched to K; if you never had one assigned, Chrome may assign K after the upgrade. To change it, or if another extension takes it, go to `chrome://extensions/shortcuts` |
 | Context menu | 导出本页为 Markdown (export page), 复制本页 Markdown (copy page), 复制选中内容为 Markdown (copy selection), 打开并导出这个知乎链接 (open and export a Zhihu link) |
 
 <img src="docs/screenshots/popup.png" width="300" alt="Toolbar popup">
@@ -102,12 +105,12 @@ Settings live in `chrome.storage.sync`; the ball position in `chrome.storage.loc
 | `contextMenus` | Right-click menu items |
 | `downloads` | Save Markdown or ZIP files |
 | `storage` | Settings, ball position and recent exports |
-| `*.zhihu.com` | Run on Zhihu pages; call Zhihu's answer API for question pages; fetch images when bundling |
+| `*.zhihu.com` | Run on Zhihu pages; call Zhihu's answer API for question pages; fetch images when bundling (images are served from Zhihu's image CDN, `zhimg.com`) |
 
 ## Privacy
 
 - No backend, no analytics, no data collection.
-- Only talks to Zhihu itself; all conversion happens in your browser.
+- Only talks to Zhihu and its image CDN (`zhimg.com`, only when bundling images); all conversion happens in your browser.
 - See [PRIVACY.md](./PRIVACY.md).
 
 ## FAQ

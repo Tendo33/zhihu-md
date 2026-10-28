@@ -30,6 +30,10 @@
   --success: #047857;
   --error: #c62828;
   --warning: #b45309;
+  /* 失败提示框（popup #action-feedback） */
+  --zm-danger-bg: #fdf2f2;
+  --zm-danger-border: #f1c4c4;
+  --zm-danger-text: #a32020;
   --danger: var(--error);
   --blue: #0a5fd1;
 
@@ -81,6 +85,9 @@
     --success: #34d399;
     --error: #f87171;
     --warning: #fbbf24;
+    --zm-danger-bg: #2a1416;
+    --zm-danger-border: #7f2a2a;
+    --zm-danger-text: #fca5a5;
   }
 }
 

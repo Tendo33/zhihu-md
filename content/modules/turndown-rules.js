@@ -240,6 +240,9 @@ export function createTurndownService(downloadImages = false) {
   });
 
   // 知乎参考脚注：<sup data-draft-type="reference" data-text data-url data-numero>
+  // 注意：这套 DOM 结构（属性名、参考列表 class）是按知乎编辑器输出推测的，
+  // 目前没有真实样本核对，测试用的是手写 fixture（tests/fixtures/footnote.html）；
+  // 拿到带参考脚注的真实回答后要按实际结构校正这里和 zhihuReferenceList。
   // 转成 GFM 脚注 [^n]，定义追加在本次转换结果末尾。编号在同一个 service 内递增，
   // 问题页多个回答共用一个 service 时不会撞号。
   const footnotes = { next: 1, pending: [], seen: new Map() };

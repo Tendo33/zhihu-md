@@ -317,6 +317,17 @@ export function createTurndownService(downloadImages = false) {
     replacement: () => ''
   });
 
+  // 标题里不转义有序列表前缀：「## 1. 先记结论」在 ATX 标题里不会被当成列表。
+  // turndown 的 escape 对所有文本节点生效，这里只把标题开头的「1\\. 」还原，其余转义（- + 1) 等）不动。
+  turndownService.addRule('zhihuHeading', {
+    filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+    replacement: (content, node) => {
+      const level = Number(node.nodeName.charAt(1));
+      const text = content.replace(/^(\s*(?:\*\*|__|[*_])?)(\d+)\\\. /, '$1$2. ');
+      return `\n\n${'#'.repeat(level)} ${text}\n\n`;
+    }
+  });
+
   return turndownService;
 }
 

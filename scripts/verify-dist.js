@@ -3,6 +3,7 @@
 // 用法：node scripts/verify-dist.js [distDir]
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const dist = path.resolve(process.argv[2] || 'dist');
 const manifestPath = path.join(dist, 'manifest.json');
@@ -78,7 +79,9 @@ export function verifyDist(dir) {
   return { missing, checked };
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname);
+// 用 fileURLToPath 解码 import.meta.url：路径含空格、中文时 URL.pathname 是百分号编码，
+// 和 argv[1] 比不上，会导致脚本什么都不做、以 0 退出。
+const isMain = Boolean(process.argv[1]) && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (!fs.existsSync(manifestPath)) {
     console.error(`verify:dist 失败：找不到 ${manifestPath}，请先运行 npm run build`);

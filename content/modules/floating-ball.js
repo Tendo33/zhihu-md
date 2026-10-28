@@ -207,6 +207,15 @@ export const FloatingBall = {
     }
   },
 
+  /**
+   * Round 3：快捷键 / 右键菜单触发导出。有悬浮球就在球上反馈；用户关掉了悬浮球时，
+   * 用一个不挂到页面的球元素跑同一流程，结果仍经 live region 播报。
+   */
+  exportFromCommand() {
+    const ball = document.getElementById('zhihu-md-floating-ball') || this.createFloatingBall();
+    return this.handleBallClick(ball);
+  },
+
   copyMarkdown(ball) {
     if (this.busy) return;
     this.busy = true;

@@ -49,6 +49,14 @@ if (window.__zhihuMdInjected) {
         Logger.info('返回导出结果:', result.success ? '成功' : '失败');
         sendResponse(result);
       })();
+    } else if (message.action === 'triggerExport') {
+      // 快捷键 Alt+Shift+Z（Round 3）
+      if (!PageDetector.isValidArticlePage()) {
+        sendResponse({ success: false, reason: 'unsupported' });
+        return true;
+      }
+      FloatingBall.exportFromCommand();
+      sendResponse({ success: true });
     } else if (message.action === 'routeChanged') {
       Logger.info('路由改变，重新检查悬浮球状态...');
       scheduleFloatingBallInit(800);

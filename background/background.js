@@ -159,3 +159,17 @@ async function downloadImages(images) {
   return successful;
 }
 
+
+// Round 3：快捷键导出当前页（manifest commands.export-page，默认 Alt+Shift+Z；不需要权限）
+if (chrome.commands && chrome.commands.onCommand) {
+  chrome.commands.onCommand.addListener((command, tab) => {
+    if (command !== 'export-page') return;
+    triggerExportInTab(tab).catch((e) => Logger.warn('快捷键导出未送达', e && e.message));
+  });
+}
+
+export async function triggerExportInTab(tab) {
+  const target = tab && tab.id != null ? tab : (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+  if (!target || target.id == null) return { success: false };
+  return chrome.tabs.sendMessage(target.id, { action: 'triggerExport' });
+}

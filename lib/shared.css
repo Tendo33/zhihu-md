@@ -18,20 +18,20 @@
   --border-strong: #7DD3FC; /* Sky 300 */
 
   --text-primary: #0C4A6E; /* Sky 900 */
-  --text-secondary: #0369A1; /* Sky 700 */
-  --text-tertiary: #0EA5E9; /* Sky 500 */
+  --text-secondary: #3d4350; /* Round 2 中性色 */
+  --text-tertiary: #5b6270; /* Round 2：原 Sky 500 对比度不足 */
 
   /* Accent Colors */
-  --accent: #0369A1; /* Sky 700 */
+  --accent: #0a5fd1; /* Round 2 品牌蓝 */
   --accent-inverse: #FFFFFF;
-  --accent-hover: #075985; /* Sky 800 */
-  --accent-active: #0B4F79; /* Sky 900 */
+  --accent-hover: #0852b5;
+  --accent-active: #06449a;
   
-  --success: #059669; /* Emerald 600 */
-  --error: #DC2626; /* Red 600 */
-  --warning: #D97706; /* Amber 600 */
+  --success: #047857;
+  --error: #c62828;
+  --warning: #b45309;
   --danger: var(--error);
-  --blue: #0284C7; /* Sky 600 */
+  --blue: #0a5fd1;
 
   /* Spacing & sizing */
   --radius-sm: 6px;
@@ -73,10 +73,14 @@
     --text-secondary: #CBD5E1; /* Slate 300 */
     --text-tertiary: #94A3B8; /* Slate 400 */
 
-    --accent: #38BDF8; /* Sky 400 */
-    --accent-inverse: #0F172A;
-    --accent-hover: #7DD3FC; /* Sky 300 */
-    --accent-active: #0EA5E9; /* Sky 500 */
+    --accent: #60a5fa;
+    --accent-inverse: #06142b;
+    --accent-hover: #93c5fd;
+    --accent-active: #3b82f6;
+    --blue: #60a5fa;
+    --success: #34d399;
+    --error: #f87171;
+    --warning: #fbbf24;
   }
 }
 

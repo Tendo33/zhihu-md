@@ -106,6 +106,17 @@ function showArticleInfo(info) {
   setExportActionsEnabled(true);
 }
 
+/** Z5 空状态文案 */
+function emptyStateCopy(message, silent) {
+  if (silent) {
+    return {
+      title: '当前页面不支持导出',
+      desc: message === '此页面不是知乎页面' || !message ? '打开知乎专栏文章、回答或问题页后再试' : message
+    };
+  }
+  return { title: '没能读取这个页面', desc: message || '请刷新知乎页面后重试' };
+}
+
 /**
  * Show error state
  * @param {string} message - Error message to display
@@ -122,9 +133,12 @@ function showError(message, silent = false, showRefresh = false) {
     updateStatus('error', '失败');
   }
 
-  // Update error message text
-  const errorText = errorMessage.querySelector('p');
-  if (errorText) errorText.textContent = message;
+  // Z5：标题说明发生了什么，描述给下一步
+  const copy = emptyStateCopy(message, silent);
+  const title = errorMessage.querySelector('.empty-title');
+  const desc = errorMessage.querySelector('.empty-desc');
+  if (title) title.textContent = copy.title;
+  if (desc) desc.textContent = copy.desc;
 
   errorMessage.classList.remove('hidden');
 
@@ -137,7 +151,7 @@ function showError(message, silent = false, showRefresh = false) {
   }
 
   articleInfo.classList.add('hidden');
-  setExportActionsEnabled(false);
+  setExportActionsEnabled(false, silent ? '当前页面不支持导出，所以按钮不可用' : '页面内容没有读取成功，所以按钮不可用');
 }
 
 /** 导出/复制失败的具体原因：保留到下一次操作，不随按钮文字一起消失 */
@@ -154,9 +168,15 @@ function showActionFeedback(feedback) {
   actionFeedback.classList.remove('hidden');
 }
 
-function setExportActionsEnabled(enabled) {
+/** Z3：按钮不可用时给出原因，并通过 aria-describedby 关联到按钮 */
+function setExportActionsEnabled(enabled, reason = '') {
   exportBtn.disabled = !enabled;
   if (copyBtn) copyBtn.disabled = !enabled;
+  const hint = document.getElementById('action-hint');
+  if (hint) {
+    hint.textContent = enabled ? '' : reason;
+    hint.classList.toggle('hidden', enabled || !reason);
+  }
 }
 
 /**

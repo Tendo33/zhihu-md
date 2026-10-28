@@ -387,3 +387,34 @@ body {
   line-height: 1.5;
 }
 .action-feedback.hidden { display: none; }
+
+/* Z5 空状态：标题 + 下一步 */
+.state-empty .empty-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.state-empty .empty-desc { font-size: 13px; color: var(--text-secondary); }
+.empty-icon { color: var(--text-secondary); }
+
+/* Z3 禁用原因 */
+.action-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Z3 禁用态：去掉品牌色和阴影，明确不可点 */
+.btn:disabled,
+.btn-primary:disabled {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+.btn-primary { box-shadow: none; }
+
+/* Z4 状态点：图形对比度 ≥3:1 */
+.status-dot,
+.status-badge.loading .status-dot,
+.status-badge.idle .status-dot { background-color: var(--text-tertiary); }

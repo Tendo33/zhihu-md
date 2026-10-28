@@ -3,6 +3,7 @@
  * Handles export for single column articles and answers
  */
 
+import { failureResult } from '../../../lib/failure-reason.js';
 import { CONSTANTS, cleanFilename, querySelectorAny } from '../constants.js';
 import { PageDetector } from '../detector.js';
 import { createTurndownService } from '../turndown-rules.js';
@@ -188,7 +189,7 @@ date: ${date}`;
     const container = this.getContentContainer(pageType);
 
     if (!container) {
-      return { success: false, error: '无法找到文章内容' };
+      return failureResult();
     }
 
     return {
@@ -232,7 +233,7 @@ date: ${date}`;
     }
 
     if (!container) {
-      return { success: false, error: '无法找到文章内容' };
+      return failureResult();
     }
 
     try {

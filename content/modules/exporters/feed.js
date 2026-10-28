@@ -3,6 +3,7 @@
  * Handles export for home page and follow page feeds
  */
 
+import { failureResult } from '../../../lib/failure-reason.js';
 import { CONSTANTS, normalizeUrl, scrollToLoadItems } from '../constants.js';
 import { createTurndownService } from '../turndown-rules.js';
 import {
@@ -134,7 +135,7 @@ export const FeedExporter = {
       const itemsToProcess = unlimited ? uniqueItems : uniqueItems.slice(0, maxItemCount);
 
       if (itemsToProcess.length === 0) {
-        return { success: false, error: '未找到任何内容' };
+        return failureResult();
       }
 
       const turndownService = createTurndownService();

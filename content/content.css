@@ -240,3 +240,11 @@
     animation: none !important;
   }
 }
+
+/* 失败原因提示需要主动显示，不依赖悬停 */
+#zhihu-md-floating-ball.error .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+  color: var(--error);
+}

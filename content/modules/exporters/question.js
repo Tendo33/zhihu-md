@@ -3,6 +3,7 @@
  * Handles export for multiple answers on question pages
  */
 
+import { failureResult } from '../../../lib/failure-reason.js';
 import { ArticleExporter } from './article.js';
 import { CONSTANTS, cleanFilename } from '../constants.js';
 import { PageDetector } from '../detector.js';
@@ -181,7 +182,7 @@ export const QuestionExporter = {
       const truncated = Boolean(questionId) && !feedState.isEnd && answers.length > 0;
 
       if (answers.length === 0) {
-        return { success: false, error: '未找到任何回答' };
+        return failureResult();
       }
 
       let markdown = `---

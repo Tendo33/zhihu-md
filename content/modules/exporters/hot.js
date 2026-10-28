@@ -3,6 +3,7 @@
  * Handles export for Zhihu hot list page
  */
 
+import { failureResult } from '../../../lib/failure-reason.js';
 import { extractHotFallback, extractHotItems } from '../zhihu-dom.js';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,7 +31,7 @@ export const HotExporter = {
       if (items.length === 0) items = extractHotFallback(document);
 
       if (items.length === 0) {
-        return { success: false, error: '未找到热榜内容，请确保在热榜页面' };
+        return failureResult();
       }
 
       const date = new Date().toISOString().split('T')[0];

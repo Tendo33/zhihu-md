@@ -113,7 +113,7 @@ export const FloatingBall = {
     this.updateBallState(ball, state);
     ball.querySelector('.tooltip').textContent = message;
     if (state !== 'normal') {
-      setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), 1600);
+      setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), state === 'error' ? 4000 : 1600);
     }
   },
 
@@ -167,6 +167,9 @@ export const FloatingBall = {
         await chrome.runtime.sendMessage(messageData);
 
         this.finishBall(ball, generation, 'success', '导出成功!');
+      } else if (result.reason) {
+        // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办
+        this.finishBall(ball, generation, 'error', result.error);
       } else {
         throw new Error(result.error || '导出失败');
       }
@@ -188,14 +191,18 @@ export const FloatingBall = {
       else if (pageType === 'home' || pageType === 'follow') result = await FeedExporter.exportFeedItems(pageType);
       else if (pageType === 'hot') result = await HotExporter.exportHotList();
       else result = await ArticleExporter.exportMarkdown(false);
-      if (!result || !result.success) throw new Error(result?.error || '复制失败');
+      if (!result || !result.success) {
+        const failure = new Error(result?.error || '复制失败');
+        failure.reason = result?.reason;
+        throw failure;
+      }
       return result.data.content;
     });
     pending.then(() => {
       this.finishBall(ball, generation, 'success', '已复制');
     }).catch((error) => {
       console.error('[Zhihu-MD] copy failed', error);
-      this.finishBall(ball, generation, 'error', '复制失败');
+      this.finishBall(ball, generation, 'error', error.reason ? error.message : '复制失败');
     });
   },
 

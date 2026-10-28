@@ -35,7 +35,7 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 0;
-  box-shadow: 0 4px 20px rgba(12, 74, 110, 0.12);
+  box-shadow: var(--shadow-2); /* 设计复验 S1：改用 ui-v2 阴影 token，去掉天蓝色调 */
   display: flex;
   flex-direction: column;
 }

@@ -8,6 +8,11 @@ body { min-width: 320px; }
 .btn-xs { min-height: 28px; padding: 0 8px; }
 .alert > svg { flex: none; margin-top: 1px; }
 .alert > div { min-width: 0; overflow-wrap: anywhere; }
+/* 设计复验 N1：限流提示里「刷新页面」不能撑出 popup——提示框允许换行，正文可收缩，按钮不超过整行 */
+.alert { flex-wrap: wrap; }
+.alert > div:not(.x) { flex: 1 1 10em; }
+.alert .x { max-width: 100%; flex: none; }
+.alert .x .btn { max-width: 100%; white-space: normal; }
 .recent { display: flex; flex-direction: column; gap: 12px; }
 .recent.hidden { display: none; }
 #recent-list { padding: 4px 10px; }

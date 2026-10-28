@@ -22,11 +22,17 @@ for (const [name, err, action, reason, re] of cases) {
 }
 console.log(`failure-text: ${cases.length} passed`);
 
-// 设计验收 R3：限流时 popup 文案用真实 40362 响应体（zhihu-r2 夹具 zhuanlan/p/2004，Chrome 以 <pre> 显示）走完整链路
+// 设计验收 R3：限流时 popup 文案用 40362 响应体走完整链路（Chrome 以 <pre> 显示 JSON）。
+// 来源：已脱敏夹具 tests/fixtures/rate-limit-40362.json，内容摘自 round2 测试桩 tools/zhihu-r2.mjs:22（'zhuanlan/p/2004'），
+// 与 round2 实测截获的响应（screenshots/round2-fix/measure.json）结构和文案一致，但去掉了末尾 32 位请求追踪串；
+// 不含账号、Cookie、用户 ID 或任何请求标识。
 {
   const { parseHTML } = await import('linkedom');
   const { diagnoseFailure, failureResult } = await import('../lib/failure-reason.js');
-  const REAL_40362 = '{"error":{"code":40362,"message":"您当前请求存在异常，暂时限制本次访问。如有疑问，您可以通过手机摇一摇或登录后私信知乎小管家反馈。","name":"ERR_RATE_LIMITED"}}';
+  const { readFileSync } = await import('node:fs');
+  const REAL_40362 = readFileSync(new URL('../tests/fixtures/rate-limit-40362.json', import.meta.url), 'utf8').trim();
+  assert.equal(JSON.parse(REAL_40362).error.code, 40362);
+  assert.doesNotMatch(REAL_40362, /[0-9a-f]{16,}|cookie|token|uid|user_?id|member|url_token/i, '夹具必须已脱敏');
   const { document } = parseHTML(`<!doctype html><html><head></head><body><pre>${REAL_40362}</pre></body></html>`);
   const url = 'https://zhuanlan.zhihu.com/p/2004';
   assert.equal(diagnoseFailure(document, url).code, 'security_check', '真实 40362 判定为 security_check');

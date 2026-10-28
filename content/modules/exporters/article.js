@@ -153,6 +153,9 @@ date: ${date}`;
       }
     });
 
+    // batch6 ZB5-03：把相邻文本节点合并。回答页（React 渲染、API 正文）里「<尖括号>」常被拆成「<」「尖括号」「>」几个文本节点，
+    // turndown 按文本节点转义，行首的「>」会变成「\>」；合并后与专栏页一致，导出「<尖括号>」。
+    clonedContainer.normalize();
     return clonedContainer;
   },
 

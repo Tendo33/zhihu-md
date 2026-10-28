@@ -19,9 +19,10 @@ function saveOptions() {
     Logger.info('设置已保存:', { showFloatingBall, maxAnswerCount: validCount, downloadImages });
     const status = document.getElementById('status');
     status.classList.add('show');
-    setTimeout(() => {
+    clearTimeout(saveOptions.hideTimer);
+    saveOptions.hideTimer = setTimeout(() => {
       status.classList.remove('show');
-    }, 1500);
+    }, 4000);
   });
 }
 

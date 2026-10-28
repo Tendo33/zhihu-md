@@ -164,6 +164,9 @@ body {
 }
 .status-badge.error .status-dot { background-color: var(--error); }
 
+.status-badge.idle { color: var(--text-secondary); }
+.status-badge.idle .status-dot { background-color: var(--text-tertiary); }
+
 @keyframes pulse {
   0%, 100% { opacity: 0.5; transform: scale(0.9); }
   50% { opacity: 1; transform: scale(1.1); }

@@ -60,7 +60,7 @@ async function safeSendMessage(tabId, message, maxRetries = 2, delay = 500) {
  */
 function updateStatus(type, text) {
   // Remove all likely classes first to be safe
-  statusBadge.classList.remove('loading', 'success', 'error');
+  statusBadge.classList.remove('loading', 'success', 'error', 'idle');
   statusBadge.classList.add(type);
   statusText.textContent = text;
 }
@@ -113,7 +113,12 @@ function showError(message, silent = false, showRefresh = false) {
   if (!silent) {
     Logger.debug('Show Error:', message);
   }
-  updateStatus('error', '失败');
+  // Unsupported pages are an expected state, not a failure
+  if (silent) {
+    updateStatus('idle', '不支持此页面');
+  } else {
+    updateStatus('error', '失败');
+  }
 
   // Update error message text
   const errorText = errorMessage.querySelector('p');

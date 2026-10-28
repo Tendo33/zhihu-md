@@ -47,15 +47,15 @@ This limits content-script execution to Zhihu pages. When local image packaging 
 
 ## 4. Local Storage
 
-The extension stores the following settings locally through Chrome storage APIs:
+The extension stores the following data through Chrome storage APIs:
 
-- `showFloatingBall`
-- `maxAnswerCount`
-- `downloadImages`
+- `showFloatingBall` (`chrome.storage.sync`, synced with your browser account when sync is on)
+- `maxAnswerCount` (`chrome.storage.sync`)
+- `downloadImages` (`chrome.storage.sync`)
 - `floatingBallPosition` (`chrome.storage.local`)
 - `recentExports` (`chrome.storage.local`): a list of up to 20 recent exports (title, success flag, time) shown in the popup; it never leaves your browser
 
-These settings are used only to preserve your preferences and UI state. We do not transmit them to our own servers.
+These values are used only to preserve your preferences and UI state. We do not transmit them to our own servers.
 
 ## 5. Image Download Mode
 

@@ -30,7 +30,7 @@
 - **Optional image bundling**: with "下载图片到本地" on, downloads of columns, answers and question pages become a ZIP with an `images/` folder.
 - **Copy Markdown**: from the popup, the floating ball (right-click) or the context menu; you can also copy just the selection.
 - **Floating ball**: draggable, snaps to the edge, remembers its position; can be turned off.
-- **Recent exports** in the popup, each with a button to show the file in its folder.
+- **Recent exports** in the popup (title, status and time); the file you just saved can be shown in its folder with one click.
 - Light and dark themes.
 
 Not a crawler: it only handles what your browser already shows, does not bypass login or paywalls, and skips comments.
@@ -105,7 +105,8 @@ Settings live in `chrome.storage.sync`; the ball position in `chrome.storage.loc
 | `contextMenus` | Right-click menu items |
 | `downloads` | Save Markdown or ZIP files |
 | `storage` | Settings, ball position and recent exports |
-| `*.zhihu.com` | Run on Zhihu pages; call Zhihu's answer API for question pages; fetch images when bundling (images are served from Zhihu's image CDN, `zhimg.com`) |
+| `*.zhihu.com` | Run on Zhihu pages; call Zhihu's answer API for question pages; fetch images when bundling |
+| (no permission) `zhimg.com` | Zhihu's image CDN; images are fetched with plain requests when bundling and are not covered by the declared host access |
 
 ## Privacy
 

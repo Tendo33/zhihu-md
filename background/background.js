@@ -5,6 +5,7 @@
 
 import { createLogger } from '../lib/logger.js';
 import { createZipWithImages } from '../lib/zip.js';
+import { recordRecent, titleFromFilename } from '../lib/recent-exports.js';
 
 const Logger = createLogger('[Zhihu-MD Background]');
 
@@ -22,30 +23,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Check if we need to download images
     if (message.downloadImages && message.images && message.images.length > 0) {
       handleDownloadWithImages(message.filename, message.content, message.images)
-        .then(() => {
+        .then((info) => {
           Logger.success('带图片下载完成');
-          sendResponse({ success: true });
+          remember(message, true);
+          sendResponse({ success: true, ...info });
         })
         .catch(error => {
           Logger.error('带图片下载失败:', error);
+          remember(message, false);
           sendResponse({ success: false, error: error.message });
         });
     } else {
       handleDownload(message.filename, message.content)
-        .then(() => {
+        .then((info) => {
           Logger.success('下载完成');
-          sendResponse({ success: true });
+          remember(message, true);
+          sendResponse({ success: true, ...info });
         })
         .catch(error => {
           Logger.error('下载失败:', error);
+          remember(message, false);
           sendResponse({ success: false, error: error.message });
         });
     }
     return true;
+  } else if (message.action === 'recordExport') {
+    // 悬浮球导出失败时也记进「最近导出」
+    remember(message, !!message.ok);
   } else {
     Logger.warn('未知的消息类型:', message.action);
   }
 });
+
+/** Round 3 C-2：popup「最近导出」 */
+function remember(message, ok) {
+  const title = message.title || titleFromFilename(message.filename);
+  recordRecent(chrome.storage, { title, ok }).catch((e) => Logger.warn('记录最近导出失败', e));
+}
 
 /**
  * Handle simple file download (no images)
@@ -60,12 +74,12 @@ async function handleDownload(filename, content) {
     reader.onload = async () => {
       try {
         const dataUrl = reader.result;
-        await chrome.downloads.download({
+        const downloadId = await chrome.downloads.download({
           url: dataUrl,
           filename: filename,
           saveAs: true
         });
-        resolve();
+        resolve({ downloadId, filename });
       } catch (error) {
         reject(error);
       }
@@ -99,12 +113,12 @@ async function handleDownloadWithImages(filename, content, images) {
         const dataUrl = reader.result;
         const zipFilename = filename.replace('.md', '') + '_with_images.zip';
         
-        await chrome.downloads.download({
+        const downloadId = await chrome.downloads.download({
           url: dataUrl,
           filename: zipFilename,
           saveAs: true
         });
-        resolve();
+        resolve({ downloadId, filename: zipFilename });
       } catch (error) {
         reject(error);
       }

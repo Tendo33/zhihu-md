@@ -49,44 +49,64 @@ const runTimers = () => { while (timers.length) timers.shift().fn(); };
   console.log('ball failure DOM tests passed');
 }
 
-// ---------- popup ----------
+// ---------- popup（Round 3 v2：内联 alert + 主按钮变「重试」 + 最近导出） ----------
 {
   const html = fs.readFileSync(new URL('../popup/popup.html', import.meta.url), 'utf8')
     .replace(/<script[^>]*><\/script>/g, '');
   const { window, document } = parseHTML(html);
   globalThis.window = window; globalThis.document = document;
   const sent = [];
+  const local = {};
+  let dl = { success: false, error: 'never' };
+  let exportRes = { success: false, reason: 'security_check', error: 'raw' };
   globalThis.chrome = {
     tabs: {
       query: async () => [{ id: 7, url: 'https://zhuanlan.zhihu.com/p/123' }],
       sendMessage: async (_id, msg) => {
         sent.push(msg.action);
         if (msg.action === 'getArticleInfo') return { success: true, data: { title: 'T', author: 'A' } };
-        return { success: false, reason: 'security_check', error: 'raw' };
+        return exportRes;
       },
       reload() {},
     },
-    runtime: { sendMessage: async () => ({}), openOptionsPage() {}, getURL: (p) => p },
-    storage: { sync: { get: (d, cb) => cb(d) } },
+    runtime: { sendMessage: async () => dl, openOptionsPage() {}, getURL: (p) => p, getManifest: () => ({ version: '9.9.9' }) },
+    commands: { getAll: async () => [{ name: 'export-page', shortcut: 'Alt+Shift+Z' }] },
+    downloads: { show(id) { sent.push('show:' + id); } },
+    storage: { sync: { get: (d, cb) => cb(d) }, local: { get: async (d) => ({ ...d, ...local }), set: async (o) => Object.assign(local, o) } },
   };
   await import('../popup/popup.js');
-  for (let i = 0; i < 5; i++) await flush();
+  for (let i = 0; i < 8; i++) await flush();
   const exportBtn = document.getElementById('export-btn');
+  const label = () => exportBtn.querySelector('.label').textContent;
   assert.equal(exportBtn.disabled, false, 'ready after init');
-  // 设计建议 6：作者写进 span，不冲掉图标
-  assert.equal(document.querySelector('#article-author span').textContent, 'A');
-  assert.ok(document.querySelector('#article-author svg'), 'author icon kept');
+  assert.equal(document.getElementById('article-author').textContent, 'A');
+  assert.equal(document.getElementById('footer-version').textContent, 'v9.9.9');
   exportBtn.dispatchEvent(new window.Event('click'));
-  for (let i = 0; i < 5; i++) await flush();
+  for (let i = 0; i < 8; i++) await flush();
   const fb = document.getElementById('action-feedback');
   assert.deepEqual(sent, ['getArticleInfo', 'exportMarkdown']);
-  assert.equal(fb.textContent, SECURITY);
+  assert.equal(fb.getAttribute('role'), 'alert');
+  assert.equal(document.getElementById('feedback-title').textContent, SECURITY.split('：')[0]);
+  assert.ok(document.getElementById('feedback-hint').textContent.includes('重试'));
   assert.equal(fb.dataset.reason, 'security_check');
   assert.ok(!fb.classList.contains('hidden'));
-  assert.equal(exportBtn.querySelector('span').textContent, '导出失败');
-  runTimers(); // 2 秒后按钮恢复，但失败原因保留
-  assert.equal(exportBtn.querySelector('span').textContent, '导出 Markdown');
-  assert.equal(fb.textContent, SECURITY, 'feedback persists after button reset');
+  assert.equal(label(), '重试', 'Z3-3: primary becomes retry');
+  assert.equal(document.querySelector('#page-status .status-text').textContent, '失败');
+  runTimers();
+  assert.ok(!fb.classList.contains('hidden'), 'feedback persists');
+  assert.equal(local.recentExports[0].ok, false, 'content-side failure recorded by popup');
+
+  // 成功：ok alert 带文件名，打开按钮调 downloads.show
+  exportRes = { success: true, data: { filename: 'T-A.md', content: '# T' } };
+  dl = { success: true, downloadId: 42, filename: 'T-A.md' };
+  exportBtn.dispatchEvent(new window.Event('click'));
+  for (let i = 0; i < 8; i++) await flush();
+  assert.ok(fb.classList.contains('hidden'), 'error cleared on success');
+  assert.equal(document.getElementById('ok-file').textContent, 'T-A.md');
+  document.getElementById('open-btn').dispatchEvent(new window.Event('click'));
+  assert.ok(sent.includes('show:42'));
+  assert.equal(label(), '导出 Markdown');
+  assert.equal(local.recentExports.length, 1, 'background records successes, popup does not double-record');
   console.log('popup failure DOM tests passed');
 }
 globalThis.setTimeout = realSetTimeout;

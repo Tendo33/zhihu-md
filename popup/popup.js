@@ -1,401 +1,322 @@
 /**
- * Popup script for Zhihu-md extension
- * Handles UI interactions and communication with content script
+ * Popup v2（Round 3 C-2 / Z3-3）
+ * 结构：顶栏 → 当前页卡片（状态徽标、标题、类型 · 作者、进度）→ 内联 alert → 主按钮整行 + 次按钮 → 最近导出 3 条 → 底栏（快捷键、版本）
  */
 
 import { createLogger } from '../lib/logger.js';
 import { checkUrlType } from '../lib/page-detector.js';
 import { copyTextLater } from '../lib/clipboard.js';
 import { describeFailure, ExportFailure } from '../lib/failure-text.js';
+import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
 
-Logger.info('Popup Script Loaded');
-
-// DOM Elements
-const statusBadge = document.getElementById('page-status');
+const $ = (id) => document.getElementById(id);
+const statusBadge = $('page-status');
 const statusText = statusBadge.querySelector('.status-text');
-const articleInfo = document.getElementById('article-info');
-const actionFeedback = document.getElementById('action-feedback');
-const articleTitle = document.getElementById('article-title');
-const articleAuthor = document.getElementById('article-author').querySelector('span');
-const articleType = document.getElementById('article-type').querySelector('span');     // Direct span child
-const errorMessage = document.getElementById('error-message');
-const refreshBtn = document.getElementById('refresh-btn');
-const exportBtn = document.getElementById('export-btn');
-const copyBtn = document.getElementById('copy-btn');
-const settingsBtn = document.getElementById('settings-btn');
+const articleInfo = $('article-info');
+const articleTitle = $('article-title');
+const articleType = $('article-type');
+const articleAuthor = $('article-author');
+const authorWrap = $('article-author-wrap');
+const errorMessage = $('error-message');
+const actionFeedback = $('action-feedback');
+const actionOk = $('action-ok');
+const actionInfo = $('action-info');
+const progress = $('progress');
+const refreshBtn = $('refresh-btn');
+const openBtn = $('open-btn');
+const exportBtn = $('export-btn');
+const copyBtn = $('copy-btn');
+const settingsBtn = $('settings-btn');
+const exportLabel = exportBtn.querySelector('.label');
+const copyLabel = copyBtn.querySelector('.label');
 
-/**
- * Wait for a specific duration (ms)
- */
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const PRIMARY = '导出 Markdown';
+const COPY = '复制 Markdown';
+const TYPE_LABEL = {
+  column: ['知乎专栏', '专栏文章'], answer: ['知乎回答', '回答'], question: ['知乎问题', '问题'],
+  home: ['知乎首页', '首页推荐'], follow: ['知乎关注', '关注动态'], hot: ['知乎热榜', '热榜'],
+};
+let pageBadge = '知乎页面';
+let lastDownloadId = null;
+let retryMode = false;
 
-/**
- * Try to send a message to a tab with retries
- * Useful when the content script might not be ready yet
- */
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function safeSendMessage(tabId, message, maxRetries = 2, delay = 500) {
   let lastError;
   for (let i = 0; i <= maxRetries; i++) {
     try {
-      if (i > 0) {
-        Logger.info(`Retrying sendMessage (${i}/${maxRetries})...`);
-        await sleep(delay);
-      }
+      if (i > 0) await sleep(delay);
       return await chrome.tabs.sendMessage(tabId, message);
     } catch (error) {
       lastError = error;
-      // Only retry if it's a "Could not establish connection" error
-      if (error.message && error.message.includes('Could not establish connection')) {
-        continue;
-      }
-      // For other errors, throw immediately
+      if (error.message && error.message.includes('Could not establish connection')) continue;
       throw error;
     }
   }
   throw lastError;
 }
 
-/**
- * Update the status badge display
- */
+/** 徽标：idle（页面类型）/ run / ok / err */
 function updateStatus(type, text) {
-  // Remove all likely classes first to be safe
-  statusBadge.classList.remove('loading', 'success', 'error', 'idle');
-  statusBadge.classList.add(type);
+  statusBadge.className = `badge ${type}`;
   statusText.textContent = text;
 }
 
-/**
- * Show article information
- */
+function hideAlerts() {
+  for (const el of [actionFeedback, actionOk, actionInfo]) el.classList.add('hidden');
+}
+
 function showArticleInfo(info) {
-  articleTitle.textContent = info.title;
+  const [badge, label] = TYPE_LABEL[info.type] || ['知乎页面', '页面'];
+  pageBadge = badge;
+  updateStatus('idle', badge);
+  articleTitle.textContent = info.title || '（无标题）';
   articleTitle.setAttribute('title', info.title || '');
+  articleType.textContent = label;
   articleAuthor.textContent = info.author || '未知作者';
-
-  // Handle different page types
-  let typeLabel;
-  switch (info.type) {
-    case 'column':
-      typeLabel = '专栏文章';
-      break;
-    case 'answer':
-      typeLabel = '回答';
-      break;
-    case 'question':
-      typeLabel = '问题';
-      break;
-    case 'home':
-      typeLabel = '首页推荐';
-      break;
-    case 'follow':
-      typeLabel = '关注动态';
-      break;
-    case 'hot':
-      typeLabel = '热榜';
-      break;
-    default:
-      typeLabel = '页面';
-  }
-  articleType.textContent = typeLabel;
-
+  authorWrap.classList.toggle('hidden', !info.author);
   articleInfo.classList.remove('hidden');
-  errorMessage.classList.add('hidden'); // Ensure error is hidden
+  errorMessage.classList.add('hidden');
   setExportActionsEnabled(true);
 }
 
-/** Z5 空状态文案 */
-function emptyStateCopy(message, silent) {
-  if (silent) {
-    return {
-      title: '当前页面不支持导出',
-      desc: message === '此页面不是知乎页面' || !message ? '打开知乎专栏文章、回答或问题页后再试' : message
-    };
-  }
-  return { title: '没能读取这个页面', desc: message || '请刷新知乎页面后重试' };
-}
-
-/**
- * Show error state
- * @param {string} message - Error message to display
- * @param {boolean} silent - If true, don't log to console (for expected cases like non-Zhihu pages)
- */
-function showError(message, silent = false, showRefresh = false) {
-  if (!silent) {
-    Logger.debug('Show Error:', message);
-  }
-  // Unsupported pages are an expected state, not a failure
-  if (silent) {
-    updateStatus('idle', '不支持此页面');
-  } else {
-    updateStatus('error', '失败');
-  }
-
-  // Z5：标题说明发生了什么，描述给下一步
-  const copy = emptyStateCopy(message, silent);
-  const title = errorMessage.querySelector('.empty-title');
-  const desc = errorMessage.querySelector('.empty-desc');
-  if (title) title.textContent = copy.title;
-  if (desc) desc.textContent = copy.desc;
-
-  errorMessage.classList.remove('hidden');
-
-  if (refreshBtn) {
-    if (showRefresh) {
-      refreshBtn.classList.remove('hidden');
-    } else {
-      refreshBtn.classList.add('hidden');
-    }
-  }
-
+/** 非知乎页、不支持的知乎页：空状态卡，按钮置灰 */
+function showUnsupported(desc) {
   articleInfo.classList.add('hidden');
-  setExportActionsEnabled(false, silent ? '当前页面不支持导出，所以按钮不可用' : '页面内容没有读取成功，所以按钮不可用');
+  errorMessage.querySelector('.empty-desc').textContent = desc || '打开知乎问题、回答或专栏文章后可用';
+  errorMessage.classList.remove('hidden');
+  updateStatus('idle', '不支持此页面');
+  setExportActionsEnabled(false, '当前页面不支持导出，所以按钮不可用');
 }
 
-/** 导出/复制失败的具体原因：保留到下一次操作，不随按钮文字一起消失 */
+/** 内容脚本还没就绪：info alert，按钮置灰，可刷新 */
+function showNotReady(tab, text, showRefresh) {
+  articleTitle.textContent = (tab && tab.title) || '知乎页面';
+  updateStatus('idle', '不可用');
+  $('info-text').textContent = text;
+  refreshBtn.classList.toggle('hidden', !showRefresh);
+  actionInfo.classList.remove('hidden');
+  setExportActionsEnabled(false, text);
+}
+
+/** popup 里主按钮就是「重试」，下一步写短一点（与样稿一致） */
+const POPUP_HINT = { security_check: '在知乎页面完成验证后点“重试”' };
+
+/** Z3-3：失败用内联 alert（原因 + 下一步），主按钮变成「重试」 */
 function showActionFeedback(feedback) {
-  if (!actionFeedback) return;
   if (!feedback) {
-    actionFeedback.textContent = '';
     actionFeedback.classList.add('hidden');
     delete actionFeedback.dataset.reason;
+    $('feedback-title').textContent = '';
+    $('feedback-hint').textContent = '';
     return;
   }
-  actionFeedback.textContent = feedback.text;
+  const [title, ...rest] = feedback.text.split(/[：:]/);
+  $('feedback-title').textContent = rest.length ? title : feedback.text;
+  $('feedback-hint').textContent = POPUP_HINT[feedback.reason] || rest.join('：');
   actionFeedback.dataset.reason = feedback.reason;
   actionFeedback.classList.remove('hidden');
 }
 
-/** Z3：按钮不可用时给出原因，并通过 aria-describedby 关联到按钮 */
 function setExportActionsEnabled(enabled, reason = '') {
   exportBtn.disabled = !enabled;
-  if (copyBtn) copyBtn.disabled = !enabled;
-  const hint = document.getElementById('action-hint');
-  if (hint) {
-    hint.textContent = enabled ? '' : reason;
-    hint.classList.toggle('hidden', enabled || !reason);
+  copyBtn.disabled = !enabled;
+  const hint = $('action-hint');
+  hint.textContent = enabled ? '' : reason;
+}
+
+function setRunning(running, text = '正在导出…') {
+  exportBtn.querySelector('.btn-icon').classList.toggle('hidden', running);
+  exportBtn.querySelector('.spinner').classList.toggle('hidden', !running);
+  if (running) {
+    exportBtn.setAttribute('aria-busy', 'true');
+    exportLabel.textContent = '转换中…';
+    updateStatus('run', '转换中');
+    $('progress-text').textContent = text;
+    progress.classList.remove('hidden');
+    setExportActionsEnabled(false, '正在导出，请稍候');
+  } else {
+    exportBtn.removeAttribute('aria-busy');
+    progress.classList.add('hidden');
   }
 }
 
-/**
- * Initialize popup - check current tab and get article info
- */
-async function init() {
-  Logger.info('Initializing Popup...');
-  
+function setRetry(on) {
+  retryMode = on;
+  exportLabel.textContent = on ? '重试' : PRIMARY;
+}
+
+async function renderRecent() {
+  if (!chrome.storage || !chrome.storage.local) return;
+  const got = await chrome.storage.local.get({ [RECENT_KEY]: [] });
+  const items = (got[RECENT_KEY] || []).slice(0, 3);
+  const box = $('recent');
+  const list = $('recent-list');
+  list.textContent = '';
+  if (!items.length) { box.classList.add('hidden'); return; }
+  const now = Date.now();
+  for (const it of items) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const b = document.createElement('span');
+    b.className = `badge ${it.ok ? 'ok' : 'err'}`;
+    b.setAttribute('aria-label', it.ok ? '成功' : '失败');
+    b.innerHTML = it.ok
+      ? '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>'
+      : '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>';
+    const n = document.createElement('span');
+    n.className = 'n';
+    n.textContent = it.title;
+    n.title = it.title;
+    const t = document.createElement('small');
+    t.textContent = relativeTime(it.ts, now);
+    row.append(b, n, t);
+    list.append(row);
+  }
+  box.classList.remove('hidden');
+}
+
+function renderFooter() {
   try {
-    // Get current active tab
+    const v = chrome.runtime.getManifest ? chrome.runtime.getManifest().version : '';
+    $('footer-version').textContent = v ? `v${v}` : '';
+  } catch { /* 测试环境 */ }
+  if (chrome.commands && chrome.commands.getAll) {
+    chrome.commands.getAll().then((cmds) => {
+      const c = (cmds || []).find((x) => x.name === 'export-page');
+      if (c && c.shortcut) $('shortcut-kbd').textContent = c.shortcut;
+      else if (c) $('shortcut-kbd').textContent = '未设置';
+    }).catch(() => {});
+  }
+}
+
+async function init() {
+  renderFooter();
+  renderRecent().catch(() => {});
+  try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.url) { showUnsupported('无法访问当前页面'); return; }
+    const f = checkUrlType(tab.url);
+    if (!f || !f.isZhihu) { showUnsupported(); return; }
+    let type = null;
+    if (f.isColumn) type = 'column';
+    else if (f.isAnswer) type = 'answer';
+    else if (f.isQuestion) type = 'question';
+    else if (f.isHome) type = 'home';
+    else if (f.isFollow) type = 'follow';
+    else if (f.isHot) type = 'hot';
+    if (!type) { showUnsupported('请打开知乎文章、问题、回答、首页、关注或热榜页面'); return; }
 
-    if (!tab || !tab.url) {
-      Logger.error('Cannot get tab info');
-      showError('无法访问当前页面');
-      return;
-    }
-
-    Logger.info('Current URL:', tab.url);
-
-    const typeFlags = checkUrlType(tab.url);
-
-    if (!typeFlags || !typeFlags.isZhihu) {
-      showError('此页面不是知乎页面', true);  // Silent - expected case
-      return;
-    }
-
-    // Determine page type
-    const isColumn = typeFlags.isColumn;
-    const isAnswer = typeFlags.isAnswer;
-    const isQuestion = typeFlags.isQuestion;
-    const isHome = typeFlags.isHome;
-    const isFollow = typeFlags.isFollow;
-    const isHot = typeFlags.isHot;
-
-    if (!isColumn && !isAnswer && !isQuestion && !isHome && !isFollow && !isHot) {
-      showError('请打开知乎文章、问题、回答、首页、关注或热榜页面', true);  // Silent - expected case
-      return;
-    }
-
-    // Send message to content script to get article info
-    Logger.info('Sending getArticleInfo to content script...');
-    
     try {
       const response = await safeSendMessage(tab.id, { action: 'getArticleInfo' });
-
-      Logger.info('Received response:', response);
-
       if (response && response.success) {
-        updateStatus('success', '就绪');
-
-        // Determine type for display
-        let displayType = 'page';
-        if (isColumn) displayType = 'column';
-        else if (isAnswer) displayType = 'answer';
-        else if (isQuestion) displayType = 'question';
-        else if (isHome) displayType = 'home';
-        else if (isFollow) displayType = 'follow';
-        else if (isHot) displayType = 'hot';
-
-        showArticleInfo({
-          title: response.data.title,
-          author: response.data.author,
-          type: displayType
-        });
+        showArticleInfo({ title: response.data.title, author: response.data.author, type });
       } else {
-        throw new Error(response?.error || '解析文章失败');
+        throw new ExportFailure(response);
       }
     } catch (msgError) {
-      // If message fails, it might be that content script isn't ready or reloaded
-      Logger.warn('Message failed (Content script might be missing):', msgError);
-
-      const isConnectionError = msgError.message && msgError.message.includes('Could not establish connection');
-      if (isConnectionError) {
-        showError('请刷新知乎页面后重试', false, true); // Show refresh button
-      } else {
-        showError(msgError.message || '由于通讯错误，解析文章失败');
-      }
+      Logger.warn('getArticleInfo failed:', msgError);
+      const fb = describeFailure(msgError, 'export');
+      if (fb.reason === 'not_loaded') showNotReady(tab, '页面仍在加载，正文就绪后可导出', true);
+      else showNotReady(tab, fb.text, true);
     }
-
   } catch (error) {
     Logger.error('Init Error:', error);
-    showError('未知错误');
+    showUnsupported('未知错误');
   }
 }
 
-/**
- * Read user settings from storage
- * @returns {Promise<{downloadImages: boolean, maxAnswerCount: number}>}
- */
 function getSettings() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     chrome.storage.sync.get({ downloadImages: false, maxAnswerCount: 20 }, resolve);
   });
 }
 
-/**
- * Handle export button click
- */
 async function handleExport() {
-  Logger.info('Start Export...');
-
-  const btnText = exportBtn.querySelector('span');
-  
+  hideAlerts();
+  showActionFeedback(null);
+  setRetry(false);
+  const settings = await getSettings();
+  setRunning(true, settings.downloadImages ? '正在导出并打包图片…' : '正在导出…');
+  const title = articleTitle.textContent;
+  let sentToBackground = false;
   try {
-    exportBtn.classList.add('loading');
-    exportBtn.setAttribute('aria-busy', 'true');
-    btnText.textContent = '导出中...';
-    setExportActionsEnabled(false);
-    showActionFeedback(null);
-
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    const settings = await getSettings();
-
-    const response = await safeSendMessage(tab.id, {
-      action: 'exportMarkdown',
-      downloadImages: settings.downloadImages
-    });
-
-    if (response && response.success) {
-      Logger.success('Markdown generated');
-      
-      const messageData = {
-        action: 'download',
-        filename: response.data.filename,
-        content: response.data.content
-      };
-
-      if (response.data.images && response.data.images.length > 0) {
-        messageData.images = response.data.images;
-        messageData.downloadImages = true;
-      }
-
-      await chrome.runtime.sendMessage(messageData);
-
-      exportBtn.classList.remove('loading');
-      exportBtn.removeAttribute('aria-busy');
-      btnText.textContent = '导出成功!';
-      
-      setTimeout(() => {
-        btnText.textContent = '导出 Markdown';
-        setExportActionsEnabled(true);
-      }, 2000);
-    } else {
-      throw new ExportFailure(response);
+    const response = await safeSendMessage(tab.id, { action: 'exportMarkdown', downloadImages: settings.downloadImages });
+    if (!response || !response.success) throw new ExportFailure(response);
+    const msg = { action: 'download', filename: response.data.filename, content: response.data.content, title };
+    if (response.data.images && response.data.images.length > 0) {
+      msg.images = response.data.images;
+      msg.downloadImages = true;
     }
+    sentToBackground = true; // 之后的失败由 background 记录
+    const res = await chrome.runtime.sendMessage(msg);
+    if (res && res.success === false) throw new Error(res.error || '下载失败');
+    lastDownloadId = res && res.downloadId != null ? res.downloadId : null;
+    setRunning(false);
+    updateStatus('ok', '已完成');
+    $('ok-file').textContent = (res && res.filename) || response.data.filename;
+    openBtn.classList.toggle('hidden', lastDownloadId == null);
+    actionOk.classList.remove('hidden');
+    exportLabel.textContent = PRIMARY;
+    setExportActionsEnabled(true);
   } catch (error) {
     Logger.error('Export Error:', error);
-    
-    exportBtn.classList.remove('loading');
-    exportBtn.removeAttribute('aria-busy');
-    btnText.textContent = '导出失败';
-    showActionFeedback(describeFailure(error, 'export'));
-    
-    setTimeout(() => {
-      btnText.textContent = '导出 Markdown';
-      setExportActionsEnabled(true);
-    }, 2000);
+    setRunning(false);
+    updateStatus('err', '失败');
+    const fb = describeFailure(error, 'export');
+    showActionFeedback(fb);
+    setRetry(true);
+    setExportActionsEnabled(true);
+    if (!sentToBackground) recordRecent(chrome.storage, { title, ok: false }).then(renderRecent).catch(() => {});
   }
+  renderRecent().catch(() => {});
 }
 
 function handleCopy() {
-  const btnText = copyBtn.querySelector('span');
-  setExportActionsEnabled(false);
+  hideAlerts();
   showActionFeedback(null);
-  btnText.textContent = '复制中...';
+  setExportActionsEnabled(false, '正在复制');
+  copyLabel.textContent = '复制中…';
   const pending = copyTextLater(async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const response = await safeSendMessage(tab.id, {
-      action: 'exportMarkdown',
-      downloadImages: false
-    });
+    const response = await safeSendMessage(tab.id, { action: 'exportMarkdown', downloadImages: false });
     if (!response || !response.success) throw new ExportFailure(response);
     return response.data.content;
   });
   pending.then(() => {
-    btnText.textContent = '已复制';
+    copyLabel.textContent = '已复制';
+    updateStatus('ok', '已复制');
   }).catch((error) => {
     Logger.error('Copy Error:', error);
-    btnText.textContent = '复制失败';
+    copyLabel.textContent = COPY;
+    updateStatus('err', '失败');
     showActionFeedback(describeFailure(error, 'copy'));
   }).finally(() => {
+    setExportActionsEnabled(true);
     setTimeout(() => {
-      btnText.textContent = '复制 Markdown';
-      setExportActionsEnabled(true);
+      copyLabel.textContent = COPY;
+      if (statusBadge.classList.contains('ok')) updateStatus('idle', pageBadge);
     }, 1600);
   });
 }
 
-// Handle Settings Navigation
-if (settingsBtn) {
-  settingsBtn.addEventListener('click', () => {
-    if (chrome.runtime.openOptionsPage) {
-      chrome.runtime.openOptionsPage();
-    } else {
-      window.open(chrome.runtime.getURL('options/options.html'));
-    }
-  });
-}
+settingsBtn.addEventListener('click', () => {
+  if (chrome.runtime.openOptionsPage) chrome.runtime.openOptionsPage();
+  else window.open(chrome.runtime.getURL('options/options.html'));
+});
+exportBtn.addEventListener('click', handleExport);
+copyBtn.addEventListener('click', handleCopy);
+openBtn.addEventListener('click', () => {
+  if (lastDownloadId != null && chrome.downloads && chrome.downloads.show) chrome.downloads.show(lastDownloadId);
+});
+refreshBtn.addEventListener('click', async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab && tab.id) { chrome.tabs.reload(tab.id); window.close(); }
+});
 
-// Event listeners
-if (exportBtn) {
-  exportBtn.addEventListener('click', handleExport);
-}
-if (copyBtn) {
-  copyBtn.addEventListener('click', handleCopy);
-}
-
-// Handle Refresh Button
-if (refreshBtn) {
-  refreshBtn.addEventListener('click', async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab && tab.id) {
-      chrome.tabs.reload(tab.id);
-      window.close(); // Close popup after reload
-    }
-  });
-}
-
-// Initialize on popup open
+export const __test = { get retryMode() { return retryMode; } };
 init();

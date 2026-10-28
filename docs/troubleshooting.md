@@ -123,7 +123,7 @@
 
 - 是否先执行了 `npm run build`，并且 `dist/manifest.json` 存在
 - `build/` 是否可写
-- `manifest.json` 是否为合法 JSON
+- `manifest.src.json`（及构建产物 `dist/manifest.json`）是否为合法 JSON
 
 相关代码：
 

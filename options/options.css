@@ -103,7 +103,7 @@ h1 {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--bg-hover);
+  background-color: var(--switch-off);
   transition: background-color var(--duration-normal) var(--ease-smooth),
     border-color var(--duration-normal) var(--ease-smooth);
   border-radius: 24px;

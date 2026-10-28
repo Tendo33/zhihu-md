@@ -12,6 +12,7 @@
   --bg-secondary: #FFFFFF;
   --bg-card: #E0F2FE; /* Sky 100 */
   --bg-hover: #BAE6FD; /* Sky 200 */
+  --switch-off: color-mix(in srgb, var(--text-tertiary) 30%, var(--bg-card)); /* Round 3 设计复验建议：关闭态轨道加深一档 */
   
   --border-subtle: #BAE6FD; /* Sky 200 */
   --border-hover: #7DD3FC; /* Sky 300 */
@@ -64,6 +65,7 @@
     --bg-secondary: #1E293B; /* Slate 800 */
     --bg-card: #334155; /* Slate 700 */
     --bg-hover: #475569; /* Slate 600 */
+    --switch-off: #475569; /* 深色保持 Slate 600 */
     
     --border-subtle: #475569; /* Slate 600 */
     --border-hover: #64748B; /* Slate 500 */

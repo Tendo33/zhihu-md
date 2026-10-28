@@ -7,7 +7,7 @@
     "build": "node scripts/build.js",
     "verify:dist": "node scripts/verify-dist.js",
     "package": "npm run build && node scripts/package.js",
-    "test": "node scripts/test-page-detector.js && node scripts/test-init-scheduler.js && node scripts/test-filename.js && node scripts/test-zip.js && node scripts/test-markdown.js && node scripts/test-zhihu-dom.js && node scripts/test-failure-reason.js && node scripts/test-failure-text.js && node scripts/test-ball-a11y.js && node scripts/test-danger-tokens.js && node scripts/test-ui-failure-dom.js && node scripts/test-recent-exports.js && node scripts/test-shortcut.js && node scripts/test-ball-face.js && node scripts/test-design-css.js && node scripts/test-exporters-failure.js && node scripts/test-fixtures.js && node scripts/test-verify-dist.js",
+    "test": "node scripts/test-page-detector.js && node scripts/test-init-scheduler.js && node scripts/test-filename.js && node scripts/test-zip.js && node scripts/test-markdown.js && node scripts/test-zhihu-dom.js && node scripts/test-failure-reason.js && node scripts/test-failure-text.js && node scripts/test-ball-a11y.js && node scripts/test-danger-tokens.js && node scripts/test-ui-failure-dom.js && node scripts/test-recent-exports.js && node scripts/test-shortcut.js && node scripts/test-ball-face.js && node scripts/test-perf-feed.js && node scripts/test-design-css.js && node scripts/test-exporters-failure.js && node scripts/test-fixtures.js && node scripts/test-verify-dist.js",
     "test:detector": "node scripts/test-page-detector.js",
     "lint": "eslint ."
   },

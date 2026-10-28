@@ -246,20 +246,23 @@ ${answer.content}
       if (full?.content) source = full;
     }
     const dom = domById.get(id);
-    const apiTextLen = source.content ? htmlTextLength(source.content) : 0;
-    const domTextLen = cleanText(dom?.contentEl).length;
+    // perf：API 正文只解析一次；只有页面上也有这条回答时才需要比较两边的可见文本长度
+    let holder = null;
+    if (source.content) {
+      holder = document.createElement('div');
+      holder.innerHTML = source.content;
+    }
+    const domTextLen = dom ? cleanText(dom.contentEl).length : 0;
     // Visible text, not innerHTML: lazy-image attributes make a short answer look complete.
-    if (dom && domTextLen > 0 && domTextLen >= apiTextLen) {
+    if (dom && domTextLen > 0 && domTextLen >= (holder ? cleanText(holder).length : 0)) {
       return this.renderAnswer(dom, questionId, turndownService);
     }
     if (!source.content && !source.excerpt) {
       return dom ? this.renderAnswer(dom, questionId, turndownService) : null;
     }
 
-    const holder = document.createElement('div');
-    if (source.content) {
-      holder.innerHTML = source.content;
-    } else {
+    if (!holder) {
+      holder = document.createElement('div');
       const paragraph = document.createElement('p');
       paragraph.textContent = source.excerpt || '';
       holder.appendChild(paragraph);
@@ -279,12 +282,6 @@ ${answer.content}
     };
   },
 };
-
-function htmlTextLength(html) {
-  const probe = document.createElement('div');
-  probe.innerHTML = html;
-  return cleanText(probe).length;
-}
 
 function answerUrl(questionId, answerId) {
   if (!questionId || !answerId) return '';

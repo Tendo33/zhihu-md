@@ -22,6 +22,8 @@ await esbuild.build({
   target: ['chrome109'],
   outdir: out,
   legalComments: 'none',
+  minify: true, // R3 perf：内容脚本每个知乎页面都注入
+
   logLevel: 'info',
 });
 
@@ -44,8 +46,15 @@ fs.copyFileSync(path.join(root, 'manifest.src.json'), path.join(out, 'manifest.j
 copyFile('README.md');
 copyFile('PRIVACY.md');
 
+// R3 perf：只复制 manifest 引用的图标（icons/icon.png 102 KB 未被引用）
+const srcManifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.src.json'), 'utf8'));
+const usedIcons = new Set([
+  ...Object.values(srcManifest.icons || {}),
+  ...Object.values(srcManifest.action?.default_icon || {}),
+]);
 for (const name of fs.readdirSync(path.join(root, 'icons'))) {
-  copyFile(path.join('icons', name));
+  const rel = path.join('icons', name);
+  if (usedIcons.has(rel.split(path.sep).join('/'))) copyFile(rel);
 }
 
 function useBundledScript(html, scriptName) {

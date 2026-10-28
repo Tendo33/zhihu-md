@@ -6,6 +6,7 @@ import { parseHTML } from 'linkedom';
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.src.json', import.meta.url), 'utf8'));
 assert.equal(manifest.commands['export-page'].suggested_key.default, 'Alt+Shift+Z');
 assert.ok(!manifest.permissions.includes('commands'), 'commands 不是权限');
+assert.equal(manifest.minimum_chrome_version, '111', 'color-mix 需要 Chrome 111+（复审建议 1）');
 
 const L = {}; const sent = [];
 const ev = (n) => ({ addListener: (fn) => { L[n] = fn; } });

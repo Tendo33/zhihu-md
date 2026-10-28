@@ -61,6 +61,7 @@ for (const [b, ua] of Object.entries(UA)) {
     const box = document.getElementById('shortcut-guide');
     assert.ok(!box.classList.contains('hidden'), `${b} 空时显示引导`);
     assert.ok(document.getElementById('shortcut-kbd').classList.contains('hidden'));
+    assert.ok(document.getElementById('shortcut-prefix').classList.contains('hidden'), '未设置时隐藏重复前缀');
     assert.ok(box.textContent.includes('快捷键未设置'));
     const btn = document.getElementById('shortcut-setup');
     if (b === 'firefox') {

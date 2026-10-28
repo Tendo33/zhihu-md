@@ -190,11 +190,13 @@ function renderShortcut(cmds) {
   if (g.set) {
     kbd.textContent = g.shortcut;
     kbd.classList.remove('hidden');
+    $('shortcut-prefix').classList.remove('hidden');
     box.classList.add('hidden');
     box.replaceChildren();
     return;
   }
   kbd.classList.add('hidden');
+  $('shortcut-prefix').classList.add('hidden'); // 「快捷键未设置」已含前缀，省出 320px 宽度
   const label = document.createElement('span');
   label.className = 'sc-label';
   label.textContent = g.label;

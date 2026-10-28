@@ -27,7 +27,8 @@ body { min-width: 320px; }
 .sec-h{min-height:24px}
 
 /* Z3-03 快捷键未设置引导 */
-#shortcut-box{display:inline-flex;align-items:center;gap:4px}
+#shortcut-box{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.ft>span{white-space:nowrap}
 .sc-guide{display:inline-flex;align-items:center;gap:2px}
 .sc-guide.hidden,#shortcut-kbd.hidden{display:none}
 .sc-label{color:var(--text-2)}

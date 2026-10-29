@@ -25,7 +25,7 @@ jobs:
       - run: npm run build
       - run: npm run verify:dist
 
-  # 可选：用真实 markdown-it（html:true）渲染检查 raw HTML 泄漏（test-html-like-text + test-fixtures 全部样本）。
+  # 必过：用真实 markdown-it（html:true）渲染检查 raw HTML 泄漏（test-html-like-text + test-fixtures 全部样本）。
   # markdown-it 只临时装（--no-save --ignore-scripts，精确版本），不进 package.json / package-lock。
   rendered-check:
     runs-on: ubuntu-latest

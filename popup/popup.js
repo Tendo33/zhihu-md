@@ -73,7 +73,9 @@ function updateStatus(type, text) {
 function hideAlerts() {
   for (const el of [actionFeedback, actionOk, actionInfo]) el.classList.add('hidden');
   setImageLine('ok-kept', '');
-  setImageLine('info-kept', '');
+  $('info-kept').textContent = '';
+  $('info-kept').classList.add('hidden');
+  actionInfo.removeAttribute('title');
   setImageLine('feedback-img', '');
 }
 
@@ -378,7 +380,12 @@ async function handleExport() {
     if (res && res.failedImages > 0) {
       // 发版 QA ZR-09：部分图片没打进 zip，正文里已保留在线链接（N 只算真正的失败）
       $('info-text').textContent = imageFailText(res.failedImages);
-      setImageLine('info-kept', keptImages > 0 ? imageKeptMoreText(keptImages) : '', keptImages > 0);
+      // 第三轮设计定稿 B：保留数不上屏，放进 .sr-only 让 role=status 一起念；title 写全句
+      const infoKept = $('info-kept');
+      infoKept.textContent = keptImages > 0 ? imageKeptMoreText(keptImages) : '';
+      infoKept.classList.toggle('hidden', !(keptImages > 0));
+      if (keptImages > 0) actionInfo.title = imagePartialLine(res.failedImages, keptImages);
+      else actionInfo.removeAttribute('title');
       $('refresh-btn').classList.add('hidden');
       actionInfo.classList.remove('hidden');
       setRecentRows(2); // 设计建议 1：多一条提示时最近导出缩为 2 行，320 宽不出内滚动

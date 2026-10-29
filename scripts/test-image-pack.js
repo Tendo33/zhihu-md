@@ -30,8 +30,16 @@ const RIFF_WAVE = Uint8Array.from([0x52, 0x49, 0x46, 0x46, 1, 2, 3, 4, 0x57, 0x4
 assert.equal(extFromMagic(RIFF_WAVE), null, 'RIFF 但不是 WEBP 不能当 webp');
 {
   const one = [{ url: 'https://pic1.zhimg.com/v2-q.jpg', filename: 'img_009_q.jpg' }];
+  // 复审 51f7f33 P3：魔数认不出时不信 Content-Type → kept，保留在线链接
   const ct = applyImageResults('![](images/img_009_q.jpg)', one, [{ ok: true, data: UNKNOWN, contentType: 'image/gif' }]);
-  assert.deepEqual(ct.files.map((f) => f.filename), ['img_009_q.gif'], '魔数认不出时按 Content-Type 命名');
+  assert.equal(ct.files.length, 0, '魔数认不出时不按 Content-Type 存文件');
+  assert.equal(ct.kept, 1);
+  const HTML = new TextEncoder().encode('<!DOCTYPE html><html><body>404 Not Found</body></html>');
+  const html = applyImageResults('![](images/img_009_q.jpg)', one, [{ ok: true, data: HTML, contentType: 'image/jpeg' }]);
+  assert.equal(html.files.length, 0, 'image/jpeg + HTML 正文：不存 .jpg');
+  assert.equal(html.kept, 1, 'image/jpeg + HTML 正文 → kept');
+  assert.equal(html.failed, 0);
+  assert.equal(html.content, '![](https://pic1.zhimg.com/v2-q.jpg)', '保留在线链接');
   const wave = applyImageResults('![](images/img_009_q.jpg)', one, [{ ok: true, data: RIFF_WAVE, contentType: 'application/octet-stream' }]);
   assert.ok(!wave.files.some((f) => f.filename.endsWith('.webp')), 'RIFF/WAVE 不应存成 .webp');
 }

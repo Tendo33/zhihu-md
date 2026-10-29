@@ -81,7 +81,7 @@ console.log('options redesign tests passed');
   const html = read('options/options.html');
   // B1 之后说明里按短语包了 .nw，文案按 textContent 比对（与规格逐字一致）
   assert.equal(descText(html, 'showFloatingBall'), '在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。');
-  assert.equal(descText(html, 'maxAnswerCount'), '问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 1000 条；被上限截断的导出会标为 truncated。');
+  assert.equal(descText(html, 'maxAnswerCount'), '问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 1000 条；被上限截断的导出会标注为已截断。');
   assert.equal(descText(html, 'downloadImages'), '把文章里的图片一起保存，导出为含 .md 和 images 文件夹的 ZIP 包；关闭时图片保留在线链接。');
   assert.match(rule('.option-desc'), /text-wrap: pretty;/);
   assert.match(rule('.option-desc'), /color: var\(--text-2\);/);

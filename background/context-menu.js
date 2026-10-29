@@ -113,6 +113,8 @@ export async function showLinkFailure(actionApi, tabId) {
   if (!actionApi || tabId == null) return;
   const safe = async (fn) => { try { await fn(); } catch { /* 标签页已关闭 */ } };
   await safe(() => actionApi.setBadgeBackgroundColor({ tabId, color: '#b42318' }));
+  // 发版审计 N5：徽标文字显式白色（白字 on #b42318 6.57:1），不依赖 Chrome 自动取色
+  await safe(() => actionApi.setBadgeTextColor?.({ tabId, color: '#ffffff' }));
   await safe(() => actionApi.setBadgeText({ tabId, text: '!' }));
   await safe(() => actionApi.setTitle({ tabId, title: LINK_TIMEOUT_TITLE }));
 }

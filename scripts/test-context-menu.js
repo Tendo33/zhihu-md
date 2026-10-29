@@ -109,6 +109,9 @@ assert.equal(r.reason, 'unsupported');
   await showLinkFailure(action, 66);
   assert.deepEqual(calls.find(([k]) => k === 'text')[1], { tabId: 66, text: '!' });
   assert.equal(calls.find(([k]) => k === 'title')[1].title, LINK_TIMEOUT_TITLE);
+  // 发版审计 N5：徽标文字颜色显式白色；旧版 Chrome 没有 setBadgeTextColor 时不报错（上面的 action 就没有）
+  const tc = []; await showLinkFailure({ ...action, setBadgeTextColor: async (o) => tc.push(o) }, 68);
+  assert.deepEqual(tc, [{ tabId: 68, color: '#ffffff' }]);
   await showLinkFailure({ setBadgeBackgroundColor: async () => { throw new Error('No tab'); }, setBadgeText: () => { throw new Error('No tab'); }, setTitle: async () => { throw new Error('x'); } }, 67);
 }
 

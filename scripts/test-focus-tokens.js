@@ -29,9 +29,9 @@ const darkBall = ct.match(/html\[data-theme="dark"\] #zhihu-md-floating-ball \{(
 assert.match(darkBall, /--focus-ring: #93c5fd;/, '悬浮球深色 --focus-ring');
 assert.match(darkBall, /--accent: #60a5fa;/);
 assert.match(ct, /\n {2}--focus-ring: #0a5fd1;\n/, '浅色 --focus-ring 不变');
-const ballFv = ct.match(/#zhihu-md-floating-ball:focus-visible \{([^}]*)\}/)[1];
-assert.match(ballFv, /outline: 2px solid var\(--focus-ring\);/);
-assert.match(ballFv, /outline-offset: 2px;/);
+const ballFv = ct.match(/#zhihu-md-floating-ball#zhihu-md-floating-ball:focus-visible \{([^}]*)\}/)[1];
+assert.match(ballFv, /outline: 2px solid var\(--focus-ring\) !important;/);
+assert.match(ballFv, /outline-offset: 2px !important;/);
 assert.ok(!/box-shadow/.test(ballFv), '悬浮球聚焦不加 box-shadow');
 for (const m of ct.matchAll(/([^{}]*)\{([^}]*)\}/g)) {
   if (/floating-ball[^,{]*:focus-visible(?![^,{]*\.tooltip)/.test(m[1])) assert.ok(!/box-shadow/.test(m[2]), `聚焦规则不改投影：${m[1].trim()}`);
@@ -47,3 +47,17 @@ console.log('ball focus token tests passed');
   assert.match(css, /\.docked-left \{\n {2}transform: translateX\(-40%\);/, '常态收边左位置不变');
   assert.match(css, /\.docked-right \{\n {2}transform: translateX\(40%\);[\s\S]*?right: 0 !important;/, '常态收边右位置不变（right:0 即 clientWidth 边）');
 }
+
+// ZF-01（P2）：知乎站点样式 `:focus{outline:none !important}` 会盖掉悬浮球的环。
+// 球的 outline 必须 !important，且选择器优先级高于知乎的 :focus（0,1,0）和 *:focus；只用单层 outline，不用 box-shadow
+{
+  const sel = ct.match(/\n([^{}\n]*#zhihu-md-floating-ball[^{}\n]*:focus-visible) \{[^}]*outline: 2px solid var\(--focus-ring\) !important;/);
+  assert.ok(sel, 'ZF-01：悬浮球 outline 要 !important');
+  const s0 = sel[1].trim();
+  assert.equal(s0, 'html body #zhihu-md-floating-ball#zhihu-md-floating-ball:focus-visible');
+  const spec = [(s0.match(/#[\w-]+/g) || []).length, (s0.match(/:[\w-]+|\.[\w-]+|\[[^\]]+\]/g) || []).length];
+  assert.ok(spec[0] >= 2 && spec[1] >= 1, `ZF-01：优先级 ${spec} 不够`);
+  // 不允许任何悬浮球规则把 outline 设成 none/0（会和 !important 打架）
+  for (const m of ct.matchAll(/([^{}]*floating-ball[^{}]*)\{([^}]*)\}/g)) assert.ok(!/outline\s*:\s*(none|0)\b/.test(m[2]), `ZF-01：${m[1].trim()} 去掉了 outline`);
+}
+console.log('ZF-01 ball outline vs zhihu :focus reset passed');

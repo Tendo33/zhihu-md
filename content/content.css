@@ -58,10 +58,12 @@
   transform: translate3d(0, 0, 0); /* Force GPU acceleration */
 }
 
-#zhihu-md-floating-ball:focus-visible {
+/* ZF-01：知乎页面自带 `:focus{outline:none !important}`（以及 `*:focus{outline:0!important}` 一类重置），
+   这里用 !important + 提高优先级（html body + 双 id）压过它们；只用单层 outline，不用 box-shadow 模拟 */
+html body #zhihu-md-floating-ball#zhihu-md-floating-ball:focus-visible {
   /* 设计验收 R3 / L-07：单层 2px 焦点环，偏移 2px；聚焦不叠加、不改投影（沿用当前状态的投影） */
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
 }
 
 /* Hover State - Normal */

@@ -17,9 +17,9 @@ for (const hex of ['#f0f9ff', '#0c4a6e', '#0f172a']) assert.ok(![html, opt].some
 assert.match(shared, /--error: #b42318;/);
 assert.ok(!shared.includes('#c62828'));
 const fv = content.match(/#zhihu-md-floating-ball:focus-visible \{([^}]*)\}/)[1];
-assert.match(fv, /outline: 2px solid var\(--focus-ring\);/);
+assert.match(fv, /outline: 2px solid var\(--focus-ring\) !important;/);
 assert.ok(!/box-shadow/.test(fv), 'L-07：聚焦不叠加投影');
-assert.match(fv, /outline-offset: 2px;/);
+assert.match(fv, /outline-offset: 2px !important;/);
 assert.ok(!/color-mix/.test(fv), '单层焦点环：不再有 color-mix 外圈');
 assert.match(content, /font: 700 14px\/1 system-ui, [^;]*"Noto Sans", sans-serif;/);
 const err = content.match(/#zhihu-md-floating-ball\.error \.tooltip,\n#zhihu-md-floating-ball\.warning \.tooltip \{([^}]*)\}/)[1];

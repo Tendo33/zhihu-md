@@ -28,7 +28,11 @@ if (shots) fs.mkdirSync(shots, { recursive: true });
 
 const THEMES = { light: { attr: 'light', bg: '#ffffff', ring: 'rgb(10, 95, 209)' }, dark: { attr: 'dark', bg: '#121212', ring: 'rgb(147, 197, 253)' } };
 // R12：收边左/右在「有滚动条」和「无滚动条（overflow hidden）」两种页面上都要四边环完整可见
-const STATES = ['idle', 'docked-left', 'docked-right', 'docked-left noscroll', 'docked-right noscroll'];
+// ZF-01：真实知乎有 `:focus{outline:none !important}`；zhihu / star 两格注入这条（及 `*:focus{outline:0!important}` 变体），用键盘 Tab 聚焦后按像素断言环在
+const STATES = ['idle', 'docked-left', 'docked-right', 'docked-left noscroll', 'docked-right noscroll', 'idle zhihu', 'idle star', 'docked-right zhihu'];
+// 可选 E2E_STATES=逗号分隔，只跑部分格（例如回滚检查只跑 ZF-01 的格）
+if (process.env.E2E_STATES) { const keep = process.env.E2E_STATES.split(','); STATES.splice(0, STATES.length, ...STATES.filter((x) => keep.includes(x))); }
+const RESETS = { zhihu: ':focus{outline:none !important}', star: '*:focus{outline:0!important}' };
 const lum = ([r, g, b]) => { const f = (x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const cr = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
 const rows = []; const failures = [];
@@ -47,12 +51,13 @@ try {
   const page = await ctx.newPage();
   for (const [theme, T] of Object.entries(THEMES)) {
     for (const state of STATES) {
-      const cell = `${theme} ${state}`; const [st0, noscroll] = [state.split(' ')[0], state.endsWith('noscroll')];
-      await page.goto('https://zhuanlan.zhihu.com/p/300');
+      const cell = `${theme} ${state}`; const [st0, noscroll] = [state.split(' ')[0], state.endsWith('noscroll')]; const reset = RESETS[state.split(' ')[1]] || '';
+      await page.goto('https://zhuanlan.zhihu.com/p/300', { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('#zhihu-md-floating-ball', { timeout: 20000 });
       // 显式设置 data-theme 和知乎页面底色；关掉过渡，量到的是终值
       await page.evaluate(([attr, bg]) => { document.documentElement.setAttribute('data-theme', attr); document.documentElement.style.background = bg; document.body.style.background = bg; }, [T.attr, T.bg]);
       await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important} body *:not([id^=zhihu-md]):not([id^=zhihu-md] *):not([class*=zhihu-md]):not([class*=zhihu-md] *){visibility:hidden!important}' }); // 隐藏正文，采样不落在文字上
+      if (reset) await page.addStyleTag({ content: reset }); // 知乎站点的焦点重置，挂在页面里，和真实知乎一样
       if (noscroll) await page.evaluate(() => { document.documentElement.style.overflow = 'hidden'; });
       await page.evaluate((st) => {
         const b = document.getElementById('zhihu-md-floating-ball'); b.classList.remove('docked-left', 'docked-right');
@@ -70,7 +75,11 @@ try {
       const [bl, , bw] = before.rect;
       if (st0 === 'docked-left' && Math.abs(bl - -0.4 * bw) > 0.5) fail(cell, `常态位置变了 left ${bl}`);
       if (st0 === 'docked-right' && Math.abs(bl - (vw - 0.6 * bw)) > 0.5) fail(cell, `常态位置变了 left ${bl}（clientWidth ${vw}）`);
-      await page.evaluate(() => document.getElementById('zhihu-md-floating-ball').focus({ focusVisible: true }));
+      if (reset) {
+        // 键盘 Tab：正文已 visibility:hidden，不可聚焦；最多按 40 次直到焦点落到球上
+        for (let i = 0; i < 40 && !(await page.evaluate(() => document.activeElement?.id === 'zhihu-md-floating-ball')); i++) await page.keyboard.press('Tab');
+        if (!(await page.evaluate(() => document.activeElement?.id === 'zhihu-md-floating-ball'))) fail(cell, 'Tab 没能聚焦到悬浮球');
+      } else await page.evaluate(() => document.getElementById('zhihu-md-floating-ball').focus({ focusVisible: true }));
       await page.waitForTimeout(150);
       const after = await read();
       if (!after.fv) fail(cell, '没有进入 :focus-visible');

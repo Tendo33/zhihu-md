@@ -49,6 +49,15 @@ const nws = (el) => [...el.querySelectorAll('.nw')].map((x) => x.textContent);
   const all = [...nws($('feedback-title')), ...nws($('feedback-hint'))];
   assert.ok(all.includes('未加载完') && all.includes('刷新页面'), `失败文案：${all}`);
 }
+// 矩阵 failed-err（login_required）320 宽实测「请登/录后」被拆开：登录、验证、限流也不从中间折行
+for (const reason of ['login_required', 'security_check']) {
+  const { $, click } = await run({ success: true }, () => ({ success: false, error: 'x', reason }));
+  await click();
+  const all = [...nws($('feedback-title')), ...nws($('feedback-hint'))];
+  const txt = $('feedback-title').textContent + $('feedback-hint').textContent;
+  for (const w of ['登录', '验证', '限流']) if (txt.includes(w)) assert.ok(all.includes(w), `${reason}：「${w}」应在 .nw 里（${all}）`);
+  assert.ok(all.length > 0, reason);
+}
 {
   const { $ } = await run({ success: true }, () => ({}), { success: false, reason: 'not_loaded' });
   assert.ok(!$('action-info').classList.contains('hidden'));

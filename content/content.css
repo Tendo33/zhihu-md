@@ -205,7 +205,8 @@
 
 #zhihu-md-floating-ball:hover .tooltip,
 #zhihu-md-floating-ball:focus-visible .tooltip,
-#zhihu-md-floating-ball.loading .tooltip {
+#zhihu-md-floating-ball.loading .tooltip,
+#zhihu-md-floating-ball.success .tooltip { /* 发版审计 N3：快捷键/键盘导出成功后不悬停也能看到提示，回到 idle 自然收起 */
   opacity: 1;
   visibility: visible;
   transform: translateY(-50%) translateX(0);

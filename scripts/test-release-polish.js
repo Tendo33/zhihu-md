@@ -33,4 +33,11 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
   const tip = css.match(/#zhihu-md-floating-ball \.tooltip \{([^}]*)\}/)[1];
   assert.match(tip, /font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif;/);
 }
+// N3：成功态提示不依赖悬停
+{
+  const css = read('content/content.css');
+  const at = css.indexOf('#zhihu-md-floating-ball:hover .tooltip,');
+  const sel = css.slice(at, css.indexOf('{', at));
+  assert.ok(sel.includes('#zhihu-md-floating-ball.success .tooltip'), 'success .tooltip 在可见规则里');
+}
 console.log('release-polish tests passed');

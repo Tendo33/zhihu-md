@@ -38,11 +38,11 @@ export function createTurndownService(downloadImages = false) {
     bulletListMarker: '-'
   });
 
-  // batch7 ZB6-03：正文里像 HTML 标签的「<T>」「<div>」「</x>」「<!--」在支持 HTML 的渲染器（GitHub / Typora / Obsidian）
-  // 会被当成标签吞掉；< 后紧跟字母、/、! 时写成 \<。turndown 只对非代码文本节点调用 escape，
+  // batch7 ZB6-03：正文里像 HTML 标签的「<T>」「<div>」「</x>」「<!--」「<?php」在支持 HTML 的渲染器（GitHub / Typora / Obsidian）
+  // 会被当成标签吞掉；< 后紧跟字母、/、!、? 时写成 \<。turndown 只对非代码文本节点调用 escape，
   // 代码块、行内代码不经过这里；公式由单独规则输出，也不经过这里。> 不动（行首 > 仍由 turndown 转义，不重新引入 ZB5-03 去掉的 \>）。
   const baseEscape = turndownService.escape.bind(turndownService);
-  turndownService.escape = (text) => baseEscape(text).replace(/<(?=[A-Za-z/!])/g, '\\<');
+  turndownService.escape = (text) => baseEscape(text).replace(/<(?=[A-Za-z/!?])/g, '\\<');
 
   // Attach a per-instance image collector when download mode is enabled
   const collector = downloadImages

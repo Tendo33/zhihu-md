@@ -25,6 +25,9 @@ const add = (tag, text, attrs = {}) => {
 add('h2', '标题 <尖括号> 结尾');
 add('p', '正文 <T> 泛型，a < b > c，<div>标签</div>，注释 <!-- x --> 结束');
 add('p', '> 行首大于号不是引用');
+// 审查 P2：处理指令 <?…?>，段首（会开启 HTML block type 3）和段中各一次
+add('p', '<?php echo 1; ?> 段首处理指令');
+add('p', '段中 <?xml version="1.0"?> 处理指令');
 const pre = add('pre');
 const code = doc.createElement('code');
 code.className = 'language-java';
@@ -42,6 +45,8 @@ const lines = md.split('\n');
 assert.ok(lines.includes('## 标题 <尖括号> 结尾'), md);
 assert.ok(lines.includes('正文 \\<T> 泛型，a < b > c，\\<div>标签\\</div>，注释 \\<!-- x --> 结束'), md);
 assert.ok(lines.includes('\\> 行首大于号不是引用'), md); // 行首 > 仍转义
+assert.ok(lines.includes('\\<?php echo 1; ?> 段首处理指令'), md);
+assert.ok(lines.includes('段中 \\<?xml version="1.0"?> 处理指令'), md);
 assert.doesNotMatch(md.replace(/^\\> /m, ''), /\\>/); // 其余位置不出现 \>
 assert.ok(md.includes('List<String> xs = a < b > c ? f() : g(); <div>'), md); // 代码块原样
 assert.ok(md.includes('`Map<K, V> <br>`'), md); // 行内代码原样
@@ -61,11 +66,21 @@ if (MarkdownIt) {
   assert.match(html, /List&lt;String&gt;/, html);
   assert.match(html, /<code>Map&lt;K, V&gt; &lt;br&gt;<\/code>/, html);
   assert.doesNotMatch(html, /<T>|<div>标签/, html);
+  // 审查 P3：按解析结果判断，任何 raw HTML token（html_block / 行内 html_inline）都不允许出现
+  const htmlTokens = [];
+  const walk = (tokens) => tokens.forEach((tk) => {
+    if (tk.type === 'html_block' || tk.type === 'html_inline') htmlTokens.push(tk.content);
+    if (tk.children) walk(tk.children);
+  });
+  // markdown-it 不认识 $…$ 公式（Typora/Obsidian 等由数学插件处理），公式段换成占位符再解析；代码由 markdown-it 自己识别为 code
+  walk(new MarkdownIt({ html: true }).parse(md.replace(/\$\$[\s\S]*?\$\$|\$[^$\n]+\$/g, 'MATH'), {}));
+  assert.deepEqual(htmlTokens, [], `raw HTML tokens: ${JSON.stringify(htmlTokens)}`);
+  assert.match(html, /&lt;\?php echo 1; \?&gt; 段首处理指令/, html);
   console.log('html-like text: markdown-it html:true render check passed');
 } else {
   // 等价兜底：CommonMark 的 raw HTML 起始形态（<tag、</tag、<!）在代码/公式之外不得出现未转义的
-  assert.doesNotMatch(prose, /(^|[^\\])<(?:[A-Za-z]|\/[A-Za-z]|!)/, prose);
+  assert.doesNotMatch(prose, /(^|[^\\])<(?:[A-Za-z]|\/[A-Za-z]|!|\?)/, prose);
   console.log('html-like text: markdown-it 未安装，按 CommonMark raw HTML 规则做等价检查 passed（设置 MD_RENDERER_DIR 可用 markdown-it 渲染）');
 }
-assert.doesNotMatch(prose, /(^|[^\\])<(?:[A-Za-z]|\/[A-Za-z]|!)/, prose);
+assert.doesNotMatch(prose, /(^|[^\\])<(?:[A-Za-z]|\/[A-Za-z]|!|\?)/, prose);
 console.log('html-like text tests passed');

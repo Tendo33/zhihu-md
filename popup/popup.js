@@ -197,10 +197,13 @@ function setRunning(running, text = '正在导出…') {
     exportLabel.textContent = '正在导出…';
     updateStatus('run', '正在导出');
     $('progress-text').textContent = text;
+    // 设计 R05：进度那行文字隐藏，读屏从 progressbar 的 aria-valuetext 拿到同一句
+    progress.querySelector('[role=progressbar]').setAttribute('aria-valuetext', text);
     progress.classList.remove('hidden');
     setExportActionsEnabled(false, '正在导出，请稍候');
   } else {
     exportBtn.removeAttribute('aria-busy');
+    progress.querySelector('[role=progressbar]').removeAttribute('aria-valuetext');
     progress.classList.add('hidden');
   }
 }

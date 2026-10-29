@@ -44,3 +44,9 @@ body { min-width: 320px; }
 #ok-file{display:flex;min-width:0}
 #ok-file .fn-stem{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #ok-file .fn-suffix{flex:none;white-space:nowrap}
+
+/* 设计 R05（ZX-01）：进度条贴在 #article-info 底边，不占文档流，按钮行不再被推下 */
+#article-info{position:relative;overflow:clip}
+#progress{position:absolute;left:0;right:0;bottom:0;margin:0}
+#progress .l{display:none}
+#progress .bar{height:3px;border-radius:0}

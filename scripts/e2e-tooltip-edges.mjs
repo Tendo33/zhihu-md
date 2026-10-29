@@ -2,6 +2,8 @@
 // 断言：四边都 ≥ 8px；1280 宽、默认位置时一行；只在「·」后折行（两行时两段各占一行）。
 // 用法：CHROME_PATH=.../chrome E2E_PLAYWRIGHT_DIR=/path/with/playwright xvfb-run -a node scripts/e2e-tooltip-edges.mjs
 //   可选：E2E_DIST（默认 dist/）、E2E_SHOTS=目录（每个组合存一张整页截图）、E2E_OUT=结果 JSON 路径
+// v9：另跑 en 320 × 四个位置 × 失败 1 / 3 张图，真点导出得到成功提示（"Exported. N image(s) couldn't be downloaded…"），
+//   断言同样四边 ≥8，且 "couldn't be downloaded" 是一个不折行段。图片走 *.zhimg.com，用 host-resolver 置空让它下载失败。
 // 中文用 LANG=zh_CN.UTF-8 启动 Chrome（Linux 上只给 --lang 仍会显示英文），脚本内部已设置。
 import fs from 'node:fs';
 import os from 'node:os';
@@ -60,7 +62,8 @@ async function drag(page, tx, ty) {
   await page.mouse.up(); await page.waitForTimeout(1100); // 吸边 800ms
 }
 
-for (const [lang, env] of Object.entries(LANGS)) {
+// E2E_ONLY=msg 只跑 v9 成功提示那组（调试用；验收跑全量）
+for (const [lang, env] of Object.entries(process.env.E2E_ONLY === 'msg' ? {} : LANGS)) {
   for (const theme of THEMES) {
     const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e-tooltip-'));
     const ctx = await chromium.launchPersistentContext(prof, {
@@ -106,7 +109,55 @@ for (const [lang, env] of Object.entries(LANGS)) {
   }
 }
 
+// v9：成功提示带失败图片（en 320，浅色）
+{
+  const html = fs.readFileSync(fixture, 'utf8');
+  const variant = (n) => { return (() => { const re = /<img src="data:[^"]*"[^>]*>/g; const first = html.match(re)[0]; let k = 0; return html.replace(re, () => (k++ === 0 ? Array.from({ length: n }, (_, j) => first.replace(/data-original="[^"]*"/, `data-original="https://pic1.zhimg.com/v2-e2efail${j}.jpg"`)).join('') : '')); })(); };
+  const vw = 320;
+  const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e-tooltip-'));
+  const ctx = await chromium.launchPersistentContext(prof, {
+    headless: false, executablePath: process.env.CHROME_PATH, locale: 'en', acceptDownloads: true,
+    env: { ...process.env, ...LANGS.en }, colorScheme: 'light', viewport: { width: vw, height: VH },
+    args: [`--disable-extensions-except=${dist}`, `--load-extension=${dist}`, '--lang=en', '--host-resolver-rules=MAP *.zhimg.com ~NOTFOUND'],
+  });
+  try {
+    await ctx.route('https://www.zhihu.com/**', (r) => { const n = Number(new URL(r.request().url()).searchParams.get('fail') || 0); r.fulfill({ body: variant(n), contentType: 'text/html; charset=utf-8' }); });
+    let sw = ctx.serviceWorkers()[0]; if (!sw) sw = await ctx.waitForEvent('serviceworker', { timeout: 15000 });
+    await sw.evaluate(() => chrome.storage.sync.set({ downloadImages: true }));
+    const page = await ctx.newPage();
+    for (const n of [1, 3]) {
+      const want = n === 1 ? "Exported. 1 image couldn't be downloaded; online link kept" : `Exported. ${n} images couldn't be downloaded; online links kept`;
+      for (const [pos, target] of [['default', null], ['leftmost', [0, VH / 2]], ['top', [vw - 46, 0]], ['bottom', [vw - 46, VH - 1]]]) {
+        await sw.evaluate(() => chrome.storage.local.remove('floatingBallPosition'));
+        await page.goto(`https://www.zhihu.com/question/282627359/answer/2571795386?fail=${n}`);
+        await page.locator('#zhihu-md-floating-ball').waitFor({ timeout: 15000 }); await page.waitForTimeout(1200);
+        if (target) await drag(page, ...target);
+        await hover(page);
+        const bb = await page.locator('#zhihu-md-floating-ball').boundingBox();
+        await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2);
+        const ok = await page.locator('#zhihu-md-floating-ball.success').waitFor({ timeout: 30000 }).then(() => true, () => false);
+        await page.waitForTimeout(400);
+        const m = await measure(page);
+        const nwText = await page.evaluate(() => [...document.querySelectorAll('#zhihu-md-floating-ball .tooltip .nw')].map((x) => x.textContent));
+        const row = { lang: 'en', theme: 'light', vw, pos: `msg${n}-${pos}`, ...m, nwText }; rows.push(row);
+        if (shots) await page.screenshot({ path: path.join(shots, `en-light-${vw}-msg${n}-${pos}.png`) });
+        const bad = [];
+        if (!ok) bad.push('没有进入成功态');
+        if (m.text !== want) bad.push(`文字=${m.text}`);
+        if (!m.visible) bad.push('提示未显示');
+        for (const s of ['left', 'right', 'top', 'bottom']) if (m[s] < EDGE) bad.push(`${s}=${m[s]}`);
+        if (JSON.stringify(nwText) !== JSON.stringify(["couldn't be downloaded"])) bad.push(`nw=${JSON.stringify(nwText)}`);
+        if (!m.nwOneLineEach) bad.push("couldn't be downloaded 被折开");
+        if (bad.length) failures.push(`en/light/${vw}/msg${n}-${pos}: ${bad.join(', ')}`);
+      }
+    }
+  } finally {
+    await ctx.close(); fs.rmSync(prof, { recursive: true, force: true });
+  }
+}
+
 const min = Object.fromEntries(['left', 'right', 'top', 'bottom'].map((s) => [s, Math.min(...rows.map((r) => r[s]))]));
+// 成功提示四边同样要 ≥8，单独列出它们的最小值
 const out = { rows, min, failures };
 if (process.env.E2E_OUT) fs.writeFileSync(process.env.E2E_OUT, JSON.stringify(out, null, 1));
 console.log('lang\ttheme\tvw\tpos\tplace\tL\tR\tT\tB\tlines\th\tw');

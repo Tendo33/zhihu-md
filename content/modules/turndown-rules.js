@@ -12,16 +12,30 @@ import TurndownService from '../../lib/turndown.min.js';
  * @param {boolean} downloadImages - Whether to use local image paths
  * @returns {TurndownService}
  */
+// batch8 ZB7-01：解开 link.zhihu.com 跳转后要重新序列化成合法 URL（空格、<、> 等保持百分号编码），
+// 否则 `[卡片](https://a/b c?r=<x>)` 在 Markdown 里不是链接，<x> 还会变成 raw HTML。
+// 只接受 http / https：跳转目标是别的协议（javascript:、data: 等）时退回原来的 link.zhihu.com 地址；
+// 原始链接本身不是 http(s) 或解析不了时返回 ''，调用方只保留文字、不输出链接。
+function toHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
 export function normalizeZhihuHref(href = '') {
   let value = String(href).trim();
   if (value.startsWith('//')) value = 'https:' + value;
   else if (value.startsWith('/')) value = 'https://www.zhihu.com' + value;
-  if (/^https?:\/\/link\.zhihu\.com\//.test(value)) {
-    try {
-      value = new URL(value).searchParams.get('target') || value;
-    } catch { /* 不是合法 URL 时保留原值 */ }
+  const original = toHttpUrl(value);
+  if (!original) return '';
+  if (/^https?:\/\/link\.zhihu\.com\//.test(original)) {
+    const target = new URL(original).searchParams.get('target');
+    return (target && toHttpUrl(target.trim())) || original;
   }
-  return value;
+  return original;
 }
 
 // 代码块外：去掉只含空白的行（连续 <br> 产生），压缩多余空行；代码块原样保留
@@ -144,6 +158,7 @@ export function createTurndownService(downloadImages = false) {
       const title = turndownService.escape(linkCardTitle(node, link));
       
       const cleanHref = normalizeZhihuHref(href);
+      if (!cleanHref) return title;
 
       return `[${title}](${cleanHref})`;
     }
@@ -299,6 +314,7 @@ export function createTurndownService(downloadImages = false) {
     replacement: (content, node) => {
       const href = normalizeZhihuHref(node.getAttribute('href'));
       if (!content.trim()) return '';
+      if (!href) return content;
       const title = node.getAttribute('title');
       return `[${content}](${href}${title ? ` "${title.replace(/"/g, '\\"')}"` : ''})`;
     }

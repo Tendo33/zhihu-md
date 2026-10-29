@@ -101,15 +101,16 @@ assert.strictEqual(await feedTarget(null), null, 'null 原样（原逻辑）');
 assert.strictEqual(await feedTarget('abc'), 'abc', '非数字原样（原逻辑）');
 
 // 信息流：DOM 里卡片多于上限时只处理上限条（锁住 slice）
-async function feedRun(stored, cards, reason = 'idle') {
-  const items = Array.from({ length: cards }, (_, i) => `<div class="TopstoryItem"><h2 class="ContentItem-title"><a href="https://www.zhihu.com/question/1/answer/${i + 1}">t${i + 1}</a></h2><div class="RichText">b</div></div>`).join('');
+async function feedRun(stored, cards, reason = 'idle', dupes = 0) {
+  // dupes：末尾 dupes 张卡片和第 1 张重复（同一链接），去重后少 dupes 条
+  const items = Array.from({ length: cards }, (_, i) => { const n = i >= cards - dupes ? 1 : i + 1; return `<div class="TopstoryItem"><h2 class="ContentItem-title"><a href="https://www.zhihu.com/question/1/answer/${n}">t${n}</a></h2><div class="RichText">b</div></div>`; }).join('');
   const f = parseHTML(`<!doctype html><html><body>${items}</body></html>`);
   globalThis.window = f.window;
   globalThis.document = f.document;
   globalThis.chrome = { storage: { sync: { get: (_d, done) => done({ maxAnswerCount: stored }) } } };
   let processed = 0;
   const orig = [FeedExporter.scrollToLoadFeedItems, FeedExporter.processFeedItem];
-  FeedExporter.scrollToLoadFeedItems = async () => ({ count: cards, reason });
+  FeedExporter.scrollToLoadFeedItems = async () => (reason === 'non-object' ? undefined : { count: cards, reason });
   FeedExporter.processFeedItem = async () => { processed++; return { title: 't', author: 'a', content: 'c' }; };
   try {
     const r = await FeedExporter.exportFeedItems('home');
@@ -133,6 +134,9 @@ assert.match((await feedRun(0, 300, 'timeout')).md, /^item_count: 300\ntruncated
 assert.doesNotMatch((await feedRun(0, 300, 'idle')).md, /truncated/, 'idle 取完不标');
 assert.match((await feedRun(20, 25, 'idle')).md, /truncated: true/, 'idle 卡片多于导出条数');
 
+// 审查 P3-1：滚动函数返回非对象（stub 返回 undefined）→ 没有停止原因，只按卡片数是否超过导出条数判断
+assert.doesNotMatch((await feedRun(20, 20, 'non-object')).md, /truncated/, '非对象 20/20 不标');
+assert.match((await feedRun(20, 25, 'non-object')).md, /^item_count: 20\ntruncated: true$/m, '非对象 20/25 标');
 // scrollToLoadItemsWithReason 本身
 {
   const { CONSTANTS, scrollToLoadItems, scrollToLoadItemsWithReason } = await import('../content/modules/constants.js');

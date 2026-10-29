@@ -78,7 +78,7 @@
 .row{display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px solid var(--border);font-size:var(--fs-sm)}.row:last-child{border:0}
 .row .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ft{height:36px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:var(--fs-xs);color:var(--text-2);background:var(--surface);border-top:1px solid var(--border)}
-kbd{font:600 11px/1 ui-monospace,monospace;padding:2px 5px;border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:4px;background:var(--surface)}
+kbd{font:600 11px/1 ui-monospace,monospace;padding:2px 6px;border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:4px;background:var(--surface)}
 .empty{text-align:center;padding:20px 8px;color:var(--text-2);font-size:var(--fs-sm)}.empty .ic{width:40px;height:40px;margin:0 auto 8px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center}
 .prog{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-xs);color:var(--text-2)}.prog .l{display:flex;justify-content:space-between}
 /* ---------- 设置页 ---------- */

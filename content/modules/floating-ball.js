@@ -8,6 +8,7 @@ import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
 import { partialText } from '../../lib/partial-export.js';
+import { imageFailText } from '../../lib/image-pack.js';
 import { PageDetector } from './detector.js';
 import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
@@ -171,13 +172,14 @@ export const FloatingBall = {
           messageData.downloadImages = true;
         }
 
-        await chrome.runtime.sendMessage(messageData);
+        const dl = await chrome.runtime.sendMessage(messageData);
 
         if (result.data.partial) {
           // 发版 QA ZR-02：文件已保存但不完整，不用成功样式
           this.finishBall(ball, generation, 'error', partialText(result.data.partial));
         } else {
-          this.finishBall(ball, generation, 'success', '已导出');
+          // 发版 QA ZR-09：部分图片没打进 zip 时，成功提示里带上数量
+          this.finishBall(ball, generation, 'success', dl && dl.failedImages > 0 ? `已导出，${imageFailText(dl.failedImages)}` : '已导出');
         }
       } else if (result.reason) {
         // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办

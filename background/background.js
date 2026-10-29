@@ -6,6 +6,7 @@
 import { createLogger } from '../lib/logger.js';
 import { createZipWithImages } from '../lib/zip.js';
 import { recordRecent, titleFromFilename } from '../lib/recent-exports.js';
+import { applyImageResults } from '../lib/image-pack.js';
 import { createMenus, handleMenuClick, openAndWait, showLinkFailure } from './context-menu.js';
 
 const Logger = createLogger('[Zhihu-MD Background]');
@@ -101,10 +102,11 @@ async function handleDownloadWithImages(filename, content, images) {
   Logger.info(`开始下载 ${images.length} 张图片...`);
   
   // Download all images
-  const imageData = await downloadImages(images);
+  // 发版 QA ZR-09：失败的图片在正文里退回在线链接；成功的按实际格式定扩展名
+  const packed = applyImageResults(content, images, await downloadImages(images));
   
   // Create ZIP file
-  const zipBlob = await createZipWithImages(filename, content, imageData);
+  const zipBlob = await createZipWithImages(filename, packed.content, packed.files);
   
   // Download ZIP
   const reader = new FileReader();
@@ -119,7 +121,7 @@ async function handleDownloadWithImages(filename, content, images) {
           filename: zipFilename,
           saveAs: true
         });
-        resolve({ downloadId, filename: zipFilename });
+        resolve({ downloadId, filename: zipFilename, failedImages: packed.failed });
       } catch (error) {
         reject(error);
       }
@@ -143,21 +145,18 @@ async function downloadImages(images) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();
       const arrayBuffer = await blob.arrayBuffer();
-      return { filename: img.filename, data: new Uint8Array(arrayBuffer) };
+      return { ok: true, data: new Uint8Array(arrayBuffer), contentType: response.headers?.get?.('content-type') || blob.type };
     })
   );
 
-  const successful = [];
-  results.forEach((result, i) => {
-    if (result.status === 'fulfilled') {
-      successful.push(result.value);
-    } else {
-      Logger.warn(`图片下载失败: ${images[i].url}`, result.reason);
-    }
+  const out = results.map((result, i) => {
+    if (result.status === 'fulfilled') return result.value;
+    Logger.warn(`图片下载失败: ${images[i].url}`, result.reason);
+    return { ok: false };
   });
 
-  Logger.info(`成功下载 ${successful.length}/${images.length} 张图片`);
-  return successful;
+  Logger.info(`成功下载 ${out.filter((r) => r.ok).length}/${images.length} 张图片`);
+  return out;
 }
 
 

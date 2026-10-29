@@ -10,6 +10,7 @@ import { describeFailure, ExportFailure } from '../lib/failure-text.js';
 import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 import { partialHint, partialText } from '../lib/partial-export.js';
+import { imageFailText } from '../lib/image-pack.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
 
@@ -326,6 +327,12 @@ async function handleExport() {
     $('ok-file').textContent = (res && res.filename) || response.data.filename;
     openBtn.classList.toggle('hidden', lastDownloadId == null);
     actionOk.classList.remove('hidden');
+    if (res && res.failedImages > 0) {
+      // 发版 QA ZR-09：部分图片没打进 zip，正文里已保留在线链接
+      $('info-text').textContent = imageFailText(res.failedImages);
+      $('refresh-btn').classList.add('hidden');
+      actionInfo.classList.remove('hidden');
+    }
     exportLabel.textContent = PRIMARY;
     setExportActionsEnabled(true);
   } catch (error) {

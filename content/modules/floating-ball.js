@@ -214,7 +214,7 @@ export const FloatingBall = {
     return this.handleBallClick(ball);
   },
 
-  /** Round 3 C-3：右键菜单「复制本页 Markdown」 */
+  /** Round 3 C-3：右键菜单「复制本页为 Markdown」 */
   copyFromCommand() {
     const ball = document.getElementById('zhihu-md-floating-ball') || this.createFloatingBall();
     return this.copyMarkdown(ball);

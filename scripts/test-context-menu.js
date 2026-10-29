@@ -44,6 +44,8 @@ for (const u of HIDE) assert.ok(!pageHit(u), '页面菜单不应显示: ' + u);
 for (const u of ['https://zhuanlan.zhihu.com/p/5', 'https://www.zhihu.com/question/1', 'https://www.zhihu.com/question/1/answer/2']) assert.ok(linkHit(u) && isExportableLink(u), '链接菜单应显示: ' + u);
 for (const u of ['https://www.zhihu.com/people/a', 'https://www.zhihu.com/topic/1', 'https://www.zhihu.com/', 'https://www.zhihu.com/search?q=1', 'https://evil.com/question/1']) assert.ok(!linkHit(u), '链接菜单不应显示: ' + u);
 assert.equal(MENU_ITEMS.length, 4);
+// 主管 2026-10-29：中文菜单统一为「导出本页」「复制本页为 Markdown」
+assert.equal(MENU_ITEMS.find((x) => x.id === 'zm-page-copy').title, '复制本页为 Markdown');
 // Z85-01：标题走 chrome.i18n.getMessage，create 时不带 messageKey；取不到时中文兜底
 {
   const asked = []; const got = [];
@@ -52,7 +54,7 @@ assert.equal(MENU_ITEMS.length, 4);
   assert.deepEqual(got.map((c) => c.title), asked.map((k) => 'EN:' + k));
   assert.ok(got.every((c) => !('messageKey' in c)), 'messageKey 不能传给 contextMenus.create');
   const fb = []; createMenus({ removeAll: (cb) => cb(), create: (o) => fb.push(o) }, () => '');
-  assert.deepEqual(fb.map((c) => c.title), ['导出本页为 Markdown', '复制本页 Markdown', '复制选中内容为 Markdown', '打开并导出这个知乎链接']);
+  assert.deepEqual(fb.map((c) => c.title), ['导出本页为 Markdown', '复制本页为 Markdown', '复制选中内容为 Markdown', '打开并导出这个知乎链接']);
   const loc = JSON.parse(fs.readFileSync(new URL('../_locales/zh_CN/messages.json', import.meta.url), 'utf8'));
   for (const it of MENU_ITEMS) assert.equal(loc[it.messageKey].message, it.title, it.id + ' 兜底与 zh_CN 一致');
 }

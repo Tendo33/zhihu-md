@@ -1,6 +1,6 @@
 /**
  * Round 3 C-3：右键菜单（contextMenus 权限，Simon 已同意）。
- * 页面类菜单（导出本页 / 复制本页 Markdown / 复制选中内容为 Markdown）只在可导出的知乎页面出现（PAGE_PATTERNS）。
+ * 页面类菜单（导出本页 / 复制本页为 Markdown / 复制选中内容为 Markdown）只在可导出的知乎页面出现（PAGE_PATTERNS）。
  * 链接菜单「打开并导出这个知乎链接」有意不设 documentUrlPatterns：在任意网站上右键指向知乎问题 / 回答 / 专栏文章的链接
  * 都会出现（只按 targetUrlPatterns = LINK_PATTERNS 过滤链接本身），方便从其他网站直接导出。
  */
@@ -23,7 +23,7 @@ export const LINK_PATTERNS = ['*://www.zhihu.com/question/*', '*://zhuanlan.zhih
 
 export const MENU_ITEMS = [
   { id: 'zm-page-export', messageKey: 'menuPageExport', title: '导出本页为 Markdown', contexts: ['page'], documentUrlPatterns: PAGE_PATTERNS },
-  { id: 'zm-page-copy', messageKey: 'menuPageCopy', title: '复制本页 Markdown', contexts: ['page'], documentUrlPatterns: PAGE_PATTERNS },
+  { id: 'zm-page-copy', messageKey: 'menuPageCopy', title: '复制本页为 Markdown', contexts: ['page'], documentUrlPatterns: PAGE_PATTERNS },
   { id: 'zm-selection-copy', messageKey: 'menuSelectionCopy', title: '复制选中内容为 Markdown', contexts: ['selection'], documentUrlPatterns: PAGE_PATTERNS },
   { id: 'zm-link-export', messageKey: 'menuLinkExport', title: '打开并导出这个知乎链接', contexts: ['link'], targetUrlPatterns: LINK_PATTERNS },
 ];

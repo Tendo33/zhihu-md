@@ -17,7 +17,7 @@
   },
   "menuPageCopy": {
     "message": "Copy this page as Markdown",
-    "description": "右键菜单：复制本页 Markdown 到剪贴板。"
+    "description": "右键菜单：复制本页为 Markdown 到剪贴板。"
   },
   "menuSelectionCopy": {
     "message": "Copy selection as Markdown",

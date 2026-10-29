@@ -163,7 +163,7 @@ async function downloadImages(images) {
 }
 
 
-// Round 3：快捷键导出当前页（manifest commands.export-page，默认 Alt+Shift+K；不需要权限）
+// Round 3：快捷键导出本页（manifest commands.export-page，默认 Alt+Shift+K；不需要权限）
 if (chrome.commands && chrome.commands.onCommand) {
   chrome.commands.onCommand.addListener((command, tab) => {
     if (command !== 'export-page') return;

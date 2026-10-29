@@ -8,7 +8,7 @@
     "description": "扩展简介，显示在 Chrome 应用商店和 chrome://extensions 中。不超过 132 个字符。"
   },
   "cmdExportPage": {
-    "message": "导出当前页为 Markdown",
+    "message": "导出本页为 Markdown",
     "description": "快捷键说明（Alt+Shift+K），显示在 chrome://extensions/shortcuts。"
   },
   "menuPageExport": {
@@ -16,8 +16,8 @@
     "description": "右键菜单：在知乎可导出页面上导出本页。"
   },
   "menuPageCopy": {
-    "message": "复制本页 Markdown",
-    "description": "右键菜单：复制本页 Markdown 到剪贴板。"
+    "message": "复制本页为 Markdown",
+    "description": "右键菜单：复制本页为 Markdown 到剪贴板。"
   },
   "menuSelectionCopy": {
     "message": "复制选中内容为 Markdown",

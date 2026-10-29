@@ -77,8 +77,8 @@ npm run build
 | --- | --- |
 | 工具栏弹窗 | 显示页面类型、标题、作者；「导出 Markdown」「复制 Markdown」；最近导出 |
 | 悬浮球 | 左键下载，右键复制；问题页、信息流、热榜优先用它 |
-| 快捷键 | 导出当前页。1.1.7 起新安装默认 `Alt+Shift+K`（macOS 为 `Option+Shift+K`）。从旧版本升级时，已经分配过的快捷键（如 `Alt+Shift+Z`）保持不变，不会被自动改成 K；以前没有分配到快捷键的用户，升级后 Chrome 可能补上 K。实际生效的快捷键以弹窗底栏显示为准。如需修改，或快捷键被其他扩展占用、被浏览器保留，请到 `chrome://extensions/shortcuts` 设置 |
-| 右键菜单 | 「导出本页为 Markdown」「复制本页 Markdown」；选中文字时「复制选中内容为 Markdown」；知乎链接上「打开并导出这个知乎链接」 |
+| 快捷键 | 导出本页。1.1.7 起新安装默认 `Alt+Shift+K`（macOS 为 `Option+Shift+K`）。从旧版本升级时，已经分配过的快捷键（如 `Alt+Shift+Z`）保持不变，不会被自动改成 K；以前没有分配到快捷键的用户，升级后 Chrome 可能补上 K。实际生效的快捷键以弹窗底栏显示为准。如需修改，或快捷键被其他扩展占用、被浏览器保留，请到 `chrome://extensions/shortcuts` 设置 |
+| 右键菜单 | 「导出本页为 Markdown」「复制本页为 Markdown」；选中文字时「复制选中内容为 Markdown」；知乎链接上「打开并导出这个知乎链接」 |
 
 <img src="docs/screenshots/popup.png" width="300" alt="工具栏弹窗">
 

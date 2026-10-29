@@ -82,7 +82,41 @@ export function verifyDist(dir) {
   const extraIcons = fs.existsSync(iconDir)
     ? fs.readdirSync(iconDir).map((n) => `icons/${n}`).filter((f) => !usedIcons.has(f))
     : [];
-  return { missing, checked, extraIcons };
+  return { missing, checked, extraIcons, localeErrors: verifyLocales(dir, manifest) };
+}
+
+// 商店多语言：messages.json 必须能解析、含必需条目且 message 非空；
+// manifest 里每个 __MSG_x__ 在每种语言都要有条目；description 不超过 132 字符（Chrome 限制）。
+export const REQUIRED_LOCALES = ['zh_CN', 'en'];
+export const REQUIRED_MESSAGES = ['extName', 'extDescription'];
+export function manifestMessageKeys(manifest) {
+  const keys = new Set();
+  JSON.stringify(manifest).replace(/__MSG_(\w+?)__/g, (_, k) => keys.add(k));
+  return [...keys];
+}
+export function verifyLocales(dir, manifest) {
+  const errors = [];
+  const keys = manifestMessageKeys(manifest);
+  if (keys.length && !manifest.default_locale) errors.push('manifest 用了 __MSG_ 但没有 default_locale');
+  const locales = new Set(REQUIRED_LOCALES);
+  if (manifest.default_locale) locales.add(manifest.default_locale);
+  if (!keys.length && !manifest.default_locale) return errors;
+  for (const loc of locales) {
+    const file = path.join(dir, '_locales', loc, 'messages.json');
+    if (!fs.existsSync(file)) { errors.push(`缺少 _locales/${loc}/messages.json`); continue; }
+    let msgs;
+    try { msgs = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { errors.push(`_locales/${loc}/messages.json 无法解析：${e.message}`); continue; }
+    // Chrome 对 message 名不区分大小写
+    const lower = new Map(Object.entries(msgs).map(([k, v]) => [k.toLowerCase(), v]));
+    for (const k of new Set([...REQUIRED_MESSAGES, ...keys])) {
+      const m = lower.get(k.toLowerCase());
+      if (!m || typeof m.message !== 'string' || !m.message.trim()) errors.push(`_locales/${loc}: 缺少 ${k}`);
+    }
+    const descKey = /^__MSG_(\w+)__$/.exec(manifest.description || '')?.[1];
+    const desc = descKey && lower.get(descKey.toLowerCase())?.message;
+    if (desc && [...desc].length > 132) errors.push(`_locales/${loc}: ${descKey} 超过 132 字符（${[...desc].length}）`);
+  }
+  return errors;
 }
 
 // 用 fileURLToPath 解码 import.meta.url：路径含空格、中文时 URL.pathname 是百分号编码，
@@ -93,7 +127,12 @@ if (isMain) {
     console.error(`verify:dist 失败：找不到 ${manifestPath}，请先运行 npm run build`);
     process.exit(1);
   }
-  const { missing, checked, extraIcons } = verifyDist(dist);
+  const { missing, checked, extraIcons, localeErrors } = verifyDist(dist);
+  if (localeErrors.length) {
+    console.error(`verify:dist 失败：_locales 有 ${localeErrors.length} 个问题`);
+    localeErrors.forEach((m) => console.error('  - ' + m));
+    process.exit(1);
+  }
   if (extraIcons.length) {
     console.error(`verify:dist 失败：dist/icons 有 ${extraIcons.length} 个 manifest 未引用的图标`);
     extraIcons.forEach((m) => console.error('  - ' + m));

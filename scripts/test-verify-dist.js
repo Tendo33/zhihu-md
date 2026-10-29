@@ -33,6 +33,20 @@ write('icons/icon.png');
 assert.deepEqual(verifyDist(dir).extraIcons, ['icons/icon.png']);
 fs.rmSync(path.join(dir, 'icons/icon.png'));
 assert.deepEqual(htmlRefs('<img src="a.png?x=1"><a href="b.html"><script src="//x/y.js">'), ['a.png']);
+// 商店多语言：有 default_locale 时 messages.json 进文件清单，locale 问题单独报
+{
+  const mf = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ ...mf, name: '__MSG_extName__', default_locale: 'zh_CN' }));
+  let v = verifyDist(dir);
+  assert.ok(v.missing.includes('default_locale: _locales/zh_CN/messages.json'));
+  assert.ok(v.localeErrors.length > 0);
+  write('_locales/zh_CN/messages.json', JSON.stringify({ extName: { message: 'A' }, extDescription: { message: 'B' } }));
+  write('_locales/en/messages.json', JSON.stringify({ extName: { message: 'A' }, extDescription: { message: 'B' } }));
+  v = verifyDist(dir);
+  assert.deepEqual(v.missing, []);
+  assert.deepEqual(v.localeErrors, []);
+  assert.ok(v.checked.includes('_locales/zh_CN/messages.json'));
+}
 fs.rmSync(dir, { recursive: true, force: true });
 
 // 作为 CLI 直接运行：仓库路径含空格和中文时也必须真的执行检查，缺文件时非零退出

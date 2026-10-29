@@ -48,7 +48,11 @@ const rows = ($) => $('recent-list').children.length;
   assert.equal(rows($), 1, '方案①：部分导出 + 失败和保留都有 → 最近导出 1 行');
 }
 // 部分导出其他情况仍是 2 行
-for (const img of [{ failedImages: 1, keptImages: 0 }, { failedImages: 0, keptImages: 2 }, { failedImages: 0, keptImages: 0 }]) {
+for (const img of [{ failedImages: 1, keptImages: 0 }, { failedImages: 12, keptImages: 0 }]) {
+  const $ = await run(img, { partial: { exported: 3, total: 10, failedPage: 2 } });
+  assert.equal(rows($), 1, `复审 da941ab：部分导出 ${JSON.stringify(img)}（f>0, k=0）→ 1 行`);
+}
+for (const img of [{ failedImages: 0, keptImages: 2 }, { failedImages: 0, keptImages: 0 }]) {
   const $ = await run(img, { partial: { exported: 3, total: 10, failedPage: 2 } });
   assert.equal(rows($), 2, `部分导出 ${JSON.stringify(img)} 仍 2 行`);
 }

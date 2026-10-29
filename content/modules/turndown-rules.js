@@ -140,7 +140,8 @@ export function createTurndownService(downloadImages = false) {
       if (!link) return '';
       
       const href = link.getAttribute('href') || '';
-      const title = linkCardTitle(node, link);
+      // 审查 P3：卡片标题直接拼进 [..]，要和正文一样过 escape（含 <T> 转义、*、[ ] 等）
+      const title = turndownService.escape(linkCardTitle(node, link));
       
       const cleanHref = normalizeZhihuHref(href);
 

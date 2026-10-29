@@ -28,6 +28,11 @@ add('p', '> 行首大于号不是引用');
 // 审查 P2：处理指令 <?…?>，段首（会开启 HTML block type 3）和段中各一次
 add('p', '<?php echo 1; ?> 段首处理指令');
 add('p', '段中 <?xml version="1.0"?> 处理指令');
+// 审查 P3：LinkCard 标题也要过 escape（可见标题与 data-text 回退两条路径）
+const card1 = add('a', null, { href: 'https://example.com/a', class: 'LinkCard', 'data-text': 'x' });
+const t1 = doc.createElement('span'); t1.className = 'LinkCard-title'; t1.textContent = '卡片 <T> 与 <div> *星*'; card1.appendChild(t1);
+add('div', null, { class: 'RichText-LinkCardContainer' }).appendChild(
+  Object.assign(doc.createElement('a'), { href: 'https://example.com/b' })).setAttribute('data-text', '回退 <?php x ?> 标题');
 const pre = add('pre');
 const code = doc.createElement('code');
 code.className = 'language-java';
@@ -47,6 +52,8 @@ assert.ok(lines.includes('正文 \\<T> 泛型，a < b > c，\\<div>标签\\</div
 assert.ok(lines.includes('\\> 行首大于号不是引用'), md); // 行首 > 仍转义
 assert.ok(lines.includes('\\<?php echo 1; ?> 段首处理指令'), md);
 assert.ok(lines.includes('段中 \\<?xml version="1.0"?> 处理指令'), md);
+assert.ok(md.includes('[卡片 \\<T> 与 \\<div> \\*星\\*](https://example.com/a)'), md);
+assert.ok(md.includes('[回退 \\<?php x ?> 标题](https://example.com/b)'), md);
 assert.doesNotMatch(md.replace(/^\\> /m, ''), /\\>/); // 其余位置不出现 \>
 assert.ok(md.includes('List<String> xs = a < b > c ? f() : g(); <div>'), md); // 代码块原样
 assert.ok(md.includes('`Map<K, V> <br>`'), md); // 行内代码原样

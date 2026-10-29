@@ -33,6 +33,11 @@ const nws = (el) => [...el.querySelectorAll('.nw')].map((x) => x.textContent);
   assert.ok(nws(t).includes('未能加载'), `「未能加载」在 .nw 里：${nws(t)}`);
   assert.ok(nws(t).includes('3/10 条') && nws(t).includes('7 条'), '数字和量词不拆开');
   assert.ok(nws($('feedback-hint')).includes('第 2 页') && nws($('feedback-hint')).includes('重新导出'));
+  // 设计验收必改 2：320 宽「文件已保/存」「可稍/后」被拆开
+  assert.equal($('feedback-hint').textContent, '第 2 页起加载失败，文件已保存，可稍后重新导出');
+  assert.ok(nws($('feedback-hint')).includes('文件已保存') && nws($('feedback-hint')).includes('可稍后'), `${nws($('feedback-hint'))}`);
+  // 徽标也走 .nw（设计验收建议）
+  assert.equal(globalThis.document.querySelector('.status-text').textContent, '部分导出');
   assert.ok(nws($('feedback-img')).includes('123 张图片') && nws($('feedback-img')).includes('未能下载') && nws($('feedback-img')).includes('在线链接'));
 }
 {
@@ -63,5 +68,5 @@ for (const reason of ['login_required', 'security_check']) {
   assert.ok(!$('action-info').classList.contains('hidden'));
   assert.equal($('action-hint').textContent, '暂不可导出，原因见下方提示');
 }
-assert.match(fs.readFileSync(new URL('../popup/popup.css', import.meta.url), 'utf8'), /\.alert \.nw\{white-space:nowrap\}/);
+assert.match(fs.readFileSync(new URL('../popup/popup.css', import.meta.url), 'utf8'), /(^|\n)\.nw\{white-space:nowrap\}/);
 console.log('popup r05 nowrap tests passed');

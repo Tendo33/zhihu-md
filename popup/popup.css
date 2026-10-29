@@ -56,4 +56,4 @@ body { min-width: 320px; }
 .status-zone:not(:has(> :not(.hidden))){display:none}
 
 /* 设计 R05 / R09：状态文案里的词组和“数字+量词”不从中间折行 */
-.alert .nw{white-space:nowrap}
+.nw{white-space:nowrap} /* 设计验收建议：全局生效（徽标、选项页同名类也适用） */

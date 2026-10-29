@@ -68,7 +68,7 @@ async function safeSendMessage(tabId, message, maxRetries = 2, delay = 500) {
 /** 徽标：idle（页面类型）/ run / ok / err */
 function updateStatus(type, text) {
   statusBadge.className = `badge ${type}`;
-  statusText.textContent = text;
+  setStatusText(statusText, text); // 设计验收建议：徽标也走 .nw，词组不拆
 }
 
 function hideAlerts() {
@@ -99,7 +99,7 @@ function setSavedFilename(name) {
  * 设计 R05 / R09：中文状态文案里不能从中间断开的词组和“数字+量词”。
  * 320 宽时「条未能加/载」被拆到两行；这些片段包进 .nw（white-space:nowrap），textContent 不变。
  */
-const NOWRAP_RE = /第 \d+ 页|\d+(?:\/\d+)? (?:张图片|条|张)|未能加载|未能下载|加载失败|未加载完|在线链接|重新导出|刷新页面|知乎页面|几分钟后|剪贴板|登录|验证|限流/g;
+const NOWRAP_RE = /文件已保存|已保存|可稍后|第 \d+ 页|\d+(?:\/\d+)? (?:张图片|条|张)|未能加载|未能下载|加载失败|未加载完|在线链接|重新导出|刷新页面|知乎页面|几分钟后|剪贴板|登录|验证|限流/g;
 function noWrapNodes(text) {
   const out = [];
   const s = String(text ?? '');

@@ -40,10 +40,10 @@ const rows = ($) => $('recent-list').children.length;
   const $ = await run({ failedImages: 1, keptImages: 2 }, { partial: { exported: 3, total: 10, failedPage: 2 } });
   const el = $('feedback-img');
   assert.ok(!el.classList.contains('hidden'));
-  const sr = el.querySelector('.sr-only');
-  assert.ok(sr && sr.textContent === '，另有 2 张保留为在线链接', 'F2：保留数在 .sr-only');
-  assert.equal(el.textContent.replace(sr.textContent, ''), '1 张图片未能下载，已保留在线链接', 'F2：屏幕上只显示失败句');
-  assert.equal(el.getAttribute('title'), '1 张图片未能下载，另有 2 张保留为在线链接', 'F2：title 全句');
+  // PM 定稿 2026-10-29：整句上屏，没有 .sr-only 和 title
+  assert.equal(el.querySelector('.sr-only'), null, '不再有 .sr-only');
+  assert.equal(el.textContent, '1 张图片未能下载，2 张不支持保存，均已保留在线链接', '合并句上屏');
+  assert.equal(el.getAttribute('title'), null, '不加 title');
   assert.equal($('action-feedback').getAttribute('title'), null, '容器不带 title');
   assert.equal(rows($), 1, '方案①：部分导出 + 失败和保留都有 → 最近导出 1 行');
 }
@@ -83,9 +83,12 @@ for (const [img, want] of [[{ failedImages: 0, keptImages: 0 }, 3], [{ failedIma
 for (const next of [{ failedImages: 1, keptImages: 0 }, { failedImages: 0, keptImages: 0 }, { failedImages: 0, keptImages: 2 }]) {
   const bg = { failedImages: 1, keptImages: 2 };
   const $ = await run(bg);
-  assert.equal($('info-text').getAttribute('title'), '1 张图片未能下载，另有 2 张保留为在线链接', '先 kept>0：有 title');
+  // PM 定稿 2026-10-29：kept>0 也不再加 title（整句已上屏）；下次导出文字要被换掉
+  assert.equal($('info-text').getAttribute('title'), null, '先 kept>0：没有 title');
+  assert.equal($('info-text').textContent, '1 张图片未能下载，2 张不支持保存，均已保留在线链接');
   Object.assign(bg, next);
   $('export-btn').dispatchEvent(new globalThis.window.Event('click')); await flush();
   assert.equal($('info-text').getAttribute('title'), null, `再导出 ${JSON.stringify(next)}：#info-text 没有 title`);
+  assert.ok($('action-info').classList.contains('hidden') || !$('info-text').textContent.includes('不支持保存'), `再导出 ${JSON.stringify(next)}：合并句被换掉`);
 }
 console.log('popup rows/title tests passed');

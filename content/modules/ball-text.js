@@ -14,7 +14,7 @@ const FAIL_KEY = {
 
 /** 部分导出时读屏末尾的图片信息（对应 imagePartialSrExtra）；没有图片问题返回空串 */
 export function ballImageSrExtra(failed, kept) {
-  if (failed > 0 && kept > 0) return tn('ballImagesFailed', failed) + t('ballSep') + tn('ballImagesKeptMore', kept);
+  if (failed > 0 && kept > 0) return tn('ballImagesFailedKept', failed, kept); // PM 定稿 2026-10-29 合并句
   if (failed > 0) return tn('ballImagesFailed', failed);
   if (kept > 0) return tn('ballImagesKept', kept) + t('ballReasonSep') + t('ballImagesKeptReason');
   return '';

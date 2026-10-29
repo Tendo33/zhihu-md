@@ -148,6 +148,30 @@
       }
     }
   },
+  "ballImagesFailedKept": {
+    "message": "$ARG1$\u00a0images couldn't be downloaded, $ARG2$\u00a0can't be saved locally; online links kept",
+    "description": "Screen reader extra when some images failed to download AND others can't be saved locally (PM copy 2026-10-29). $1 = failed count (2 or more), $2 = kept count.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "ballImagesFailedKeptOne": {
+    "message": "$ARG1$\u00a0image couldn't be downloaded, $ARG2$\u00a0can't be saved locally; online links kept",
+    "description": "Singular form of ballImagesFailedKept, used when the failed count is 1. $1 = 1, $2 = kept count.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
   "ballImagesKept": {
     "message": "$ARG1$ images kept as online links",
     "description": "Screen reader extra: images kept as online links. $1 = number of images (2 or more).",

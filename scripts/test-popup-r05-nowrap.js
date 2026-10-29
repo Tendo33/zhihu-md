@@ -44,8 +44,22 @@ const nws = (el) => [...el.querySelectorAll('.nw')].map((x) => x.textContent);
   const { $, click } = await run({ success: true, downloadId: 9, filename: 'q.md', failedImages: 2, keptImages: 1 },
     () => ({ success: true, data: { filename: 'q.md', content: '#' } }));
   await click();
-  assert.deepEqual(nws($('info-text')), ['2 张图片', '未能下载', '在线链接']);
-  assert.equal($('info-text').textContent, '2 张图片未能下载，已保留在线链接');
+  // PM 定稿 2026-10-29：合并句只允许在逗号后折行
+  assert.deepEqual(nws($('info-text')), ['2 张图片', '未能下载', '1 张', '不支持保存', '均已保留', '在线链接']);
+  assert.equal($('info-text').textContent, '2 张图片未能下载，1 张不支持保存，均已保留在线链接');
+  // 逗号之间的文字全在 .nw 里（无可折行的空隙）
+  const loose = [...$('info-text').childNodes].filter((c) => c.nodeType === 3).map((c) => c.textContent).join('');
+  assert.equal(loose.replace(/，/g, ''), '', `只有逗号在 .nw 外：「${loose}」`);
+}
+{
+  const { $, click } = await run({ success: true, downloadId: 9, filename: 'q.md', failedImages: 123, keptImages: 1000 },
+    () => ({ success: true, data: { filename: 'q.md', content: '#', partial: { exported: 3, total: 10, failedPage: 2 } } }));
+  await click();
+  assert.equal($('feedback-img').textContent, '123 张图片未能下载，1000 张不支持保存，均已保留在线链接');
+  const loose = [...$('feedback-img').childNodes].filter((c) => c.nodeType === 3).map((c) => c.textContent).join('');
+  assert.equal(loose.replace(/，/g, ''), '', `partial：只有逗号在 .nw 外：「${loose}」`);
+  assert.equal($('feedback-img').querySelector('.sr-only'), null);
+  assert.equal($('feedback-img').getAttribute('title'), null);
 }
 {
   const { $, click } = await run({ success: true }, () => ({ success: false, error: 'x', reason: 'not_loaded' }));

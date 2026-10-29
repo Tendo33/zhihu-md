@@ -6,8 +6,8 @@ import { imagePartialSrExtra, imagePartialLine, IMAGE_KEPT_REASON } from '../lib
 // 纯函数：与弹窗琥珀提示的图片行同一套文案；只有保留时带原因（同成功态）
 assert.equal(imagePartialSrExtra(0, 0), '');
 assert.equal(imagePartialSrExtra(3, 0), '3 张图片未能下载，已保留在线链接');
-assert.equal(imagePartialSrExtra(3, 2), '3 张图片未能下载，已保留在线链接，另有 2 张保留为在线链接');
-assert.equal(imagePartialLine(3, 2), '3 张图片未能下载，另有 2 张保留为在线链接');
+assert.equal(imagePartialSrExtra(3, 2), '3 张图片未能下载，2 张不支持保存，均已保留在线链接');
+assert.equal(imagePartialLine(3, 2), '3 张图片未能下载，2 张不支持保存，均已保留在线链接');
 assert.equal(imagePartialSrExtra(0, 5), `5 张图片保留为在线链接。${IMAGE_KEPT_REASON}`);
 
 const { window, document } = parseHTML('<!doctype html><html><body></body></html>');
@@ -43,7 +43,7 @@ async function run(res) {
 const cases = [
   // P2Z-B（设计决定）：概况和图片情况之间用「；」
   [{ success: true, failedImages: 3, keptImages: 0 }, '部分导出：已导出 43/60 条，17 条未能加载；3 张图片未能下载，已保留在线链接'],
-  [{ success: true, failedImages: 3, keptImages: 2 }, '部分导出：已导出 43/60 条，17 条未能加载；3 张图片未能下载，已保留在线链接，另有 2 张保留为在线链接'],
+  [{ success: true, failedImages: 3, keptImages: 2 }, '部分导出：已导出 43/60 条，17 条未能加载；3 张图片未能下载，2 张不支持保存，均已保留在线链接'],
   [{ success: true, failedImages: 0, keptImages: 5 }, `${TOOLTIP}；5 张图片保留为在线链接。${IMAGE_KEPT_REASON}`],
   [{ success: true, failedImages: 0, keptImages: 0 }, TOOLTIP],
   [{ success: true, downloadId: 1 }, TOOLTIP],

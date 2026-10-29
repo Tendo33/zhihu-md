@@ -22,6 +22,8 @@ export const ZH_FALLBACK = {
   ballPartial: "部分导出：已导出 $1/$2 条，$3 条未能加载",
   ballImagesFailed: "$1 张图片未能下载，已保留在线链接",
   ballImagesFailedOne: "$1 张图片未能下载，已保留在线链接",
+  ballImagesFailedKept: "$1 张图片未能下载，$2 张不支持保存，均已保留在线链接",
+  ballImagesFailedKeptOne: "$1 张图片未能下载，$2 张不支持保存，均已保留在线链接",
   ballImagesKept: "$1 张图片保留为在线链接",
   ballImagesKeptOne: "$1 张图片保留为在线链接",
   ballImagesKeptMore: "另有 $1 张保留为在线链接",

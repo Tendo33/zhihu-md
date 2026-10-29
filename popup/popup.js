@@ -10,7 +10,7 @@ import { describeFailure, ExportFailure } from '../lib/failure-text.js';
 import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 import { partialHint, partialText } from '../lib/partial-export.js';
-import { IMAGE_KEPT_REASON, IMAGE_KEPT_REASON_SEP, imageFailText, imageKeptMoreShortText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
+import { IMAGE_KEPT_REASON, IMAGE_KEPT_REASON_SEP, imageFailText, imageFailedKeptText, imageKeptMoreShortText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
 import { svgIcon } from '../lib/safe-dom.js';
 import { splitFilename } from '../lib/filename-split.js';
 
@@ -99,7 +99,7 @@ function setSavedFilename(name) {
  * 设计 R05 / R09：中文状态文案里不能从中间断开的词组和“数字+量词”。
  * 320 宽时「条未能加/载」被拆到两行；这些片段包进 .nw（white-space:nowrap），textContent 不变。
  */
-const NOWRAP_RE = /文件已保存|已保存|可稍后|第 \d+ 页|\d+(?:\/\d+)? (?:张图片|条|张)|未能加载|未能下载|加载失败|未加载完|在线链接|重新导出|刷新页面|知乎页面|几分钟后|剪贴板|登录|验证|限流/g;
+const NOWRAP_RE = /文件已保存|已保存|可稍后|不支持保存|均已保留|第 \d+ 页|\d+(?:\/\d+)? (?:张图片|条|张)|未能加载|未能下载|加载失败|未加载完|在线链接|重新导出|刷新页面|知乎页面|几分钟后|剪贴板|登录|验证|限流/g;
 function noWrapNodes(text) {
   const out = [];
   const s = String(text ?? '');
@@ -406,14 +406,8 @@ async function handleExport() {
         const f = (res && res.failedImages) || 0;
         const k = (res && res.keptImages) || 0;
         if (f > 0 && k > 0) {
-          // 设计复核 4193502 F2：与方案 B 一致，屏幕上只显示失败句，保留数放进 .sr-only，全句写在 title
-          setImageLine('feedback-img', imageFailText(f));
-          const el = $('feedback-img');
-          const sr = document.createElement('span');
-          sr.className = 'sr-only';
-          sr.textContent = `，${imageKeptMoreShortText(k)}`;
-          el.append(sr);
-          el.title = imagePartialLine(f, k);
+          // PM 定稿 2026-10-29：整句上屏（{f} 张图片未能下载，{k} 张不支持保存，均已保留在线链接），不再用 .sr-only 和 title
+          setImageLine('feedback-img', imageFailedKeptText(f, k));
         } else {
           setImageLine('feedback-img', imagePartialLine(f, k), f === 0 && k > 0);
         }
@@ -437,14 +431,11 @@ async function handleExport() {
     }
     if (res && res.failedImages > 0) {
       // 发版 QA ZR-09：部分图片没打进 zip，正文里已保留在线链接（N 只算真正的失败）
-      setStatusText($('info-text'), imageFailText(res.failedImages));
-      // 第三轮设计定稿 B：保留数不上屏，放进 .sr-only 让 role=status 一起念；title 写全句
-      const infoKept = $('info-kept');
-      infoKept.textContent = keptImages > 0 ? imageKeptMoreText(keptImages) : '';
-      infoKept.classList.toggle('hidden', !(keptImages > 0));
-      // 设计复核 4193502：title 放在可见文字 span 上，role=status 容器不带 title（避免名称和内容各念一遍）
-      if (keptImages > 0) $('info-text').title = imagePartialLine(res.failedImages, keptImages);
-      else $('info-text').removeAttribute('title');
+      // PM 定稿 2026-10-29：两者都有时整句上屏，去掉 .sr-only 补充和 title
+      setStatusText($('info-text'), keptImages > 0 ? imageFailedKeptText(res.failedImages, keptImages) : imageFailText(res.failedImages));
+      $('info-kept').textContent = '';
+      $('info-kept').classList.add('hidden');
+      $('info-text').removeAttribute('title');
       $('refresh-btn').classList.add('hidden');
       actionInfo.classList.remove('hidden');
       setRecentRows(2); // 设计建议 1：多一条提示时最近导出缩为 2 行，320 宽不出内滚动

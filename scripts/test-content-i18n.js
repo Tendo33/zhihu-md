@@ -74,7 +74,14 @@ assert.equal(t('ballAriaIdle'), 'Export Markdown (click to download, right-click
   assert.equal(tn('ballImagesKeptMore', 3), '3 more kept as online links');
   assert.equal(bt.ballKeptSrExtra(2, 1), '1 more kept as an online link');
   assert.equal(bt.ballKeptSrExtra(2, 3), '3 more kept as online links');
-  assert.equal(bt.ballImageSrExtra(2, 1), '2 images couldn\'t be downloaded; online links kept, 1 more kept as an online link');
+  // PM 定稿 2026-10-29：f>0 且 k>0 用合并句，数字和名词之间是不换行空格
+  assert.equal(bt.ballImageSrExtra(2, 1), '2\u00a0images couldn\'t be downloaded, 1\u00a0can\'t be saved locally; online links kept');
+  assert.equal(bt.ballImageSrExtra(123, 1000), '123\u00a0images couldn\'t be downloaded, 1000\u00a0can\'t be saved locally; online links kept');
+  for (const k of ['ballImagesFailedKept', 'ballImagesFailedKeptOne']) {
+    assert.ok(en[k] && zh[k], `${k} 两种语言都有`);
+    assert.equal(zhGet(k, ['5', '7']), '5 张图片未能下载，7 张不支持保存，均已保留在线链接');
+    assert.ok(/\$ARG1\$\u00a0image/.test(en[k].message) && /\$ARG2\$\u00a0can't/.test(en[k].message), `${k} 英文用不换行空格`);
+  }
   // QA e2fa5da P4：保留原因单独成句（不再逗号拼接），不分单复数；中文不说「这些」
   assert.equal(bt.ballKeptSrExtra(0, 1), '1 image kept as an online link. The format or source can\'t be saved locally');
   assert.equal(bt.ballKeptSrExtra(0, 3), '3 images kept as online links. The format or source can\'t be saved locally');
@@ -85,7 +92,8 @@ assert.equal(t('ballAriaIdle'), 'Export Markdown (click to download, right-click
   assert.equal(zh.ballImagesKeptReason.message, '图片格式或来源不支持保存到本地');
   assert.equal(zh.ballReasonSep.message, '。');
   assert.ok(!/这些|这张/.test(zh.ballImagesKeptReason.message));
-  assert.equal(bt.ballImageSrExtra(1, 3), '1 image couldn\'t be downloaded; online link kept, 3 more kept as online links');
+  assert.equal(bt.ballImageSrExtra(1, 3), '1\u00a0image couldn\'t be downloaded, 3\u00a0can\'t be saved locally; online links kept');
+  assert.equal(bt.ballImageSrExtra(1, 0), '1 image couldn\'t be downloaded; online link kept', '只有 f：句子不变');
   for (const k of Object.keys(en)) assert.ok(!/again.*again/i.test(en[k].message), `${k} 英文文案：${en[k].message}`);
   for (const k of ['ballExportedImagesFailed', 'ballExportedImagesKept', 'ballImagesFailed', 'ballImagesKept']) assert.equal(zhGet(`${k}One`, ['1']), zhGet(k, ['1']));
 }

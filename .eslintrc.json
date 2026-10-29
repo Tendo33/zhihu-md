@@ -15,6 +15,7 @@
   },
   "ignorePatterns": [
     "dist/",
+    "dist-firefox/",
     "node_modules/",
     "lib/vendor/",
     "**/*.min.js"

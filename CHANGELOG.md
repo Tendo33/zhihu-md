@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 修复
+
+- Chrome / Edge 包的 manifest 不再带 `background.scripts`，Chrome 扩展页不再提示「'background.scripts' requires manifest version of 2 or lower」。Firefox 包另用 `npm run build:firefox` 构建到 `dist-firefox/`，保留 `background.scripts`。
+
 ## [1.1.8] - 2026-10-29
 
 ### 新增

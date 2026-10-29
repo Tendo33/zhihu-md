@@ -4,9 +4,17 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const out = path.join(root, 'dist');
+// 目标浏览器：默认 chrome（Chrome / Edge，产出 dist/）；--target=firefox 产出 dist-firefox/。
+// Chrome 对 MV3 的 background.scripts 报「requires manifest version of 2 or lower」，
+// 所以 Chrome 包去掉 scripts；Firefox 不支持 service_worker，Firefox 包保留 scripts。
+const target = (process.argv.find((a) => a.startsWith('--target='))?.slice(9) || 'chrome').toLowerCase();
+if (!['chrome', 'firefox'].includes(target)) {
+  console.error(`未知的 --target=${target}，只支持 chrome / firefox`);
+  process.exit(1);
+}
+const out = path.join(root, target === 'firefox' ? 'dist-firefox' : 'dist');
 
-fs.rmSync(path.join(root, 'dist'), { recursive: true, force: true });
+fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
 await esbuild.build({
@@ -72,6 +80,7 @@ fs.writeFileSync(optionsHtmlPath, useBundledScript(fs.readFileSync(optionsHtmlPa
 const manifest = JSON.parse(fs.readFileSync(path.join(out, 'manifest.json'), 'utf8'));
 manifest.background.service_worker = 'background/background.js';
 manifest.content_scripts[0].js = ['content/content.js'];
+if (target === 'chrome') delete manifest.background.scripts;
 fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-console.log(`built ${out}`);
+console.log(`built ${out} (target: ${target})`);

@@ -1,11 +1,14 @@
 // 检查 dist/manifest.json 引用的所有文件都存在于 dist 中，
 // 并检查扩展页面（popup/options 等 HTML）引用的本地脚本、样式、图片。
-// 用法：node scripts/verify-dist.js [distDir]
+// 还检查 background：Chrome 产物不能有 background.scripts，Firefox 产物必须有。
+// 用法：node scripts/verify-dist.js [distDir] [--target=chrome|firefox]（默认 chrome）
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const dist = path.resolve(process.argv[2] || 'dist');
+const args = process.argv.slice(2);
+const target = (args.find((a) => a.startsWith('--target='))?.slice(9) || 'chrome').toLowerCase();
+const dist = path.resolve(args.find((a) => !a.startsWith('--')) || 'dist');
 const manifestPath = path.join(dist, 'manifest.json');
 
 export function manifestFiles(manifest) {
@@ -57,7 +60,20 @@ export function htmlRefs(html) {
   return refs;
 }
 
-export function verifyDist(dir) {
+// Chrome 对 MV3 的 background.scripts 报「'background.scripts' requires manifest version of 2 or lower」
+export function verifyBackground(manifest, target = 'chrome') {
+  const errors = [];
+  const scripts = manifest.background?.scripts;
+  if (target === 'firefox') {
+    if (!Array.isArray(scripts) || !scripts.length) errors.push('Firefox 产物缺少 background.scripts（Firefox 不支持 service_worker）');
+  } else if (scripts !== undefined) {
+    errors.push('Chrome/Edge 产物不能有 background.scripts（MV3 下 Chrome 会报错）');
+  }
+  if (target !== 'firefox' && !manifest.background?.service_worker) errors.push('Chrome/Edge 产物缺少 background.service_worker');
+  return errors;
+}
+
+export function verifyDist(dir, target = 'chrome') {
   const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
   const missing = [];
   const checked = [];
@@ -82,7 +98,7 @@ export function verifyDist(dir) {
   const extraIcons = fs.existsSync(iconDir)
     ? fs.readdirSync(iconDir).map((n) => `icons/${n}`).filter((f) => !usedIcons.has(f))
     : [];
-  return { missing, checked, extraIcons, localeErrors: verifyLocales(dir, manifest) };
+  return { missing, checked, extraIcons, localeErrors: verifyLocales(dir, manifest), backgroundErrors: verifyBackground(manifest, target) };
 }
 
 // 商店多语言：messages.json 必须能解析、含必需条目且 message 非空；
@@ -147,7 +163,16 @@ if (isMain) {
     console.error(`verify:dist 失败：找不到 ${manifestPath}，请先运行 npm run build`);
     process.exit(1);
   }
-  const { missing, checked, extraIcons, localeErrors } = verifyDist(dist);
+  if (!['chrome', 'firefox'].includes(target)) {
+    console.error(`verify:dist 失败：未知的 --target=${target}`);
+    process.exit(1);
+  }
+  const { missing, checked, extraIcons, localeErrors, backgroundErrors } = verifyDist(dist, target);
+  if (backgroundErrors.length) {
+    console.error(`verify:dist 失败：background 有 ${backgroundErrors.length} 个问题（target: ${target}）`);
+    backgroundErrors.forEach((m) => console.error('  - ' + m));
+    process.exit(1);
+  }
   if (localeErrors.length) {
     console.error(`verify:dist 失败：_locales 有 ${localeErrors.length} 个问题`);
     localeErrors.forEach((m) => console.error('  - ' + m));
@@ -163,5 +188,5 @@ if (isMain) {
     missing.forEach((m) => console.error('  - ' + m));
     process.exit(1);
   }
-  console.log(`verify:dist 通过：检查了 ${new Set(checked).size} 个文件`);
+  console.log(`verify:dist 通过（target: ${target}）：检查了 ${new Set(checked).size} 个文件`);
 }

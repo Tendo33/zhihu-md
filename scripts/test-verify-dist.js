@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { verifyDist, htmlRefs } from './verify-dist.js';
+import { verifyDist, htmlRefs, verifyBackground } from './verify-dist.js';
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'zhihu-md-dist-'));
 const write = (f, c = '') => { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), c); };
@@ -75,6 +75,14 @@ assert.deepEqual(htmlRefs('<img src="a.png?x=1"><a href="b.html"><script src="//
 }
 fs.rmSync(dir, { recursive: true, force: true });
 
+// background：Chrome 产物不能有 scripts，Firefox 产物必须有
+assert.deepEqual(verifyBackground({ background: { service_worker: 'bg.js' } }), []);
+assert.deepEqual(verifyBackground({ background: { service_worker: 'bg.js', scripts: ['bg.js'] } }), ['Chrome/Edge 产物不能有 background.scripts（MV3 下 Chrome 会报错）']);
+assert.deepEqual(verifyBackground({ background: { service_worker: 'bg.js', scripts: [] } }, 'chrome').length, 1, '空数组也算有 scripts');
+assert.deepEqual(verifyBackground({ background: {} }, 'chrome'), ['Chrome/Edge 产物缺少 background.service_worker']);
+assert.deepEqual(verifyBackground({ background: { service_worker: 'bg.js', scripts: ['bg.js'] } }, 'firefox'), []);
+assert.deepEqual(verifyBackground({ background: { service_worker: 'bg.js' } }, 'firefox'), ['Firefox 产物缺少 background.scripts（Firefox 不支持 service_worker）']);
+
 // 作为 CLI 直接运行：仓库路径含空格和中文时也必须真的执行检查，缺文件时非零退出
 const script = fileURLToPath(new URL('./verify-dist.js', import.meta.url));
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'zhihu md 测试 '));
@@ -95,6 +103,14 @@ put('popup/popup.js');
 cli = run();
 assert.equal(cli.status, 0, cli.stderr);
 assert.match(cli.stdout, /verify:dist 通过/, '通过时必须有输出，证明检查真的执行了');
+// CLI：Chrome 产物带 scripts 时以 1 退出；--target=firefox 时反过来
+put('manifest.json', JSON.stringify({ manifest_version: 3, action: { default_popup: 'popup/popup.html' }, background: { service_worker: 'bg.js', scripts: ['bg.js'] } }));
+cli = run();
+assert.equal(cli.status, 1, cli.stdout);
+assert.match(cli.stderr, /不能有 background\.scripts/);
+cli = spawnSync(process.execPath, ['scripts/verify-dist.js', 'dist', '--target=firefox'], { cwd: repo, encoding: 'utf8' });
+assert.equal(cli.status, 0, cli.stderr);
+assert.match(cli.stdout, /target: firefox/);
 fs.rmSync(path.join(repo, 'dist', 'manifest.json'));
 cli = run();
 assert.equal(cli.status, 1);

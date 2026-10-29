@@ -113,10 +113,14 @@
 /* L-07：收边时键盘聚焦只把球展开，不换投影（保持收边时的投影，尺寸不变） */
 #zhihu-md-floating-ball.docked-left:focus-visible,
 #zhihu-md-floating-ball.docked-right:focus-visible {
-  transform: translateX(0);
+  transform: translateX(var(--ball-edge-gap));
   opacity: 1;
   border-radius: 50%;
 }
+
+/* R12：聚焦时离视口边（right:0 已按 clientWidth，不含滚动条）留出 offset 2px + 线宽 2px，环四边完整可见；只在 :focus-visible 生效，平时位置不动 */
+#zhihu-md-floating-ball.docked-left { --ball-edge-gap: 4px; }
+#zhihu-md-floating-ball.docked-right { --ball-edge-gap: -4px; }
 
 /* Docked Right - Preview visible */
 #zhihu-md-floating-ball.docked-right {

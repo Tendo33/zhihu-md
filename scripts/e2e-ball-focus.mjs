@@ -27,7 +27,8 @@ const { chromium } = loadPlaywright();
 if (shots) fs.mkdirSync(shots, { recursive: true });
 
 const THEMES = { light: { attr: 'light', bg: '#ffffff', ring: 'rgb(10, 95, 209)' }, dark: { attr: 'dark', bg: '#121212', ring: 'rgb(147, 197, 253)' } };
-const STATES = ['idle', 'docked-left', 'docked-right'];
+// R12：收边左/右在「有滚动条」和「无滚动条（overflow hidden）」两种页面上都要四边环完整可见
+const STATES = ['idle', 'docked-left', 'docked-right', 'docked-left noscroll', 'docked-right noscroll'];
 const lum = ([r, g, b]) => { const f = (x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const cr = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
 const rows = []; const failures = [];
@@ -46,22 +47,29 @@ try {
   const page = await ctx.newPage();
   for (const [theme, T] of Object.entries(THEMES)) {
     for (const state of STATES) {
-      const cell = `${theme} ${state}`;
+      const cell = `${theme} ${state}`; const [st0, noscroll] = [state.split(' ')[0], state.endsWith('noscroll')];
       await page.goto('https://zhuanlan.zhihu.com/p/300');
       await page.waitForSelector('#zhihu-md-floating-ball', { timeout: 20000 });
       // 显式设置 data-theme 和知乎页面底色；关掉过渡，量到的是终值
       await page.evaluate(([attr, bg]) => { document.documentElement.setAttribute('data-theme', attr); document.documentElement.style.background = bg; document.body.style.background = bg; }, [T.attr, T.bg]);
-      await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important}' });
+      await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important} body *:not([id^=zhihu-md]):not([id^=zhihu-md] *):not([class*=zhihu-md]):not([class*=zhihu-md] *){visibility:hidden!important}' }); // 隐藏正文，采样不落在文字上
+      if (noscroll) await page.evaluate(() => { document.documentElement.style.overflow = 'hidden'; });
       await page.evaluate((st) => {
         const b = document.getElementById('zhihu-md-floating-ball'); b.classList.remove('docked-left', 'docked-right');
         if (st !== 'idle') b.classList.add(st);
         // 球放在视口中部，环四边都在屏内，可以取像素
         b.style.setProperty('top', '300px', 'important'); if (st === 'idle') { b.style.setProperty('left', '600px', 'important'); b.style.setProperty('right', 'auto', 'important'); }
         document.activeElement?.blur();
-      }, state);
-      await page.mouse.move(5, 5);
+      }, st0);
+      await page.mouse.move(640, 5);
       const read = () => page.evaluate(() => { const b = document.getElementById('zhihu-md-floating-ball'); const s = getComputedStyle(b); const r = b.getBoundingClientRect(); return { boxShadow: s.boxShadow, outlineStyle: s.outlineStyle, outlineWidth: s.outlineWidth, outlineOffset: s.outlineOffset, outlineColor: s.outlineColor, w: b.offsetWidth, h: b.offsetHeight, rect: [r.left, r.top, r.width, r.height], fv: b.matches(':focus-visible'), bg: s.backgroundColor }; });
       const before = await read();
+      const [vw, vh, sbw] = await page.evaluate(() => [document.documentElement.clientWidth, document.documentElement.clientHeight, window.innerWidth - document.documentElement.clientWidth]);
+      if (noscroll !== (sbw === 0)) fail(cell, `滚动条宽 ${sbw}，与用例不符`);
+      // 常态位置不动：收边仍是贴 clientWidth 边、露出 60%
+      const [bl, , bw] = before.rect;
+      if (st0 === 'docked-left' && Math.abs(bl - -0.4 * bw) > 0.5) fail(cell, `常态位置变了 left ${bl}`);
+      if (st0 === 'docked-right' && Math.abs(bl - (vw - 0.6 * bw)) > 0.5) fail(cell, `常态位置变了 left ${bl}（clientWidth ${vw}）`);
       await page.evaluate(() => document.getElementById('zhihu-md-floating-ball').focus({ focusVisible: true }));
       await page.waitForTimeout(150);
       const after = await read();
@@ -71,21 +79,24 @@ try {
       if (after.outlineOffset !== '2px') fail(cell, `outline-offset ${after.outlineOffset}`);
       if (after.outlineColor !== T.ring) fail(cell, `outline-color ${after.outlineColor} ≠ ${T.ring}`);
       if (after.boxShadow !== before.boxShadow) fail(cell, `box-shadow 变了：${before.boxShadow} → ${after.boxShadow}`);
+      { const [al, at, aw, ah] = after.rect; if (al - 4 < 0 || at - 4 < 0 || al + aw + 4 > vw || at + ah + 4 > vh) fail(cell, `聚焦环外缘超出可见区 [${al - 4}, ${al + aw + 4}] / clientWidth ${vw}`); }
       if (after.w !== before.w || after.h !== before.h) fail(cell, `尺寸变了 ${before.w}x${before.h} → ${after.w}x${after.h}`);
       // 像素：环在 [边-4, 边-2) 之间，取环中线、环外 3px、缝（环与球之间 1px）
       const buf = await page.screenshot();
       const png = await page.evaluate(async (b64) => { const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode(); const c = new OffscreenCanvas(img.width, img.height); const g = c.getContext('2d'); g.drawImage(img, 0, 0); return { w: img.width, d: Array.from(g.getImageData(0, 0, img.width, img.height).data) }; }, buf.toString('base64'));
       const px = (x, y) => { x = Math.round(x); y = Math.round(y); const i = (y * png.w + x) * 4; return [png.d[i], png.d[i + 1], png.d[i + 2]]; };
-      const [vw, vh] = await page.evaluate(() => [document.documentElement.clientWidth, document.documentElement.clientHeight]); // 滚动条下面的像素不算页面
       const [L, Tp, W, H] = after.rect; const cx = L + W / 2; const cy = Tp + H / 2;
       const sides = { top: [cx, Tp, 0, -1], bottom: [cx, Tp + H, 0, 1], left: [L, cy, -1, 0], right: [L + W, cy, 1, 0] };
       const samples = {}; let minRing = Infinity;
       for (const [k, [x0, y0, dx, dy]] of Object.entries(sides)) {
         const at = (d) => [x0 + dx * d - (dx === 0 ? 0 : 0.5) , y0 + dy * d - (dy === 0 ? 0 : 0.5)];
         const ring = at(3.5).map(Math.floor); const out = at(7.5).map(Math.floor); const gap = at(1.5).map(Math.floor);
-        if ([ring, out, gap].some(([x, y]) => x < 0 || y < 0 || x >= vw || y >= vh)) { samples[k] = 'off-screen（收边贴视口边，这一侧环在视口外）'; continue; }
-        const [cR, cO, cG] = [px(...ring), px(...out), px(...gap)];
-        const o = { ring: cR, out: cO, gap: cG, crOut: +cr(cR, cO).toFixed(2), crGap: +cr(cR, cG).toFixed(2) };
+        // R12：不再放宽，环外缘（距球 4px）和环外 3px 的采样点都必须在 clientWidth/clientHeight 内
+        const inside = ([x, y]) => x >= 0 && y >= 0 && x < vw && y < vh;
+        if (!inside(ring) || !inside(gap)) { fail(cell, `${k} 侧环被视口/滚动条裁切`); samples[k] = 'clipped'; continue; }
+        // 贴边时环外只剩 0px 页面（环外缘正好在可见区边上），环外点取不到就只比「环/缝」；环外缘在可见区内由上面的几何断言保证
+        const [cR, cG] = [px(...ring), px(...gap)]; const cO = inside(out) ? px(...out) : null;
+        const o = { ring: cR, out: cO, gap: cG, crOut: cO ? +cr(cR, cO).toFixed(2) : Infinity, crGap: +cr(cR, cG).toFixed(2) };
         samples[k] = o; minRing = Math.min(minRing, o.crOut, o.crGap);
         if (o.crOut < 3 || o.crGap < 3) fail(cell, `${k} 对比度 ${o.crOut}/${o.crGap} < 3`);
       }
@@ -93,9 +104,9 @@ try {
       const crSpec = +cr(ringRgb, bg).toFixed(2); const ballRgb = after.bg.match(/\d+/g).slice(0, 3).map(Number); const crBall = +cr(ringRgb, ballRgb).toFixed(2);
       let shot = null; let ringMd5 = null;
       if (shots) {
-        const f = path.join(shots, `ball-${theme}-${state}.png`); fs.writeFileSync(f, buf); shot = crypto.createHash('md5').update(buf).digest('hex');
-        const crop = await page.screenshot({ clip: { x: Math.max(0, L - 10), y: Math.max(0, Tp - 10), width: Math.min(W + 20, 1280 - Math.max(0, L - 10)), height: H + 20 } });
-        fs.writeFileSync(path.join(shots, `ball-${theme}-${state}-ring.png`), crop); ringMd5 = crypto.createHash('md5').update(crop).digest('hex');
+        const f = path.join(shots, `ball-${theme}-${state.replace(' ', '-')}.png`); fs.writeFileSync(f, buf); shot = crypto.createHash('md5').update(buf).digest('hex');
+        const crop = await page.screenshot({ clip: { x: Math.max(0, L - 10), y: Math.max(0, Tp - 10), width: Math.min(W + 20, vw - Math.max(0, L - 10)), height: H + 20 } });
+        fs.writeFileSync(path.join(shots, `ball-${theme}-${state.replace(' ', '-')}-ring.png`), crop); ringMd5 = crypto.createHash('md5').update(crop).digest('hex');
       }
       const row = { cell, before: { boxShadow: before.boxShadow, size: [before.w, before.h] }, after: { ...after }, crSpecVsPageBg: crSpec, crRingVsBallFill: crBall, minSampled: +minRing.toFixed(2), samples, shot, ringMd5 };
       rows.push(row);

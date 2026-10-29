@@ -300,28 +300,3 @@ h1 {
 @media (prefers-color-scheme: dark) {
   .container { box-shadow: none; }
 }
-
-/* 设计 M2：嵌入式选项对话框（chrome://extensions 内，没有所属标签页）——页面即卡片，不留底色条，宽 520 */
-html.embedded,
-html.embedded body {
-  background: var(--surface);
-  min-height: 0;
-}
-
-html.embedded body {
-  padding: 0;
-  display: block;
-  width: 520px;
-  max-width: 100%;
-}
-
-html.embedded .container {
-  max-width: none;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-html.embedded .header { padding: 16px 20px; }
-html.embedded .option-item { padding: 14px 20px; }
-html.embedded .footer { padding: 10px 20px; }

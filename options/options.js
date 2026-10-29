@@ -3,22 +3,6 @@ import { capAnswerCount, MAX_ANSWER_LIMIT } from '../lib/answer-limit.js';
 
 const Logger = createLogger('[Zhihu-MD Options]');
 
-/**
- * 设计 M2：判断是否在 chrome://extensions 的嵌入式选项对话框里。
- * 嵌入时没有所属标签页，tabs.getCurrent 回调拿到 undefined；新标签页打开时拿到 tab。
- * tabs.getCurrent 不需要 tabs 权限（只有读 url/title 才需要）。
- */
-export function markEmbedded(tabsApi, root) {
-  try {
-    if (!tabsApi?.getCurrent) return;
-    tabsApi.getCurrent((tab) => {
-      root.classList.toggle('embedded', !tab);
-    });
-  } catch { /* 非扩展环境忽略 */ }
-}
-
-markEmbedded(typeof chrome !== 'undefined' ? chrome.tabs : undefined, document.documentElement);
-
 /** 设计 M7：开关用 role="switch"，aria-checked 与 checked 保持同步 */
 export function syncSwitchState(input) {
   if (input) input.setAttribute('aria-checked', input.checked ? 'true' : 'false');

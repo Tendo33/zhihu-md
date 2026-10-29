@@ -29,25 +29,15 @@ assert.match(ui, /\.switch span::after\{content:"";position:absolute;top:3px;lef
 }
 console.log('options redesign tests passed');
 
-// M2：同行居中、卡片随内容、嵌入式对话框
+// M2：同行居中、卡片随内容（审查 P2：open_in_tab 为 true，嵌入模式代码已删）
 {
   assert.ok(!/@media \(max-width: 480px\) \{\s*\.option-item \{\s*flex-direction: column/.test(css), 'M2：不再在 ≤480 改竖排');
   assert.match(rule('.option-item'), /align-items: center;/);
   assert.match(css, /\nbody \{[^}]*min-height: 100vh;[^}]*align-items: flex-start;/, 'M2：卡片不被拉伸');
-  assert.match(css, /html\.embedded body \{[^}]*padding: 0;[^}]*width: 520px;/);
-  assert.match(css, /html\.embedded,\s*html\.embedded body \{[^}]*min-height: 0;/);
-  const { parseHTML } = await import('linkedom');
-  const { window, document } = parseHTML('<!doctype html><html><body><input id="showFloatingBall" type="checkbox"><input id="maxAnswerCount"><input id="downloadImages" type="checkbox"><span id="status"></span><div id="note-maxAnswerCount"></div><span id="app-version"></span></body></html>');
-  globalThis.window = window; globalThis.document = document;
-  globalThis.chrome = { storage: { sync: { get: (d, cb) => cb(d), set: (_o, cb) => cb && cb() } }, runtime: { getManifest: () => ({ version: '9.9.9' }) } };
-  const { markEmbedded } = await import('../options/options.js');
-  const root = document.documentElement;
-  markEmbedded({ getCurrent: (cb) => cb(undefined) }, root);
-  assert.ok(root.classList.contains('embedded'), '嵌入（无所属标签页）→ html.embedded');
-  markEmbedded({ getCurrent: (cb) => cb({ id: 1 }) }, root);
-  assert.ok(!root.classList.contains('embedded'), '新标签页 → 不加');
-  markEmbedded(undefined, root);
-  assert.ok(!root.classList.contains('embedded'), '没有 tabs API 时不动');
+  assert.ok(!/embedded/.test(css), '审查 P2：不再有 .embedded 样式');
+  assert.ok(!/markEmbedded|getCurrent/.test(read('options/options.js')), '审查 P2：不再判断嵌入');
+  const mf = JSON.parse(read('manifest.src.json'));
+  assert.equal(mf.options_ui.open_in_tab, true, 'open_in_tab 保持 true');
   console.log('options redesign M2 passed');
 }
 

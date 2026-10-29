@@ -19,6 +19,18 @@ import { span, svgIcon } from '../../lib/safe-dom.js';
 // 悬浮球上面向用户的文字都走 _locales（chrome.i18n），见 i18n.js / ball-text.js
 const idleLabel = () => t('ballTooltipIdle');
 
+/** 空闲提示拆成两个不换行短语，空格在 span 外：窄屏只在「·」后折行（R12）。用 createElement/textContent 构建。 */
+export function idleTooltipNodes() {
+  return [span('nw', t('ballTooltipIdlePart1')), ' ', span('nw', t('ballTooltipIdlePart2'))];
+}
+
+/** 写入提示：空闲文案用分段结构，其余状态文字直接 textContent */
+export function setTooltipText(tip, message) {
+  if (!tip) return;
+  if (message === idleLabel()) tip.replaceChildren(...idleTooltipNodes());
+  else tip.textContent = message;
+}
+
 // Z3-2：导出中保留 M↓ 字形，靠外圈进度环表示；成功/失败换成勾/叹号
 export const BALL_FACE = {
   idle: () => span('glyph', 'M↓', { 'aria-hidden': 'true' }),
@@ -51,9 +63,10 @@ export const FloatingBall = {
     ball.append(
       span('ring', null, { 'aria-hidden': 'true' }),
       span('face'),
-      span('tooltip', idleLabel(), { 'aria-hidden': 'true' }),
+      span('tooltip', null, { 'aria-hidden': 'true' }),
     );
     ball.querySelector('.face').append(BALL_FACE.idle());
+    setTooltipText(ball.querySelector('.tooltip'), idleLabel());
 
     document.body.appendChild(ball);
     return ball;
@@ -109,7 +122,7 @@ export const FloatingBall = {
 
   /** 提示文字、读屏播报和 aria-label 一起更新 */
   setMessage(ball, message, state, srExtra = '', srSep = t('ballSep')) {
-    ball.querySelector('.tooltip').textContent = message;
+    setTooltipText(ball.querySelector('.tooltip'), message);
     const spoken = srExtra ? `${message}${srSep}${srExtra}` : message;
     const live = this.getLiveRegion();
     if (live) {

@@ -3,6 +3,8 @@
  */
 export const ZH_FALLBACK = {
   ballTooltipIdle: "点击下载 · 右键复制",
+  ballTooltipIdlePart1: "点击下载 ·",
+  ballTooltipIdlePart2: "右键复制",
   ballAriaIdle: "导出 Markdown（点击下载，右键复制）",
   ballLoadingContent: "正在加载内容…",
   ballExportingHot: "正在导出热榜…",

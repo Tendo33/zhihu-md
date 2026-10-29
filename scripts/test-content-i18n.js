@@ -53,6 +53,26 @@ const { ballA11y } = await import('../content/modules/ball-a11y.js');
 const { ballImageSrExtra, ballKeptSrExtra, ballFailureText } = await import('../content/modules/ball-text.js');
 const ball = FloatingBall.createFloatingBall();
 assert.equal(ball.querySelector('.tooltip').textContent, 'Click to export · Right-click to copy');
+// R12：两个不换行短语，空格在 span 外；拼起来仍是整句，且不含中文
+{
+  const tip = ball.querySelector('.tooltip');
+  const nws = [...tip.querySelectorAll('span.nw')];
+  assert.deepEqual(nws.map((n) => n.textContent), ['Click to export ·', 'Right-click to copy']);
+  assert.equal(tip.childNodes.length, 3);
+  assert.equal(tip.childNodes[1].nodeType, 3); assert.equal(tip.childNodes[1].textContent, ' ');
+  assert.equal(`${t('ballTooltipIdlePart1')} ${t('ballTooltipIdlePart2')}`, t('ballTooltipIdle'));
+  assert.equal(`${t('ballTooltipIdlePart1')} ${t('ballTooltipIdlePart2')}`, 'Click to export · Right-click to copy');
+  assert.ok(!CJK.test(tip.textContent));
+  const zhJoin = `${zhGet('ballTooltipIdlePart1')} ${zhGet('ballTooltipIdlePart2')}`;
+  assert.equal(zhJoin, zhGet('ballTooltipIdle'));
+  assert.equal(zhJoin, '点击下载 · 右键复制');
+  // 状态文字仍是纯文本；回到空闲时恢复分段结构
+  FloatingBall.setMessage(ball, t('ballExporting'), 'loading');
+  assert.equal(tip.querySelectorAll('span.nw').length, 0);
+  FloatingBall.setMessage(ball, t('ballTooltipIdle'), 'normal');
+  assert.equal(tip.querySelectorAll('span.nw').length, 2);
+  assert.ok(!/\.innerHTML\s*=|insertAdjacentHTML/.test(read('content/modules/floating-ball.js')), 'floating-ball.js 不用 innerHTML');
+}
 assert.equal(ball.getAttribute('aria-label'), 'Export Markdown (click to download, right-click to copy)');
 assert.ok(!CJK.test(ball.getAttribute('aria-label')), 'en 下 aria-label 不含中文');
 const texts = [];

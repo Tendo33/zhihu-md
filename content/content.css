@@ -211,6 +211,11 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
 }
 
 /* Tooltip */
+/* R12：空闲提示的两个短语各自不换行，只在「·」后的空格处折行 */
+#zhihu-md-floating-ball .tooltip .nw {
+  white-space: nowrap;
+}
+
 #zhihu-md-floating-ball .tooltip {
   position: absolute;
   right: 60px; /* Position to the left */

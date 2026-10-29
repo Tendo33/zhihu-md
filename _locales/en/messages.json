@@ -27,6 +27,14 @@
     "message": "Export linked Zhihu page as Markdown",
     "description": "右键菜单：在知乎问题、回答或专栏链接上，打开并导出该页。"
   },
+  "ballTooltipIdlePart1": {
+    "message": "Click to export ·",
+    "description": "悬浮球悬停提示前半句（不换行，含末尾「·」）；与后半句之间有一个空格，窄屏只在这里折行。"
+  },
+  "ballTooltipIdlePart2": {
+    "message": "Right-click to copy",
+    "description": "悬浮球悬停提示后半句（不换行）。"
+  },
   "ballTooltipIdle": {
     "message": "Click to export · Right-click to copy",
     "description": "悬浮球悬停提示（空闲态）。"

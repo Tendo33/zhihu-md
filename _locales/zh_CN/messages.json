@@ -6,5 +6,25 @@
   "extDescription": {
     "message": "把知乎专栏、回答、问题页和热榜转换为 Markdown，保留公式、代码和图片，一键下载或复制。",
     "description": "扩展简介，显示在 Chrome 应用商店和 chrome://extensions 中。不超过 132 个字符。"
+  },
+  "cmdExportPage": {
+    "message": "导出当前页为 Markdown",
+    "description": "快捷键说明（Alt+Shift+K），显示在 chrome://extensions/shortcuts。"
+  },
+  "menuPageExport": {
+    "message": "导出本页为 Markdown",
+    "description": "右键菜单：在知乎可导出页面上导出本页。"
+  },
+  "menuPageCopy": {
+    "message": "复制本页 Markdown",
+    "description": "右键菜单：复制本页 Markdown 到剪贴板。"
+  },
+  "menuSelectionCopy": {
+    "message": "复制选中内容为 Markdown",
+    "description": "右键菜单：把选中的内容复制为 Markdown。"
+  },
+  "menuLinkExport": {
+    "message": "打开并导出这个知乎链接",
+    "description": "右键菜单：在知乎问题、回答或专栏链接上，打开并导出该页。"
   }
 }

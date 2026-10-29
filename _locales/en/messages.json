@@ -6,5 +6,25 @@
   "extDescription": {
     "message": "Convert Zhihu columns, answers, question pages and hot lists to Markdown, with math, code and images kept. Download or copy.",
     "description": "Extension description shown in the Chrome Web Store and chrome://extensions. 132 characters max."
+  },
+  "cmdExportPage": {
+    "message": "Export current page as Markdown",
+    "description": "快捷键说明（Alt+Shift+K），显示在 chrome://extensions/shortcuts。"
+  },
+  "menuPageExport": {
+    "message": "Export this page as Markdown",
+    "description": "右键菜单：在知乎可导出页面上导出本页。"
+  },
+  "menuPageCopy": {
+    "message": "Copy this page as Markdown",
+    "description": "右键菜单：复制本页 Markdown 到剪贴板。"
+  },
+  "menuSelectionCopy": {
+    "message": "Copy selection as Markdown",
+    "description": "右键菜单：把选中的内容复制为 Markdown。"
+  },
+  "menuLinkExport": {
+    "message": "Open and export this Zhihu link",
+    "description": "右键菜单：在知乎问题、回答或专栏链接上，打开并导出该页。"
   }
 }

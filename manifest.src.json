@@ -72,7 +72,7 @@
         "default": "Alt+Shift+K",
         "mac": "Alt+Shift+K"
       },
-      "description": "导出当前页为 Markdown"
+      "description": "__MSG_cmdExportPage__"
     }
   },
   "browser_specific_settings": {

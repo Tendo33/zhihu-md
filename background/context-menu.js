@@ -22,10 +22,10 @@ export const PAGE_PATTERNS = [
 export const LINK_PATTERNS = ['*://www.zhihu.com/question/*', '*://zhuanlan.zhihu.com/p/*'];
 
 export const MENU_ITEMS = [
-  { id: 'zm-page-export', title: '导出本页为 Markdown', contexts: ['page'], documentUrlPatterns: PAGE_PATTERNS },
-  { id: 'zm-page-copy', title: '复制本页 Markdown', contexts: ['page'], documentUrlPatterns: PAGE_PATTERNS },
-  { id: 'zm-selection-copy', title: '复制选中内容为 Markdown', contexts: ['selection'], documentUrlPatterns: PAGE_PATTERNS },
-  { id: 'zm-link-export', title: '打开并导出这个知乎链接', contexts: ['link'], targetUrlPatterns: LINK_PATTERNS },
+  { id: 'zm-page-export', messageKey: 'menuPageExport', title: '导出本页为 Markdown', contexts: ['page'], documentUrlPatterns: PAGE_PATTERNS },
+  { id: 'zm-page-copy', messageKey: 'menuPageCopy', title: '复制本页 Markdown', contexts: ['page'], documentUrlPatterns: PAGE_PATTERNS },
+  { id: 'zm-selection-copy', messageKey: 'menuSelectionCopy', title: '复制选中内容为 Markdown', contexts: ['selection'], documentUrlPatterns: PAGE_PATTERNS },
+  { id: 'zm-link-export', messageKey: 'menuLinkExport', title: '打开并导出这个知乎链接', contexts: ['link'], targetUrlPatterns: LINK_PATTERNS },
 ];
 
 /** 链接是否指向可导出的知乎页面（文章 / 问题 / 回答） */
@@ -40,10 +40,19 @@ export function isExportableLink(url) {
   }
 }
 
-export function createMenus(menus) {
+/** Z85-01：菜单文字走 chrome.i18n（_locales 的 menu* 条目）；取不到时用中文 title 兜底 */
+export function menuTitle(item, getMessage = globalThis.chrome?.i18n?.getMessage?.bind(globalThis.chrome.i18n)) {
+  let msg = '';
+  try { msg = getMessage ? getMessage(item.messageKey) : ''; } catch { msg = ''; }
+  return msg || item.title;
+}
+
+export function createMenus(menus, getMessage) {
   menus.removeAll(() => {
     for (const item of MENU_ITEMS) {
-      menus.create({ ...item });
+      // messageKey 不是 contextMenus.create 认识的字段，传进去会报错，必须去掉
+      const { messageKey, ...props } = item;
+      menus.create({ ...props, title: menuTitle(item, getMessage) });
     }
   });
 }

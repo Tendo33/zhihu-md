@@ -20,7 +20,7 @@ body {
  */
 
 body {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg); /* 设计 M7：页面用 --bg，卡片用 --surface（原来反了） */
   color: var(--text-primary);
   min-height: 100vh;
   display: flex;
@@ -31,8 +31,8 @@ body {
 
 .container {
   width: 100%;
-  max-width: 600px;
-  background: var(--bg-primary); /* Slightly lighter than bg-secondary */
+  max-width: 640px;
+  background: var(--surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 0;
@@ -43,7 +43,7 @@ body {
 
 /* Header */
 .header {
-  padding: 24px 32px;
+  padding: 20px 24px; /* 设计 M7：页眉 20/24 */
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -56,14 +56,14 @@ h1 {
 
 /* Sections */
 .section {
-  padding: 8px 0;
+  padding: 0; /* 设计 M7：去掉上下额外内边距 */
 }
 
 .option-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 32px;
+  padding: 16px 24px; /* 设计 M7：每行 16/24 */
   border-bottom: 1px solid var(--border-subtle);
   transition: background-color var(--duration-fast) var(--ease-smooth);
   gap: 16px;
@@ -74,20 +74,22 @@ h1 {
 }
 
 .option-item:hover {
-  background-color: var(--bg-card);
+  background-color: var(--state-hover);
 }
 
 .option-content {
   flex: 1;
-  padding-right: 20px;
-  min-width: 0;
+  min-width: 0; /* 设计 M7：去掉与 gap 重复的 padding-right */
 }
 
 .option-label {
+  display: block;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600; /* 设计 M7 */
+  line-height: 1.4;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  cursor: pointer;
 }
 
 .option-desc {
@@ -267,15 +269,15 @@ h1 {
   }
 
   .header {
-    padding: 20px 20px;
+    padding: 16px;
   }
 
   .option-item {
-    padding: 16px 20px;
+    padding: 14px 16px; /* 设计 M7：≤640 时 14/16 */
   }
 
   .footer {
-    padding: 10px 20px;
+    padding: 10px 16px;
   }
 }
 

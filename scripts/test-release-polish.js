@@ -17,7 +17,7 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
 // B2：设置页悬浮球标题与适用范围
 {
   const html = read('options/options.html');
-  assert.match(html, /id="label-showFloatingBall">悬浮导出球</);
+  assert.match(html, /id="label-showFloatingBall" for="showFloatingBall">悬浮导出球</);
   assert.match(html, /id="desc-showFloatingBall">在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。</);
   assert.ok(!html.includes('悬浮导出按钮') && !html.includes('知乎文章页面'));
 }

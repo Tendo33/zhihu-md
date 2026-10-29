@@ -96,3 +96,39 @@ console.log('options redesign tests passed');
   assert.match(rule('.nw'), /white-space: nowrap;/);
   console.log('options redesign M6 passed');
 }
+
+// M7：层级与间距、语义（<label for>、role="switch"、aria-checked 同步）
+{
+  const html = read('options/options.html');
+  assert.match(css, /\nbody \{\s*background-color: var\(--bg\);/, 'M7：页面 --bg');
+  assert.match(rule('.container'), /background: var\(--surface\);/, 'M7：卡片 --surface');
+  assert.match(rule('.header'), /padding: 20px 24px;/);
+  assert.match(rule('.option-item'), /padding: 16px 24px;/);
+  assert.match(rule('.section'), /padding: 0;/);
+  assert.ok(!/padding-right: 20px/.test(rule('.option-content')));
+  assert.match(rule('.option-label'), /font-weight: 600;/);
+  assert.match(rule('.option-item:hover'), /var\(--state-hover\)/);
+  for (const k of ['showFloatingBall', 'maxAnswerCount', 'downloadImages']) {
+    assert.match(html, new RegExp(`<label class="option-label" id="label-${k}" for="${k}">`), `${k} 用 <label for>`);
+  }
+  assert.ok(!html.includes('<label class="switch">'), '开关外层不再是 label（避免嵌套 label）');
+  assert.equal((html.match(/<input type="checkbox" role="switch" aria-checked="false"/g) || []).length, 2);
+  assert.equal((html.match(/<span class="slider" aria-hidden="true"><\/span>/g) || []).length, 2);
+  // aria-checked 跟随 checked：读取设置时、切换时
+  const { parseHTML } = await import('linkedom');
+  const page = parseHTML(html.replace(/<script[\s\S]*?<\/script>/g, ''));
+  globalThis.window = page.window; globalThis.document = page.document;
+  let store = { showFloatingBall: true, maxAnswerCount: 20, downloadImages: false };
+  globalThis.chrome = { storage: { sync: { get: (d, cb) => cb({ ...d, ...store }), set: (o, cb) => { store = { ...store, ...o }; cb && cb(); } } } };
+  await import('../options/options.js?m7');
+  page.document.dispatchEvent(new page.window.Event('DOMContentLoaded'));
+  const ball = page.document.getElementById('showFloatingBall');
+  const img = page.document.getElementById('downloadImages');
+  assert.equal(ball.getAttribute('aria-checked'), 'true', '读取后同步');
+  assert.equal(img.getAttribute('aria-checked'), 'false');
+  img.checked = true; img.dispatchEvent(new page.window.Event('change'));
+  assert.equal(img.getAttribute('aria-checked'), 'true', '切换后同步');
+  assert.equal(store.downloadImages, true);
+  assert.equal(page.document.getElementById('status').textContent, '✓ 已保存');
+  console.log('options redesign M7 passed');
+}

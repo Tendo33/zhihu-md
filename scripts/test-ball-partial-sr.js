@@ -5,9 +5,9 @@ import { imagePartialSrExtra, imagePartialLine, IMAGE_KEPT_REASON } from '../lib
 
 // 纯函数：与弹窗琥珀提示的图片行同一套文案；只有保留时带原因（同成功态）
 assert.equal(imagePartialSrExtra(0, 0), '');
-assert.equal(imagePartialSrExtra(3, 0), '3 张图片下载失败，已保留在线链接');
-assert.equal(imagePartialSrExtra(3, 2), '3 张图片下载失败，另有 2 张保留为在线链接');
-assert.equal(imagePartialSrExtra(3, 2), imagePartialLine(3, 2));
+assert.equal(imagePartialSrExtra(3, 0), '3 张图片未能下载，已保留在线链接');
+assert.equal(imagePartialSrExtra(3, 2), '3 张图片未能下载，已保留在线链接，另有 2 张保留为在线链接');
+assert.equal(imagePartialLine(3, 2), '3 张图片未能下载，另有 2 张保留为在线链接');
 assert.equal(imagePartialSrExtra(0, 5), `5 张图片保留为在线链接，${IMAGE_KEPT_REASON}`);
 
 const { window, document } = parseHTML('<!doctype html><html><body></body></html>');
@@ -41,9 +41,10 @@ async function run(res) {
 }
 
 const cases = [
-  [{ success: true, failedImages: 3, keptImages: 0 }, `${TOOLTIP}，3 张图片下载失败，已保留在线链接`],
-  [{ success: true, failedImages: 3, keptImages: 2 }, `${TOOLTIP}，3 张图片下载失败，另有 2 张保留为在线链接`],
-  [{ success: true, failedImages: 0, keptImages: 5 }, `${TOOLTIP}，5 张图片保留为在线链接，${IMAGE_KEPT_REASON}`],
+  // P2Z-B（设计决定）：概况和图片情况之间用「；」
+  [{ success: true, failedImages: 3, keptImages: 0 }, '部分导出：已导出 43/60 条，17 条未能加载；3 张图片未能下载，已保留在线链接'],
+  [{ success: true, failedImages: 3, keptImages: 2 }, '部分导出：已导出 43/60 条，17 条未能加载；3 张图片未能下载，已保留在线链接，另有 2 张保留为在线链接'],
+  [{ success: true, failedImages: 0, keptImages: 5 }, `${TOOLTIP}；5 张图片保留为在线链接，${IMAGE_KEPT_REASON}`],
   [{ success: true, failedImages: 0, keptImages: 0 }, TOOLTIP],
   [{ success: true, downloadId: 1 }, TOOLTIP],
 ];
@@ -53,6 +54,27 @@ for (const [res, spoken] of cases) {
   assert.equal(r.tooltip, TOOLTIP, 'tooltip 不变');
   assert.equal(r.live, spoken, `live region：${JSON.stringify(res)}`);
   assert.equal(r.label, `${spoken}。再次点击可重新导出`, `aria-label：${JSON.stringify(res)}`);
+  assert.doesNotMatch(r.label, /失败/, '警告态读屏不出现「失败」（M1）');
   assert.doesNotMatch(r.label, /导出失败/, '警告态不用「导出失败：」前缀');
+}
+
+// 审查预提示：「；」只用在部分导出读屏里概况和图片情况之间；成功态（同一个 setMessage）仍用「，」，
+// 「保留为在线链接，原因」内部的逗号也不变
+QuestionExporter.exportMultipleAnswers = async () => ({
+  success: true,
+  data: { filename: 'q.md', content: '# q', images: [{ url: '//pic3.zhimg.com/a.jpg', filename: 'img_001_a.jpg' }] },
+});
+const successCases = [
+  [{ success: true, failedImages: 3, keptImages: 0 }, '已导出，3 张图片未能下载，已保留在线链接', '已导出，3 张图片未能下载，已保留在线链接'],
+  [{ success: true, failedImages: 3, keptImages: 2 }, '已导出，3 张图片未能下载，已保留在线链接', '已导出，3 张图片未能下载，已保留在线链接，另有 2 张保留为在线链接'],
+  [{ success: true, failedImages: 0, keptImages: 5 }, '已导出', `已导出，5 张图片保留为在线链接，${IMAGE_KEPT_REASON}`],
+];
+for (const [res, tip, spoken] of successCases) {
+  const r = await run(res);
+  assert.ok(!r.warning, '成功态不是警告态');
+  assert.equal(r.tooltip, tip);
+  assert.equal(r.live, spoken, `成功态 live：${JSON.stringify(res)}`);
+  assert.doesNotMatch(r.live, /；/, '成功态不用「；」');
+  assert.equal(r.label, `${spoken}。再次点击可重新导出`);
 }
 console.log('ball partial sr tests passed');

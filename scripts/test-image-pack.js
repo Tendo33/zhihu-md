@@ -62,7 +62,7 @@ assert.equal(extFromMagic(RIFF_WAVE), null, 'RIFF 但不是 WEBP 不能当 webp'
 }
 
 // 文案
-assert.equal(imageFailText(2), '2 张图片下载失败，已保留在线链接');
+assert.equal(imageFailText(2), '2 张图片未能下载，已保留在线链接');
 
 // 回退与改名
 const images = [
@@ -113,7 +113,7 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
   assert.ok(zip.includes('](https://pic2.zhimg.com/v2-b.jpg)'));
 }
 
-// popup：已保存 + 信息条「N 张图片下载失败，已保留在线链接」
+// popup：已保存 + 信息条「N 张图片未能下载，已保留在线链接」
 {
   const flush = async () => { for (let i = 0; i < 12; i++) await new Promise((r) => setImmediate(r)); };
   const html = fs.readFileSync(new URL('../popup/popup.html', import.meta.url), 'utf8').replace(/<script[^>]*><\/script>/g, '');
@@ -133,7 +133,7 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
   const $ = (id) => document.getElementById(id);
   assert.ok(!$('action-ok').classList.contains('hidden'));
   assert.ok(!$('action-info').classList.contains('hidden'), '显示图片失败信息条');
-  assert.equal($('info-text').textContent, '3 张图片下载失败，已保留在线链接');
+  assert.equal($('info-text').textContent, '3 张图片未能下载，已保留在线链接');
   assert.ok($('refresh-btn').classList.contains('hidden'));
   await flush();
   assert.equal($('recent-list').children.length, 2, '设计建议 1：图片失败提示出现时最近导出缩为 2 行');

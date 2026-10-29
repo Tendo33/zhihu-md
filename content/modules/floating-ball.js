@@ -8,7 +8,7 @@ import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
 import { PARTIAL_PREFIX, partialText } from '../../lib/partial-export.js';
-import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptText, imagePartialSrExtra } from '../../lib/image-pack.js';
+import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptText, imagePartialSrExtra, PARTIAL_SR_SEP } from '../../lib/image-pack.js';
 import { PageDetector } from './detector.js';
 import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
@@ -108,9 +108,9 @@ export const FloatingBall = {
   },
 
   /** 提示文字、读屏播报和 aria-label 一起更新 */
-  setMessage(ball, message, state, srExtra = '') {
+  setMessage(ball, message, state, srExtra = '', srSep = '，') {
     ball.querySelector('.tooltip').textContent = message;
-    const spoken = srExtra ? `${message}，${srExtra}` : message;
+    const spoken = srExtra ? `${message}${srSep}${srExtra}` : message;
     const live = this.getLiveRegion();
     if (live) {
       live.setAttribute('role', state === 'error' ? 'alert' : 'status');
@@ -121,11 +121,11 @@ export const FloatingBall = {
     applyBallA11y(ball, current, spoken);
   },
 
-  finishBall(ball, generation, state, message, srExtra = '') {
+  finishBall(ball, generation, state, message, srExtra = '', srSep = '，') {
     if (generation !== this.operation) return;
     this.busy = false;
     this.updateBallState(ball, state);
-    this.setMessage(ball, message, state, srExtra);
+    this.setMessage(ball, message, state, srExtra, srSep);
     // 成功提示短暂停留；失败原因一直显示，直到下一次操作（Round 2：错误持续可见）
     if (state === 'success') {
       setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), 4000);
@@ -185,7 +185,7 @@ export const FloatingBall = {
           // 发版 QA ZR-02 / 设计 M1：文件已保存但不完整 → 警告态（琥珀色三角，持续显示，polite 播报）
           // QA P2Z-02：tooltip 不变，读屏末尾补上图片失败数和保留数（与弹窗琥珀提示的图片行一致）
           const srExtra = imagePartialSrExtra((dl && dl.failedImages) || 0, (dl && dl.keptImages) || 0);
-          this.finishBall(ball, generation, 'warning', `${PARTIAL_PREFIX}${partialText(result.data.partial)}`, srExtra);
+          this.finishBall(ball, generation, 'warning', `${PARTIAL_PREFIX}${partialText(result.data.partial)}`, srExtra, PARTIAL_SR_SEP);
         } else {
           // 发版 QA ZR-09：部分图片没打进 zip 时，成功提示里带上数量
           // 第三轮 B：只有 kept 按普通成功处理，tooltip 不变，读屏末尾补一句；数字只算失败

@@ -1,4 +1,4 @@
-// 第三轮 B（主管决定 + 设计定稿）：按规则保留在线链接的图片单独计数（kept），不算「N 张图片下载失败」
+// 第三轮 B（主管决定 + 设计定稿）：按规则保留在线链接的图片单独计数（kept），不算「N 张图片未能下载」
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { parseHTML } from 'linkedom';
@@ -24,9 +24,9 @@ const md = (list) => list.map((im) => `![](images/${im.filename})`).join('\n');
 // 文案（集中在 lib/image-pack.js）
 assert.equal(imageKeptText(2), '2 张图片保留为在线链接');
 assert.equal(imageKeptMoreText(2), '另有 2 张图片保留为在线链接');
-assert.equal(imagePartialLine(1, 0), '1 张图片下载失败，已保留在线链接');
+assert.equal(imagePartialLine(1, 0), '1 张图片未能下载，已保留在线链接');
 assert.equal(imagePartialLine(0, 2), '2 张图片保留为在线链接');
-assert.equal(imagePartialLine(1, 2), '1 张图片下载失败，另有 2 张保留为在线链接');
+assert.equal(imagePartialLine(1, 2), '1 张图片未能下载，另有 2 张保留为在线链接');
 assert.equal(imagePartialLine(0, 0), '');
 
 // popup 场景
@@ -63,21 +63,21 @@ const shown = (el) => !el.classList.contains('hidden');
 {
   const $ = await runPopup({ failedImages: 3, keptImages: 0 });
   assert.ok(shown($('action-info')));
-  assert.equal($('info-text').textContent, '3 张图片下载失败，已保留在线链接');
+  assert.equal($('info-text').textContent, '3 张图片未能下载，已保留在线链接');
   assert.ok(!shown($('info-kept')) && !shown($('ok-kept')), '只有失败：没有保留行');
   assert.equal($('info-text').getAttribute('title'), null, '只有失败：不加 title');
   assert.equal($('action-info').getAttribute('title'), null);
 }
 {
   const $ = await runPopup({ failedImages: 1, keptImages: 2 });
-  assert.equal($('info-text').textContent, '1 张图片下载失败，已保留在线链接', 'N 只算失败');
+  assert.equal($('info-text').textContent, '1 张图片未能下载，已保留在线链接', 'N 只算失败');
   // 设计定稿 B：保留数不上屏，视觉隐藏 span 放在 #action-info（role=status）里一起念；title 写全句
   const k = $('info-kept');
   assert.equal(k.textContent, '另有 2 张图片保留为在线链接', 'sr-only 文字');
   assert.ok(k.classList.contains('sr-only') && !k.classList.contains('img-sub'), '是视觉隐藏，不上屏');
   assert.ok(shown(k), '不是 display:none（没有 .hidden）');
   assert.ok($('action-info').contains(k) && $('action-info').getAttribute('role') === 'status', '在 #action-info 里');
-  assert.equal($('info-text').getAttribute('title'), '1 张图片下载失败，另有 2 张保留为在线链接', 'title 全句，在可见文字 span 上');
+  assert.equal($('info-text').getAttribute('title'), '1 张图片未能下载，另有 2 张保留为在线链接', 'title 全句，在可见文字 span 上');
   assert.equal($('action-info').getAttribute('title'), null, 'role=status 容器不带 title');
   const css = fs.readFileSync(new URL('../lib/ui-v2.css', import.meta.url), 'utf8').match(/\.sr-only\{[^}]*\}/)[0];
   assert.ok(!/display\s*:\s*none/.test(css) && /clip/.test(css), '.sr-only 是标准视觉隐藏写法');

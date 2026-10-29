@@ -238,7 +238,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
   transform: translateY(-50%) translateX(0);
 }
 
-/* 设计建议 3：成功提示较长（图片下载失败数量）时换行，375 宽不出屏；与错误提示同一宽度上限 */
+/* 设计建议 3：成功提示较长（图片未能下载数量）时换行，375 宽不出屏；与错误提示同一宽度上限 */
 #zhihu-md-floating-ball.success .tooltip {
   white-space: normal;
   width: max-content;

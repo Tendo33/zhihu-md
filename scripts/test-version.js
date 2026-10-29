@@ -15,6 +15,6 @@ assert.match(read('README.en.md'), new RegExp(`From ${v.replace(/\./g, '\\.')}, 
   const cl = read('CHANGELOG.md');
   const sec = cl.slice(cl.indexOf(`## [${v}]`), cl.indexOf('\n## [', cl.indexOf(`## [${v}]`) + 1) >>> 0);
   assert.match(sec, /Chrome 121/, 'CHANGELOG 当前版本写明最低 Chrome 121');
-  assert.match(sec, /SVG、ico 和无法识别格式的图片不打包，保留在线链接/, 'CHANGELOG 写明 SVG/ico/未知格式保留在线链接');
+  assert.match(sec, /SVG、ico、无法识别格式和非知乎图床（zhimg.com）的图片不打包，保留在线链接，单独提示「N 张图片保留为在线链接」，不算下载失败/, 'CHANGELOG 写明保留在线链接单独计数');
 }
 console.log('version consistency tests passed');

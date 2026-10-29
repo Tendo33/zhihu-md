@@ -89,6 +89,9 @@ export function verifyDist(dir) {
 // manifest 里每个 __MSG_x__ 在每种语言都要有条目；description 不超过 132 字符（Chrome 限制）。
 export const REQUIRED_LOCALES = ['zh_CN', 'en'];
 export const REQUIRED_MESSAGES = ['extName', 'extDescription'];
+export const NAME_MAX = 75;
+export const SHORT_NAME_MAX = 12;
+const SHORT_NAME_KEY = /short_?name/i;
 export function manifestMessageKeys(manifest) {
   const keys = new Set();
   JSON.stringify(manifest).replace(/__MSG_(\w+?)__/g, (_, k) => keys.add(k));
@@ -100,6 +103,11 @@ export function verifyLocales(dir, manifest) {
   if (keys.length && !manifest.default_locale) errors.push('manifest 用了 __MSG_ 但没有 default_locale');
   const locales = new Set(REQUIRED_LOCALES);
   if (manifest.default_locale) locales.add(manifest.default_locale);
+  // 没用 __MSG_ 的字面值也要守住长度
+  for (const [field, max] of [['name', NAME_MAX], ['short_name', SHORT_NAME_MAX]]) {
+    const v = manifest[field];
+    if (typeof v === 'string' && !/^__MSG_\w+__$/.test(v) && [...v].length > max) errors.push(`manifest ${field} 超过 ${max} 字符（${[...v].length}）`);
+  }
   if (!keys.length && !manifest.default_locale) return errors;
   for (const loc of locales) {
     const file = path.join(dir, '_locales', loc, 'messages.json');
@@ -115,6 +123,18 @@ export function verifyLocales(dir, manifest) {
     const descKey = /^__MSG_(\w+)__$/.exec(manifest.description || '')?.[1];
     const desc = descKey && lower.get(descKey.toLowerCase())?.message;
     if (desc && [...desc].length > 132) errors.push(`_locales/${loc}: ${descKey} 超过 132 字符（${[...desc].length}）`);
+    // 审查 P3：名称 ≤75、short_name ≤12（Chrome 限制）。short_name 只在 manifest 或 messages 里有时才检查
+    for (const [field, max] of [['name', NAME_MAX], ['short_name', SHORT_NAME_MAX]]) {
+      const key = /^__MSG_(\w+)__$/.exec(manifest[field] || '')?.[1];
+      const text = key && lower.get(key.toLowerCase())?.message;
+      if (text && [...text].length > max) errors.push(`_locales/${loc}: ${field}（${key}）超过 ${max} 字符（${[...text].length}）`);
+    }
+    if (!/^__MSG_\w+__$/.test(manifest.short_name || '')) {
+      for (const [k, m] of Object.entries(msgs)) {
+        const text = m && typeof m.message === 'string' ? m.message : '';
+        if (SHORT_NAME_KEY.test(k) && [...text].length > SHORT_NAME_MAX) errors.push(`_locales/${loc}: short_name（${k}）超过 ${SHORT_NAME_MAX} 字符（${[...text].length}）`);
+      }
+    }
   }
   return errors;
 }

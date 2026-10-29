@@ -46,6 +46,32 @@ assert.deepEqual(htmlRefs('<img src="a.png?x=1"><a href="b.html"><script src="//
   assert.deepEqual(v.missing, []);
   assert.deepEqual(v.localeErrors, []);
   assert.ok(v.checked.includes('_locales/zh_CN/messages.json'));
+  // 审查 P3：名称 ≤75、short_name ≤12；正好等于上限通过，超 1 个字符报错；没有 short_name 不检查
+  const msgs = (name, extra = {}) => JSON.stringify({ extName: { message: name }, extDescription: { message: 'B' }, ...extra });
+  write('_locales/en/messages.json', msgs('N'.repeat(75)));
+  write('_locales/zh_CN/messages.json', msgs('知'.repeat(75)));
+  assert.deepEqual(verifyDist(dir).localeErrors, [], '名称 75 字符通过');
+  write('_locales/en/messages.json', msgs('N'.repeat(76)));
+  assert.deepEqual(verifyDist(dir).localeErrors, ['_locales/en: name（extName）超过 75 字符（76）']);
+  write('_locales/en/messages.json', msgs('A'));
+  write('_locales/zh_CN/messages.json', msgs('知'.repeat(76)));
+  assert.deepEqual(verifyDist(dir).localeErrors, ['_locales/zh_CN: name（extName）超过 75 字符（76）'], '按字符数算，不按字节');
+  write('_locales/zh_CN/messages.json', msgs('A', { extShortName: { message: '知'.repeat(13) } }));
+  assert.deepEqual(verifyDist(dir).localeErrors, ['_locales/zh_CN: short_name（extShortName）超过 12 字符（13）'], 'messages 里有 short_name 条目时检查');
+  write('_locales/zh_CN/messages.json', msgs('A', { extShortName: { message: '知'.repeat(12) } }));
+  assert.deepEqual(verifyDist(dir).localeErrors, []);
+  const mf2 = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ ...mf2, short_name: '__MSG_extShortName__' }));
+  write('_locales/en/messages.json', msgs('A', { extShortName: { message: 'Zhihu2Markdown' } }));
+  write('_locales/zh_CN/messages.json', msgs('A', { extShortName: { message: '知乎转MD' } }));
+  assert.deepEqual(verifyDist(dir).localeErrors, ['_locales/en: short_name（extShortName）超过 12 字符（14）'], 'manifest short_name 用 __MSG_');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ ...mf2, short_name: 'Zhihu2Markdown' }));
+  write('_locales/en/messages.json', msgs('A'));
+  write('_locales/zh_CN/messages.json', msgs('A'));
+  assert.deepEqual(verifyDist(dir).localeErrors, ['manifest short_name 超过 12 字符（14）'], 'manifest 字面 short_name');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ ...mf2, name: 'N'.repeat(76), default_locale: undefined }));
+  assert.deepEqual(verifyDist(dir).localeErrors, ['manifest name 超过 75 字符（76）'], 'manifest 字面 name');
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(mf2));
 }
 fs.rmSync(dir, { recursive: true, force: true });
 

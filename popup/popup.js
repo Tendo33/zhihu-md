@@ -390,6 +390,8 @@ async function handleExport() {
         } else {
           setImageLine('feedback-img', imagePartialLine(f, k), f === 0 && k > 0);
         }
+        // 设计复核 after-5（方案①）：部分导出且失败和保留都有时提示框最高，最近导出缩为 1 行；不按宽度切换
+        setRecentRows(f > 0 && k > 0 ? 1 : 2);
       }
       exportLabel.textContent = PRIMARY;
       setExportActionsEnabled(true);

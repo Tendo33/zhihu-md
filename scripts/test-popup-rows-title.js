@@ -45,7 +45,12 @@ const rows = ($) => $('recent-list').children.length;
   assert.equal(el.textContent.replace(sr.textContent, ''), '1 张图片下载失败，已保留在线链接', 'F2：屏幕上只显示失败句');
   assert.equal(el.getAttribute('title'), '1 张图片下载失败，另有 2 张保留为在线链接', 'F2：title 全句');
   assert.equal($('action-feedback').getAttribute('title'), null, '容器不带 title');
-  assert.equal(rows($), 2, 'F2：最近导出 2 行');
+  assert.equal(rows($), 1, '方案①：部分导出 + 失败和保留都有 → 最近导出 1 行');
+}
+// 部分导出其他情况仍是 2 行
+for (const img of [{ failedImages: 1, keptImages: 0 }, { failedImages: 0, keptImages: 2 }, { failedImages: 0, keptImages: 0 }]) {
+  const $ = await run(img, { partial: { exported: 3, total: 10, failedPage: 2 } });
+  assert.equal(rows($), 2, `部分导出 ${JSON.stringify(img)} 仍 2 行`);
 }
 // 状态卡标题：单行、末尾省略；title 和 textContent 都是完整标题（空闲、成功、部分导出、失败）
 {

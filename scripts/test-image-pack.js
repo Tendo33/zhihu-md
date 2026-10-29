@@ -36,6 +36,22 @@ assert.equal(extFromMagic(RIFF_WAVE), null, 'RIFF 但不是 WEBP 不能当 webp'
   assert.ok(!wave.files.some((f) => f.filename.endsWith('.webp')), 'RIFF/WAVE 不应存成 .webp');
 }
 
+// 审查 P3-5：魔数优先；SVG / 认不出的类型算下载失败，保留在线链接
+{
+  const one = [{ url: 'https://pic1.zhimg.com/v2-m.png', filename: 'img_010_m.png' }];
+  const md1 = '![](images/img_010_m.png)';
+  const magicFirst = applyImageResults(md1, one, [{ ok: true, data: JPG, contentType: 'image/png' }]);
+  assert.deepEqual(magicFirst.files.map((f) => f.filename), ['img_010_m.jpg'], 'Content-Type 说 png、文件头是 JPEG → .jpg');
+  const SVG = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>');
+  for (const [data, ct] of [[SVG, 'image/svg+xml'], [UNKNOWN, 'application/octet-stream'], [UNKNOWN, ''], [RIFF_WAVE, 'audio/wav']]) {
+    const x = applyImageResults(md1, one, [{ ok: true, data, contentType: ct }]);
+    assert.equal(x.failed, 1, `${ct || '无类型'} 计为失败`);
+    assert.equal(x.files.length, 0);
+    assert.equal(x.content, '![](https://pic1.zhimg.com/v2-m.png)');
+  }
+  assert.equal(extFromContentType('image/svg+xml'), null);
+}
+
 // 文案
 assert.equal(imageFailText(2), '2 张图片下载失败，已保留在线链接');
 

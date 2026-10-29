@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { parseHTML } from 'linkedom';
 const { window, document } = parseHTML('<!doctype html><html><body></body></html>');
 globalThis.window = window; globalThis.document = document;
-const { parseHtmlInert, svgIcon } = await import('../lib/safe-dom.js');
+const { parseHtmlInert, svgIcon, span } = await import('../lib/safe-dom.js');
 
 const h = parseHtmlInert('<p>你好<img src="x" onerror="alert(1)"></p><script>bad()</script>');
 assert.notEqual(h.ownerDocument, document, '外部 HTML 不进当前页面文档');
@@ -17,7 +17,11 @@ assert.equal(s.getAttribute('aria-hidden'), 'true');
 assert.equal(s.querySelector('path').getAttribute('d'), 'M5 12l5 5L20 7');
 assert.equal(svgIcon('alert').querySelectorAll('circle').length, 1);
 
-for (const f of ['content/modules/floating-ball.js', 'content/modules/exporters/question.js',
+const sp = span('', '<b>x</b>');
+assert.equal(sp.children.length, 0, 'span 文本不能被当成 HTML');
+assert.equal(sp.textContent, '<b>x</b>');
+
+for (const f of ['lib/safe-dom.js', 'content/modules/floating-ball.js', 'content/modules/exporters/question.js',
   'content/modules/exporters/article.js', 'popup/popup.js']) {
   const src = fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
   assert.doesNotMatch(src, /\.innerHTML\s*=(?!=)/, `${f} 不应再给 innerHTML 赋值`);

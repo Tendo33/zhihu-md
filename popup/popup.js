@@ -30,6 +30,7 @@ const actionInfo = $('action-info');
 const progress = $('progress');
 const refreshBtn = $('refresh-btn');
 const openBtn = $('open-btn');
+const feedbackOpen = $('feedback-open'); // 设计复核 935b5b5：部分导出时「打开」放在琥珀提示里
 const exportBtn = $('export-btn');
 const copyBtn = $('copy-btn');
 const settingsBtn = $('settings-btn');
@@ -136,6 +137,7 @@ const POPUP_HINT = { security_check: '在知乎页面完成验证后点“重试
 function setFeedbackTone(tone) {
   // 设计 M1：部分导出是警告（琥珀色、三角、status/polite），其余失败是错误（红色、叹号、alert）
   const warn = tone === 'warn';
+  if (!warn && feedbackOpen) feedbackOpen.classList.add('hidden');
   actionFeedback.className = `alert ${warn ? 'warn' : 'err'}${actionFeedback.classList.contains('hidden') ? ' hidden' : ''}`;
   actionFeedback.setAttribute('role', warn ? 'status' : 'alert');
   const icon = svgIcon(warn ? 'warn' : 'alert');
@@ -352,9 +354,8 @@ async function handleExport() {
       setFeedbackTone('warn');
       $('feedback-title').textContent = partialText(response.data.partial);
       $('feedback-hint').textContent = partialHint(response.data.partial);
-      $('ok-file').textContent = (res && res.filename) || response.data.filename;
-      openBtn.classList.toggle('hidden', lastDownloadId == null);
-      actionOk.classList.remove('hidden');
+      // 设计复核 935b5b5：不再显示绿色「已保存」框，「打开」挪进琥珀提示
+      feedbackOpen.classList.toggle('hidden', lastDownloadId == null);
       {
         const f = (res && res.failedImages) || 0;
         const k = (res && res.keptImages) || 0;
@@ -431,9 +432,11 @@ settingsBtn.addEventListener('click', () => {
 });
 exportBtn.addEventListener('click', handleExport);
 copyBtn.addEventListener('click', handleCopy);
-openBtn.addEventListener('click', () => {
+function openLastDownload() {
   if (lastDownloadId != null && chrome.downloads && chrome.downloads.show) chrome.downloads.show(lastDownloadId);
-});
+}
+openBtn.addEventListener('click', openLastDownload);
+feedbackOpen.addEventListener('click', openLastDownload);
 refreshBtn.addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab && tab.id) { chrome.tabs.reload(tab.id); window.close(); }

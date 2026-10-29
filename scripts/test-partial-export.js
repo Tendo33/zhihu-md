@@ -26,7 +26,8 @@ document.getElementById('export-btn').dispatchEvent(new window.Event('click'));
 await flush();
 const $ = (id) => document.getElementById(id);
 // 设计 M1：警告样式（不是错误），文件已保存所以同时给「打开」
-assert.ok(!$('action-ok').classList.contains('hidden'), '文件已保存，显示「打开」');
+assert.ok($('action-ok').classList.contains('hidden'), '设计复核 935b5b5：部分导出不再显示绿色「已保存」');
+assert.ok(!$('feedback-open').classList.contains('hidden'), '「打开」在琥珀提示里');
 const fb = $('action-feedback');
 assert.ok(!fb.classList.contains('hidden') && fb.classList.contains('warn') && !fb.classList.contains('err'), '提示框是 warn 样式');
 assert.equal(fb.getAttribute('role'), 'status', '警告用 status，不用 alert');

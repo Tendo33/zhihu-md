@@ -76,7 +76,12 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "zhihu-md@tendo33"
+      "id": "zhihu-md@tendo33",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   }
 }

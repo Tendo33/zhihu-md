@@ -16,3 +16,10 @@ for (const [size, file] of Object.entries(want)) {
   assert.equal(buf.readUInt32BE(20), Number(size), file + ' 高');
 }
 console.log('icon manifest tests passed');
+
+// web-ext MISSING_DATA_COLLECTION_PERMISSIONS：扩展不收集/外发用户数据，声明 none
+{
+  const m = JSON.parse(fs.readFileSync(new URL('../manifest.src.json', import.meta.url), 'utf8'));
+  assert.deepEqual(m.browser_specific_settings?.gecko?.data_collection_permissions, { required: ['none'] });
+  console.log('data collection permissions test passed');
+}

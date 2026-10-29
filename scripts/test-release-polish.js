@@ -1,6 +1,7 @@
 // 发版前 UI 审计（design-release-audit-2026-10-29）：文案与样式断言
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { descText } from './options-desc-text.js';
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 
 // B1：popup 与悬浮球「正在导出…」统一，全角省略号，无半角「!」
@@ -18,7 +19,7 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
 {
   const html = read('options/options.html');
   assert.match(html, /id="label-showFloatingBall" for="showFloatingBall">悬浮导出球</);
-  assert.match(html, /id="desc-showFloatingBall">在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。</);
+  assert.equal(descText(html, 'showFloatingBall'), '在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。');
   assert.ok(!html.includes('悬浮导出按钮') && !html.includes('知乎文章页面'));
 }
 // B3：数字输入框边框用 --text-2（即 --text-tertiary，非文本对比度 ≥3:1；设置页重做 M5 直接写 v2 token）

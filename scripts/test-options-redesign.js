@@ -1,6 +1,7 @@
 // 设置页重做（设计 2026-10-29 M1–M7）：开关单旋钮、同行居中、嵌入式对话框、页脚保存提示、标题、数字框、文案、层级与语义
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { descText } from './options-desc-text.js';
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const css = read('options/options.css');
 const ui = read('lib/ui-v2.css');
@@ -88,9 +89,10 @@ console.log('options redesign tests passed');
 // M6：三项说明新文案（逐字照设计规格）、text-wrap: pretty、「1000 条」不断行
 {
   const html = read('options/options.html');
-  assert.ok(html.includes('id="desc-showFloatingBall">在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。</div>'));
-  assert.ok(html.includes('id="desc-maxAnswerCount">问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 <span class="nw">1000 条</span>；被上限截断的导出会标为 truncated。</div>'));
-  assert.ok(html.includes('id="desc-downloadImages">把文章里的图片一起保存，导出为含 .md 和 images 文件夹的 ZIP 包；关闭时图片保留在线链接。</div>'));
+  // B1 之后说明里按短语包了 .nw，文案按 textContent 比对（与规格逐字一致）
+  assert.equal(descText(html, 'showFloatingBall'), '在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。');
+  assert.equal(descText(html, 'maxAnswerCount'), '问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 1000 条；被上限截断的导出会标为 truncated。');
+  assert.equal(descText(html, 'downloadImages'), '把文章里的图片一起保存，导出为含 .md 和 images 文件夹的 ZIP 包；关闭时图片保留在线链接。');
   assert.match(rule('.option-desc'), /text-wrap: pretty;/);
   assert.match(rule('.option-desc'), /color: var\(--text-2\);/);
   assert.match(rule('.nw'), /white-space: nowrap;/);
@@ -131,4 +133,25 @@ console.log('options redesign tests passed');
   assert.equal(store.downloadImages, true);
   assert.equal(page.document.getElementById('status').textContent, '✓ 已保存');
   console.log('options redesign M7 passed');
+}
+
+// 设计验收 B1：三段说明按短语包 .nw（只在标点 / 空格处断行），空格在 span 外，textContent 不变
+{
+  const html = read('options/options.html');
+  const { parseHTML } = await import('linkedom');
+  const doc = parseHTML(html).document;
+  for (const k of ['showFloatingBall', 'maxAnswerCount', 'downloadImages']) {
+    const el = doc.getElementById(`desc-${k}`);
+    const kids = [...el.childNodes];
+    // 只能是 .nw span 或纯空格文本节点
+    for (const n of kids) {
+      if (n.nodeType === 3) assert.match(n.textContent, /^ $/, `${k}：span 外只能是单个空格`);
+      else assert.ok(n.tagName === 'SPAN' && n.className === 'nw', `${k}：子节点都是 span.nw`);
+    }
+    for (const sp of el.querySelectorAll('span.nw')) assert.ok(!/^\s|\s$/.test(sp.textContent), `${k}：空格不能在 span 首尾（320 会溢出）`);
+    assert.ok(el.querySelectorAll('span.nw').length >= 6, `${k}：按短语拆开`);
+  }
+  // options.js 不会改写说明（会把 span 冲掉）
+  assert.ok(!/desc-|option-desc|innerHTML/.test(read('options/options.js')), 'options.js 不重写说明');
+  console.log('options redesign B1 passed');
 }

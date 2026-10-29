@@ -23,4 +23,22 @@ const rule = (sel) => { const m = css.match(new RegExp(`(^|\\n)${sel.replace(/[.
   assert.match(js, /setAttribute\('aria-valuetext', text\)/, '进度文字写进 aria-valuetext');
   assert.match(js, /removeAttribute\('aria-valuetext'\)/, '结束时清掉 aria-valuetext');
 }
+// 2. 所有提示进 #status-zone，紧跟 #action-hint、在 .acts 之后；空状态区不占位
+{
+  const zone = document.getElementById('status-zone');
+  assert.ok(zone, '#status-zone 存在');
+  assert.ok(zone.classList.contains('status-zone'));
+  assert.equal(document.getElementById('action-hint').nextElementSibling, zone, '#status-zone 紧跟在 #action-hint 后');
+  const acts = document.querySelector('.acts');
+  assert.ok(acts.compareDocumentPosition(zone) & 4, '#status-zone 在按钮行之后');
+  for (const id of ['action-feedback', 'action-ok', 'action-info']) {
+    assert.equal(document.getElementById(id).parentElement, zone, `#${id} 直接在 #status-zone 里`);
+  }
+  assert.equal(document.getElementById('action-feedback').getAttribute('role'), 'alert', '红色失败仍是 role=alert');
+  assert.equal(document.querySelectorAll('[aria-live]').length, 1, '只有 #page-status 一个 aria-live');
+  assert.ok(document.getElementById('page-status').hasAttribute('aria-live'));
+  assert.match(rule('.status-zone'), /display:flex/); assert.match(rule('.status-zone'), /flex-direction:column/);
+  assert.match(rule('.status-zone'), /gap:8px/);
+  assert.match(css, /\.status-zone:not\(:has\(> :not\(\.hidden\)\)\)\{display:none\}/, '全隐藏时状态区不占位');
+}
 console.log('popup r05 tests passed');

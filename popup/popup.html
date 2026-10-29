@@ -29,22 +29,6 @@
         <b class="empty-title">当前页面暂不支持</b><br><span class="empty-desc">打开知乎问题、回答或专栏文章后可用</span>
       </div>
 
-      <div id="action-feedback" class="alert err hidden" role="alert">
-        <svg id="feedback-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>
-        <div><b id="feedback-title"></b><span id="feedback-hint"></span><span id="feedback-img" class="img-sub hidden"></span></div>
-        <div class="x"><button id="feedback-open" class="btn btn-ghost btn-xs hidden">打开</button></div>
-      </div>
-      <div id="action-ok" class="alert ok hidden" role="status">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
-        <div><b>已保存</b><span id="ok-file"></span><span id="ok-kept" class="img-sub hidden"></span></div>
-        <div class="x"><button id="open-btn" class="btn btn-ghost btn-xs">打开</button></div>
-      </div>
-      <div id="action-info" class="alert info hidden" role="status">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8v.5"/></svg>
-        <div><span id="info-text">页面仍在加载，正文就绪后可导出</span><span id="info-kept" class="sr-only hidden"></span></div>
-        <div class="x"><button id="refresh-btn" class="btn btn-ghost btn-xs hidden">刷新页面</button></div>
-      </div>
-
       <div class="acts">
         <button id="export-btn" class="btn btn-primary" disabled aria-describedby="action-hint">
           <svg class="btn-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg><span class="spinner hidden" aria-hidden="true"></span><span class="label">导出 Markdown</span>
@@ -52,6 +36,23 @@
         <button id="copy-btn" class="btn btn-secondary span-2" disabled aria-describedby="action-hint"><span class="label">复制 Markdown</span></button>
       </div>
       <small id="action-hint" class="sr-only">正在检测页面，完成后可导出</small>
+      <div id="status-zone" class="status-zone">
+        <div id="action-feedback" class="alert err hidden" role="alert">
+          <svg id="feedback-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>
+          <div><b id="feedback-title"></b><span id="feedback-hint"></span><span id="feedback-img" class="img-sub hidden"></span></div>
+          <div class="x"><button id="feedback-open" class="btn btn-ghost btn-xs hidden">打开</button></div>
+        </div>
+        <div id="action-ok" class="alert ok hidden" role="status">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+          <div><b>已保存</b><span id="ok-file"></span><span id="ok-kept" class="img-sub hidden"></span></div>
+          <div class="x"><button id="open-btn" class="btn btn-ghost btn-xs">打开</button></div>
+        </div>
+        <div id="action-info" class="alert info hidden" role="status">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8v.5"/></svg>
+          <div><span id="info-text">页面仍在加载，正文就绪后可导出</span><span id="info-kept" class="sr-only hidden"></span></div>
+          <div class="x"><button id="refresh-btn" class="btn btn-ghost btn-xs hidden">刷新页面</button></div>
+        </div>
+      </div>
 
       <div id="recent" class="recent hidden">
         <div class="sec-h"><span>最近导出</span></div>

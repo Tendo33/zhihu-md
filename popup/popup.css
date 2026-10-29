@@ -50,3 +50,7 @@ body { min-width: 320px; }
 #progress{position:absolute;left:0;right:0;bottom:0;margin:0}
 #progress .l{display:none}
 #progress .bar{height:3px;border-radius:0}
+
+/* 设计 R05：所有提示放到按钮行下方的状态区，出现/消失不改变按钮位置 */
+.status-zone{display:flex;flex-direction:column;gap:8px}
+.status-zone:not(:has(> :not(.hidden))){display:none}

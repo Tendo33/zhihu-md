@@ -188,3 +188,18 @@ console.log('options redesign tests passed');
   assert.match(narrow, /\.field-col \.field-note \{\s*text-align: left;\s*\}/);
   console.log('design recheck M2 passed');
 }
+
+// 主管：0 =「尽可能多（上限 1000）」哨兵值语义不变，数字框旁说明必须写明
+{
+  const html = read('options/options.html');
+  const desc = descText(html, 'maxAnswerCount');
+  assert.ok(desc.includes('填 0 则尽量全部下载') && desc.includes('最多 1000 条'), '说明写明 0 = 尽量全部（上限 1000）');
+  assert.match(html, /<span class="nw">填 0 则尽量全部下载，<\/span>/, '「填 0 则尽量全部下载」整句不断行');
+  const { normalizeAnswerCount, MIN_ANSWER_NOTE } = await import('../lib/answer-limit.js');
+  assert.deepEqual(normalizeAnswerCount('0'), { value: 0, note: '' }, '0 原样保存为哨兵值');
+  for (const v of ['-1', '0.5']) assert.deepEqual(normalizeAnswerCount(v), { value: 1, note: MIN_ANSWER_NOTE }, `${v} 存成 1`);
+  assert.match(MIN_ANSWER_NOTE, /0/, '低于 1 的提示里提到 0 是合法值');
+  const feed = read('content/modules/exporters/feed.js');
+  assert.match(feed, /maxItemCount === 0 \? MAX_ANSWER_LIMIT : maxItemCount/, '导出时 0 按上限 1000 处理');
+  console.log('answer count zero sentinel passed');
+}

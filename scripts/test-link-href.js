@@ -34,7 +34,7 @@ assert.equal(normalizeZhihuHref('//www.zhihu.com/q/1'), 'https://www.zhihu.com/q
 assert.equal(normalizeZhihuHref('/people/a b'), 'https://www.zhihu.com/people/a%20b');
 assert.equal(normalizeZhihuHref('https://example.com/x_(y)?a=1&b=2'), 'https://example.com/x_%28y%29?a=1&b=2');
 // 原链接不是 http(s)：返回 ''，调用方只留文字
-for (const bad of ['javascript:alert(1)', 'mailto:a@b.c', 'data:,x', 'http://']) assert.equal(normalizeZhihuHref(bad), '', bad);
+for (const bad of ['javascript:alert(1)', 'data:,x', 'http://', '#sec', '#']) assert.equal(normalizeZhihuHref(bad), '', bad);
 
 // --- 转换结果 ---
 const card = (href, title) => `<a class="LinkCard" href="${href.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"><span class="LinkCard-title">${title}</span></a>`;
@@ -74,6 +74,21 @@ for (const [target, want] of PAREN) {
   }
 }
 console.log(`paren href: ${loaded ? `markdown-it ${loaded.version} link_open href ok` : 'fallback (no markdown-it) ok'}`);
+
+// --- 审查 P3①（lead 决定）：mailto 保留为链接；#锚点有意只留文字 ---
+assert.equal(normalizeZhihuHref('mailto:a@b.c'), 'mailto:a@b.c');
+assert.equal(normalizeZhihuHref('MAILTO:a@b.c?subject=hi there'), 'mailto:a@b.c?subject=hi%20there');
+assert.equal(normalizeZhihuHref('mailto:x(y)@b.c'), 'mailto:x%28y%29@b.c');
+assert.equal(normalizeZhihuHref('mailto:'), '');
+assert.equal(normalizeZhihuHref(redirect('mailto:a@b.c')), new URL(redirect('mailto:a@b.c')).href, '跳转目标仍只接受 http(s)');
+assert.equal(md('<p>写信给 <a href="mailto:a@b.c">我</a></p>'), '写信给 [我](mailto:a@b.c)');
+assert.equal(md('<p>见 <a href="#sec2">第二节</a> 和 <a href="#">顶部</a></p>'), '见 第二节 和 顶部');
+assert.equal(md(card('#sec2', '锚点卡片')), '锚点卡片');
+if (loaded) {
+  const toks = new loaded.MarkdownIt({ html: true }).parseInline(md('<p><a href="mailto:x(y)@b.c?subject=a b">信</a></p>'), {})[0].children;
+  assert.equal(toks.find((t) => t.type === 'link_open').attrGet('href'), 'mailto:x%28y%29@b.c?subject=a%20b');
+}
+console.log('mailto kept / #anchor text-only: ok');
 console.log('link href tests passed');
 
 // --- ZB7-02 相邻 LinkCard 各占一段 ---

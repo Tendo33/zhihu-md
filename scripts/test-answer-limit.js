@@ -15,15 +15,15 @@ assert.match(html, /<input type="number" id="maxAnswerCount" name="maxAnswerCoun
 
 assert.ok(html.includes('问题页回答和信息流（首页、关注）的下载上限。填 0 时尽量全部下载，最多 1000 条；没下完时文件会标 truncated。'), '说明文案');
 const css = fs.readFileSync(new URL('../options/options.css', import.meta.url), 'utf8');
+// 设置页重做 M3：保存提示在卡片页脚里，不再是 fixed 浮层
 const rule = css.match(/\.status-msg \{([^}]*)\}/)[1];
-assert.match(rule, /width: max-content;/);
-assert.match(rule, /max-width: calc\(100vw - 32px\);/);
-assert.match(rule, /left: 50%;/);
+assert.match(rule, /position: static;/);
+assert.ok(!/position: fixed/.test(css), '设置页不再有 fixed 浮层');
 
 // 保存路径：真的加载 options.js，改输入框触发 change
 const { window, document } = parseHTML(`<!doctype html><html><body>
 <input type="checkbox" id="showFloatingBall" checked><input type="number" id="maxAnswerCount" value="20">
-<input type="checkbox" id="downloadImages"><div id="status"></div><span id="app-version"></span></body></html>`);
+<input type="checkbox" id="downloadImages"><div id="note-maxAnswerCount"></div><div id="status"></div><span id="app-version"></span></body></html>`);
 globalThis.window = window;
 globalThis.document = document;
 let stored = { showFloatingBall: true, maxAnswerCount: 5000, downloadImages: false };
@@ -38,16 +38,19 @@ document.dispatchEvent(new window.Event('DOMContentLoaded'));
 assert.strictEqual(String(input.value), '1000', '旧的大值显示时截到 1000');
 const save = (raw) => { input.value = raw; input.dispatchEvent(new window.Event('change')); return saved.at(-1); };
 const status = document.getElementById('status');
+const note = document.getElementById('note-maxAnswerCount');
 assert.strictEqual(save('999'), 999);
-assert.strictEqual(status.textContent, '设置已保存');
+assert.strictEqual(status.textContent, '✓ 已保存');
+assert.strictEqual(note.textContent, '');
 assert.strictEqual(save('1000'), 1000);
-assert.strictEqual(status.textContent, '设置已保存', '恰好 1000 不提示已按上限');
+assert.strictEqual(note.textContent, '', '恰好 1000 不出警示行');
 assert.strictEqual(save('1001'), 1000);
 assert.strictEqual(String(input.value), '1000', '截断后回填输入框');
-assert.strictEqual(status.textContent, '已按上限保存为 1000', '超过上限时提示');
+assert.strictEqual(note.textContent, '超过上限，已保存为 1000', '超过上限时数字框下方警示');
+assert.strictEqual(status.textContent, '✓ 已保存', '页脚仍显示已保存');
 assert.strictEqual(save('99999999999'), 1000);
 assert.strictEqual(save('0'), 0, '0 仍表示尽量全部');
-assert.strictEqual(status.textContent, '设置已保存', '未截断时恢复原提示');
+assert.strictEqual(note.textContent, '', '下次未截断的修改清掉警示行');
 assert.strictEqual(save(''), 20, '空串 → 20');
 assert.strictEqual(save('NaN'), 20);
 // 原有处理不变：负数 → 0，非数字 → 20，小数取整

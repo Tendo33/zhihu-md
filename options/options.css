@@ -180,41 +180,48 @@ h1 {
   box-shadow: 0 0 0 2px var(--bg-secondary), 0 0 0 4px var(--blue);
 }
 
-/* Footer & Status */
+/* 设计 M3：保存提示放进卡片页脚左侧（不再 position:fixed 浮层），版本号在右 */
 .footer {
-  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  min-height: 44px;
   border-top: 1px solid var(--border-subtle);
-  text-align: center;
+  text-align: left;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-2);
 }
 
 .status-msg {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--text-primary);
-  color: var(--bg-secondary);
-  padding: 10px 20px;
-  border-radius: 20px;
-  width: max-content;
-  max-width: calc(100vw - 32px);
-  font-size: 13px;
-  font-weight: 500;
+  position: static;
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 600;
   opacity: 0;
-  visibility: hidden;
-  transition: transform var(--duration-normal) var(--ease-smooth),
-    opacity var(--duration-normal) var(--ease-smooth),
-    visibility var(--duration-normal) var(--ease-smooth);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  will-change: transform, opacity;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
 }
 
 .status-msg.show {
   opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
+}
+
+.ver {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* 超过上限时数字字段下方的警示行，保留到下次修改 */
+.field-note {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--warning);
+  margin-top: 6px;
+}
+
+.field-note:empty {
+  display: none;
 }
 
 @media (max-width: 640px) {
@@ -233,6 +240,10 @@ h1 {
 
   .option-item {
     padding: 16px 20px;
+  }
+
+  .footer {
+    padding: 10px 20px;
   }
 }
 

@@ -34,13 +34,16 @@ function saveOptions() {
     downloadImages: downloadImages
   }, () => {
     Logger.info('设置已保存:', { showFloatingBall, maxAnswerCount: validCount, downloadImages });
+    // 设计 M3：页脚左侧「✓ 已保存」，2.5 秒后淡出；被上限改值时在数字框下方留一行警示，保留到下次修改
+    const note = document.getElementById('note-maxAnswerCount');
+    if (note) note.textContent = capped ? `超过上限，已保存为 ${MAX_ANSWER_LIMIT}` : '';
     const status = document.getElementById('status');
-    status.textContent = capped ? `已按上限保存为 ${MAX_ANSWER_LIMIT}` : '设置已保存';
+    status.textContent = '✓ 已保存';
     status.classList.add('show');
     clearTimeout(saveOptions.hideTimer);
     saveOptions.hideTimer = setTimeout(() => {
       status.classList.remove('show');
-    }, 4000);
+    }, 2500);
   });
 }
 

@@ -49,3 +49,18 @@ console.log('options redesign tests passed');
   assert.ok(!root.classList.contains('embedded'), '没有 tabs API 时不动');
   console.log('options redesign M2 passed');
 }
+
+// M3：保存提示在页脚（左），版本号在右；超限警示行在数字框下方并被 aria-describedby 关联
+{
+  const html = read('options/options.html');
+  const footer = html.slice(html.indexOf('<footer class="footer">'), html.indexOf('</footer>'));
+  assert.match(footer, /<span id="status" class="status-msg" role="status" aria-live="polite" aria-atomic="true"><\/span>\s*<span class="ver">Zhihu to Markdown <span id="app-version"><\/span><\/span>/, 'M3：提示在页脚左、版本号在右');
+  assert.ok(html.indexOf('id="status"') < html.indexOf('</footer>') && html.indexOf('id="status"') > html.indexOf('<footer'), 'status 在页脚内');
+  assert.match(html, /<div class="field-note" id="note-maxAnswerCount" role="status" aria-live="polite"><\/div>/);
+  assert.match(html, /aria-describedby="desc-maxAnswerCount note-maxAnswerCount"/);
+  assert.match(rule('.status-msg'), /position: static;/);
+  assert.ok(!/position: fixed/.test(css), 'M3：没有 fixed 浮层');
+  assert.match(rule('.field-note'), /color: var\(--warning\);/);
+  assert.match(read('options/options.js'), /\}, 2500\);/, '2.5 秒后淡出');
+  console.log('options redesign M3 passed');
+}

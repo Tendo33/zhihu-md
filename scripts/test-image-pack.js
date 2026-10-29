@@ -157,4 +157,26 @@ console.log('image pack tests passed');
   assert.deepEqual(name(BMP), ['img_010_m.bmp'], 'BM + octet-stream → .bmp');
   assert.deepEqual(name(HEIC), [], 'ftyp heic 不是 avif，按无法识别处理');
 }
+// 主管定：major brand 不是 avif/avis 时查 compatible brands
+{
+  const box = (size, ...brands) => Uint8Array.from([(size >>> 24) & 255, (size >>> 16) & 255, (size >>> 8) & 255, size & 255, 0x66, 0x74, 0x79, 0x70, ...brands.flatMap((s) => [...s].map((c) => c.charCodeAt(0)))]);
+  const one = [{ url: 'https://pic1.zhimg.com/v2-m.jpg', filename: 'img_011_m.jpg' }];
+  const res = (data) => applyImageResults('![](images/img_011_m.jpg)', one, [{ ok: true, data, contentType: 'image/avif' }]);
+  const pos = res(box(28, 'mif1', '\0\0\0\0', 'mif1', 'avif', 'miaf'));
+  assert.deepEqual(pos.files.map((f) => f.filename), ['img_011_m.avif'], 'mif1 + compatible avif → .avif');
+  assert.equal(extFromMagic(box(24, 'mif1', '\0\0\0\0', 'mif1', 'avis')), 'avif', 'mif1 + avis → avif');
+  const neg = res(box(28, 'mif1', '\0\0\0\0', 'mif1', 'heic', 'miaf'));
+  assert.equal(neg.files.length, 0, 'mif1 + heic → 不存');
+  assert.equal(neg.kept, 1, 'mif1 + heic → kept');
+  // 边界：avif 在 box 声明的长度之外不算
+  assert.equal(extFromMagic(Uint8Array.from([...box(20, 'mif1', '\0\0\0\0', 'mif1'), ...[...'avif'].map((c) => c.charCodeAt(0))])), null, 'box 长度之外的 avif 不算');
+  // 截断：声明 size 很大但缓冲区只到一半，不越界、不误判
+  const cut = box(64, 'mif1', '\0\0\0\0', 'mif1', 'av');
+  assert.equal(extFromMagic(cut), null, '截断的 brand 不算');
+  assert.equal(extFromMagic(box(64, 'mif1', '\0\0\0\0', 'avif')), 'avif', 'size 大于缓冲区时按实际长度扫');
+  assert.equal(extFromMagic(box(0, 'mif1', '\0\0\0\0', 'avif')), 'avif', 'size=0 表示到末尾');
+  assert.equal(extFromMagic(box(1, 'mif1', '\0\0\0\0', 'avif')), null, 'size=1（64 位长度）不扫 compatible');
+  assert.equal(extFromMagic(box(16, 'mif1', '\0\0\0\0')), null, '没有 compatible brands');
+  assert.equal(extFromMagic(box(12, 'mif1').slice(0, 10)), null, '短缓冲区');
+}
 console.log('image pack avif/bmp magic tests passed');

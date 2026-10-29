@@ -136,8 +136,8 @@ export const FeedExporter = {
 
       const itemsToProcess = uniqueItems.slice(0, targetCount);
       // 和问题页一致，没下完时文首写 truncated: true：
-      // 停在上限且导出满额、或滚动超时 → 视为没下完；连续 3 轮没有新卡片（idle）时按卡片是否被上限截掉判断
-      const truncated = (stopReason === 'limit' && itemsToProcess.length === targetCount)
+      // 停在上限（含去重后不足目标条数）、或滚动超时 → 视为没下完；连续 3 轮没有新卡片（idle）时按卡片是否被上限截掉判断
+      const truncated = stopReason === 'limit'
         || stopReason === 'timeout'
         || uniqueItems.length > itemsToProcess.length;
 

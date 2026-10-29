@@ -137,6 +137,13 @@ assert.match((await feedRun(20, 25, 'idle')).md, /truncated: true/, 'idle 卡片
 // 审查 P3-1：滚动函数返回非对象（stub 返回 undefined）→ 没有停止原因，只按卡片数是否超过导出条数判断
 assert.doesNotMatch((await feedRun(20, 20, 'non-object')).md, /truncated/, '非对象 20/20 不标');
 assert.match((await feedRun(20, 25, 'non-object')).md, /^item_count: 20\ntruncated: true$/m, '非对象 20/25 标');
+// 审查 P3-2：停在上限但去重后不足目标条数 → 也标（CHANGELOG「滚动停在上限」）
+{
+  const r = await feedRun(20, 20, 'limit', 3);
+  assert.match(r.md, /^item_count: 17\ntruncated: true$/m, '停在上限、去重后 17/20 也标');
+  assert.doesNotMatch((await feedRun(20, 20, 'idle', 3)).md, /truncated/, 'idle 去重后取完不标');
+}
+
 // scrollToLoadItemsWithReason 本身
 {
   const { CONSTANTS, scrollToLoadItems, scrollToLoadItemsWithReason } = await import('../content/modules/constants.js');

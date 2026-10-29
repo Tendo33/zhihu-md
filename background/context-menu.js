@@ -9,7 +9,6 @@
 //   question / answer /question/* → www.zhihu.com/question/*（含 /answer/）
 //   hot /hot、follow /follow      → 也是可导出类型（HotExporter / FeedExporter），保留
 //   home /                       → 发版 QA ZR-04 恢复首页（README 写了支持首页推荐）；搜索页、用户页仍不出现
-//                                  （注：此前按管理员要求隐藏过首页，本次按 11:36 指示恢复，已在 dev-log 待决策里提示）
 export const PAGE_PATTERNS = [
   '*://zhuanlan.zhihu.com/p/*',
   '*://www.zhihu.com/question/*',

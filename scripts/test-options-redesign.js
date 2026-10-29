@@ -72,3 +72,15 @@ console.log('options redesign tests passed');
   assert.ok(!html.includes('最大下载回答数'), 'M4：旧标题不再出现');
   console.log('options redesign M4 passed');
 }
+
+// M5：数字框
+{
+  const html = read('options/options.html');
+  assert.match(html, /<div class="option-item option-item--field">/);
+  assert.match(html, /<div class="num">\s*<input type="number" id="maxAnswerCount"[^>]*class="number-input"[^>]*>\s*<span class="num-unit" aria-hidden="true">条<\/span>\s*<\/div>/, 'M5：单位「条」紧跟数字框');
+  const n = rule('.number-input');
+  assert.match(n, /width: 88px;/); assert.match(n, /text-align: right;/); assert.match(n, /appearance: textfield;/); assert.match(n, /-moz-appearance: textfield;/, 'Firefox 去箭头');
+  assert.match(css, /\.number-input::-webkit-inner-spin-button,\s*\.number-input::-webkit-outer-spin-button \{\s*-webkit-appearance: none;/, 'WebKit 去箭头');
+  assert.ok(!/\.number-input \{[^}]*width: 100%/.test(css), 'M5：窄屏不拉满');
+  console.log('options redesign M5 passed');
+}

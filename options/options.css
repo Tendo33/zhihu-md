@@ -156,28 +156,54 @@ h1 {
   .switch .slider::after { box-shadow: none; }
 }
 
-/* Number Input */
+/* 设计 M5：数字框去掉原生上下箭头，宽 88，右对齐、等宽数字，后接单位「条」 */
+.num {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
 .number-input {
-  width: clamp(80px, 22vw, 120px);
-  padding: 8px 12px;
-  background: var(--bg-hover);
-  border: 1px solid var(--text-tertiary); /* 发版审计 B3：WCAG 1.4.11 边界 ≥3:1 */
+  width: 88px;
+  height: 36px;
+  padding: 0 10px;
+  font: 500 14px/1 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  background: var(--surface);
+  border: 1px solid var(--text-2); /* 发版审计 B3：WCAG 1.4.11 边界 ≥3:1 */
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 14px;
-  text-align: center;
-  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
+  appearance: textfield;
+  -moz-appearance: textfield;
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth);
+}
+
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.number-input:hover {
+  border-color: var(--text);
 }
 
 .number-input:focus {
-  border-color: var(--text-tertiary);
-  background: var(--bg-card);
+  background: var(--surface);
+  border-color: var(--brand);
 }
 
 .number-input:focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--bg-secondary), 0 0 0 4px var(--blue);
+  box-shadow: none;
+}
+
+.num-unit {
+  font-size: 14px;
+  color: var(--text-2);
 }
 
 /* 设计 M3：保存提示放进卡片页脚左侧（不再 position:fixed 浮层），版本号在右 */
@@ -248,6 +274,14 @@ h1 {
 }
 
 /* 设计 M2：开关行在任何宽度都与标题、说明同一行、垂直居中（删掉 ≤480 改竖排的规则） */
+/* 设计 M5：只有数字字段那一行在 ≤480 时改成上下排列，字段左对齐、不撑满 */
+@media (max-width: 480px) {
+  .option-item--field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
 
 /* Series control and focus rules */
 .switch input:focus-visible + .slider { outline: 2px solid var(--focus-ring); outline-offset: 2px; }

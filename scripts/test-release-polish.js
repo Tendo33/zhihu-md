@@ -21,11 +21,11 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
   assert.match(html, /id="desc-showFloatingBall">在知乎首页、关注、热榜、问题、回答和专栏文章页显示导出悬浮球（点击下载，右键复制）。</);
   assert.ok(!html.includes('悬浮导出按钮') && !html.includes('知乎文章页面'));
 }
-// B3：数字输入框边框用 --text-tertiary（非文本对比度 ≥3:1）
+// B3：数字输入框边框用 --text-2（即 --text-tertiary，非文本对比度 ≥3:1；设置页重做 M5 直接写 v2 token）
 {
   const css = read('options/options.css');
   const rule = css.match(/\.number-input \{([^}]*)\}/)[1];
-  assert.match(rule, /border: 1px solid var\(--text-tertiary\);/);
+  assert.match(rule, /border: 1px solid var\(--text-2\);/);
 }
 // N2：悬浮球提示与球本体同一中文字体栈
 {

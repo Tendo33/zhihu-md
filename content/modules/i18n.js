@@ -23,6 +23,7 @@ export const ZH_FALLBACK = {
   ballImagesKept: "$1 张图片保留为在线链接",
   ballImagesKeptOne: "$1 张图片保留为在线链接",
   ballImagesKeptMore: "另有 $1 张保留为在线链接",
+  ballImagesKeptMoreOne: "另有 $1 张保留为在线链接",
   ballImagesKeptReason: "这些图片的格式或来源不支持保存到本地",
   ballSep: "，",
   ballPartialSep: "；",

@@ -66,6 +66,14 @@ assert.equal(t('ballAriaIdle'), 'Export Markdown (click to download, right-click
   assert.equal(tn('ballImagesKept', 1), '1 image kept as an online link');
   assert.equal(tn('ballImagesKept', 3), '3 images kept as online links');
   assert.equal(t('ballAriaDone', 'Exported'), 'Exported. Click to export again');
+  // 设计复核 e2fa5da：ballImagesKeptMore 单复数，经 ball-text 的两个调用处
+  const bt = await import('../content/modules/ball-text.js');
+  assert.equal(tn('ballImagesKeptMore', 1), '1 more kept as an online link');
+  assert.equal(tn('ballImagesKeptMore', 3), '3 more kept as online links');
+  assert.equal(bt.ballKeptSrExtra(2, 1), '1 more kept as an online link');
+  assert.equal(bt.ballKeptSrExtra(2, 3), '3 more kept as online links');
+  assert.equal(bt.ballImageSrExtra(2, 1), '2 images couldn\'t be downloaded; online links kept, 1 more kept as an online link');
+  assert.equal(bt.ballImageSrExtra(1, 3), '1 image couldn\'t be downloaded; online link kept, 3 more kept as online links');
   for (const k of Object.keys(en)) assert.ok(!/again.*again/i.test(en[k].message), `${k} 英文文案：${en[k].message}`);
   for (const k of ['ballExportedImagesFailed', 'ballImagesFailed', 'ballImagesKept']) assert.equal(zhGet(`${k}One`, ['1']), zhGet(k, ['1']));
 }

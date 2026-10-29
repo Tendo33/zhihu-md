@@ -157,6 +157,15 @@
       }
     }
   },
+  "ballImagesKeptMoreOne": {
+    "message": "另有 $ARG1$ 张保留为在线链接",
+    "description": "Singular form of ballImagesKeptMore, used when the count is 1. $1 = 1.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
   "ballImagesKeptReason": {
     "message": "这些图片的格式或来源不支持保存到本地",
     "description": "Screen reader extra: why images were kept as online links."

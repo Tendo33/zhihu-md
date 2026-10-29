@@ -14,7 +14,7 @@ const FAIL_KEY = {
 
 /** 部分导出时读屏末尾的图片信息（对应 imagePartialSrExtra）；没有图片问题返回空串 */
 export function ballImageSrExtra(failed, kept) {
-  if (failed > 0 && kept > 0) return tn('ballImagesFailed', failed) + t('ballSep') + t('ballImagesKeptMore', kept);
+  if (failed > 0 && kept > 0) return tn('ballImagesFailed', failed) + t('ballSep') + tn('ballImagesKeptMore', kept);
   if (failed > 0) return tn('ballImagesFailed', failed);
   if (kept > 0) return tn('ballImagesKept', kept) + t('ballSep') + t('ballImagesKeptReason');
   return '';
@@ -23,7 +23,7 @@ export function ballImageSrExtra(failed, kept) {
 /** 成功态读屏补充：只算保留的图片（失败数已在 tooltip 里） */
 export function ballKeptSrExtra(failed, kept) {
   if (!(kept > 0)) return '';
-  return failed > 0 ? t('ballImagesKeptMore', kept) : tn('ballImagesKept', kept) + t('ballSep') + t('ballImagesKeptReason');
+  return failed > 0 ? tn('ballImagesKeptMore', kept) : tn('ballImagesKept', kept) + t('ballSep') + t('ballImagesKeptReason');
 }
 
 /** 失败原因：沿用 describeFailure 的判定，文字按界面语言取 */

@@ -157,6 +157,15 @@
       }
     }
   },
+  "ballImagesKeptMoreOne": {
+    "message": "$ARG1$ more kept as an online link",
+    "description": "Singular form of ballImagesKeptMore, used when the count is 1. $1 = 1.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
   "ballImagesKeptReason": {
     "message": "these images' format or source can't be saved locally",
     "description": "Screen reader extra: why images were kept as online links."

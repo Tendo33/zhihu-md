@@ -1,6 +1,6 @@
 # Privacy Policy for Zhihu-md
 
-**Last Updated: October 10, 2026**
+**Last Updated: October 29, 2026**
 
 Zhihu-md ("we", "us", or "our") is a browser extension for exporting Zhihu content into Markdown files. This policy explains what the extension can access, how data is processed, and what is stored locally.
 
@@ -13,6 +13,8 @@ The extension only processes:
 - The content in the current Zhihu page
 - On a question page, later answers requested from Zhihu's own question feed API in your current login session
 - On an answer page, that answer's record from Zhihu's own answer API when the page does not contain it
+
+These Zhihu API requests go only to `www.zhihu.com`, carry your existing Zhihu login cookies (the same as the page itself), and fetch answers that are not yet shown on the page. The responses are processed only in your browser and are not sent anywhere else.
 - Your extension settings stored in browser storage
 - Temporary image responses fetched directly by your browser when you enable local image packaging
 
@@ -37,7 +39,7 @@ The current extension manifest requests only these permissions:
 - `clipboardWrite`: Write the Markdown you asked to copy onto your device clipboard
 - `contextMenus`: Add right-click menu items (export page, copy page, copy selection, open and export a Zhihu link)
 - `downloads`: Save generated Markdown files or ZIP packages to your device, and show a saved file in its folder when you ask
-- `storage`: Save extension settings such as floating button visibility, answer count limit, image download preference, and floating button position
+- `storage`: Save extension settings such as floating button visibility, answer count limit, image download preference, the floating button position, and the recent exports list
 
 The extension also declares host access for:
 
@@ -49,11 +51,13 @@ This limits content-script execution to Zhihu pages. When local image packaging 
 
 The extension stores the following data through Chrome storage APIs:
 
-- `showFloatingBall` (`chrome.storage.sync`, synced with your browser account when sync is on)
-- `maxAnswerCount` (`chrome.storage.sync`)
+- `showFloatingBall` (`chrome.storage.sync`)
+- `maxAnswerCount` (`chrome.storage.sync`; capped at 1000)
 - `downloadImages` (`chrome.storage.sync`)
 - `floatingBallPosition` (`chrome.storage.local`)
-- `recentExports` (`chrome.storage.local`): a list of up to 20 recent exports (title, success flag, time) shown in the popup; it never leaves your browser
+- `recentExports` (`chrome.storage.local`): the most recent exports shown in the popup, up to 20 entries. Each entry has only the title (at most 200 characters), whether the export succeeded, and the time. No page content or link is stored. When a 21st entry is added the oldest is dropped; exporting the same title again keeps only the newest entry. It stays in your browser until you clear the extension's data or remove the extension, and it never leaves your browser.
+
+Settings in `chrome.storage.sync` are synced with your browser account when browser sync is turned on. That is the browser's own sync feature: it carries these three settings only, never page content, and is not sent to the developer. The other values stay on this device.
 
 These values are used only to preserve your preferences and UI state. We do not transmit them to our own servers.
 
@@ -82,7 +86,7 @@ The extension does not maintain cloud-side retention because it does not store y
 
 Data remains:
 
-- in your browser storage, if it is a saved setting
+- in your browser storage, if it is a saved setting or the recent exports list, until you clear the extension's data or remove the extension
 - on your local device, if it is a downloaded Markdown or ZIP file
 
 ## 8. Policy Updates

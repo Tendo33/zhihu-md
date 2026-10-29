@@ -24,7 +24,7 @@
 ## Features
 
 - **Columns and answers**: one Markdown file with YAML front matter.
-- **Question pages in bulk**: keeps fetching answers through Zhihu's answer API; 20 by default, up to 1000. If it stops early, the file gets `truncated: true`.
+- **Question pages in bulk**: keeps fetching answers through Zhihu's answer API; 20 by default, up to 1000 (larger numbers count as 1000). If it stops early, the file gets `truncated: true`.
 - **Home feed, Following and Hot list**: exported as item-by-item list documents.
 - **Formatting kept**: headings, lists, quotes; math as `$...$` / `$$...$$`; fenced code with language detection; tables; link cards become plain links.
 - **Optional image bundling**: with "下载图片到本地" on, downloads of columns, answers and question pages become a ZIP with an `images/` folder.
@@ -33,7 +33,7 @@
 - **Recent exports** in the popup (title, status and time); the file you just saved can be shown in its folder with one click.
 - Light and dark themes.
 
-Not a crawler: it only handles what your browser already shows, does not bypass login or paywalls, and skips comments.
+Not a crawler: it only handles the Zhihu page you opened, plus answers not yet shown on the page that it fetches from Zhihu's own API with your current login. It does not bypass login or paywalls, and skips comments.
 
 | Floating ball | Exported Markdown |
 | --- | --- |
@@ -91,10 +91,10 @@ Long exports started from the popup (such as a question page) need the popup to 
 | Setting | Description | Default |
 | --- | --- | --- |
 | 悬浮导出球 (floating button) | Show the floating ball | On |
-| 最大下载回答数 (max items) | Limit for question pages and feeds. 0 means up to 1000 answers on question pages, and scroll until no new cards on feeds | 20 |
+| 最大下载回答数 (max items) | Limit for question pages and feeds. Max 1000; larger numbers count as 1000. 0 means as many answers as the question page lists, up to 1000, and scroll until no new cards on feeds | 20 |
 | 下载图片到本地 (download images) | Bundle images into a ZIP for column, answer and question downloads; copy, feed and hot exports keep remote images | Off |
 
-Settings live in `chrome.storage.sync`; the ball position in `chrome.storage.local`.
+Settings live in `chrome.storage.sync` (synced with your browser account when browser sync is on); the ball position and recent exports in `chrome.storage.local`.
 
 ## Permissions
 
@@ -110,7 +110,8 @@ Settings live in `chrome.storage.sync`; the ball position in `chrome.storage.loc
 
 ## Privacy
 
-- No backend, no analytics, no data collection.
+- No backend, no analytics, no data collection; nothing is sent to the developer or third parties.
+- Settings are stored in `chrome.storage.sync` and sync with your browser account when browser sync is on. That is the browser's own sync, carries settings only and no page content.
 - Only talks to Zhihu and its image CDN (`zhimg.com`, only when bundling images); all conversion happens in your browser.
 - See [PRIVACY.md](./PRIVACY.md).
 
@@ -120,7 +121,7 @@ Settings live in `chrome.storage.sync`; the ball position in `chrome.storage.loc
 Only if the page already shows it. Nothing is bypassed.
 
 **Why are some answers missing on a question page?**
-The max-items limit (20 by default). Set 0 for up to 1000. If the API fails, only answers already on the page are kept.
+The max-items limit (20 by default). Set 0 for up to 1000; numbers above 1000 count as 1000. If the API fails, only answers already on the page are kept.
 
 **The shortcut does nothing.**
 Check `chrome://extensions/shortcuts`.

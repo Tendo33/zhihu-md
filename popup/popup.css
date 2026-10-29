@@ -21,7 +21,7 @@ body { min-width: 320px; }
 /* 进度条：知乎导出没有可靠的百分比，用不确定进度 */
 .bar.indeterminate > i { width: 40%; animation: zm-indet 1.2s var(--ease) infinite; }
 @keyframes zm-indet { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
-@media (prefers-reduced-motion: reduce) { .bar.indeterminate > i { animation: none; width: 100%; opacity: .5; } }
+@media (prefers-reduced-motion: reduce) { .bar.indeterminate > i { animation: none; width: 40%; opacity: 1; } /* 设计 R05：静止的一段，不透明度 100%（.5 在浅色下对比度只有约 2.3:1） */ }
 
 /* 样稿里标题行右侧有 24px 高的「全部」按钮；这里没有历史页，保留同样行高 */
 .sec-h{min-height:24px}

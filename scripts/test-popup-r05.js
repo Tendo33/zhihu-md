@@ -44,4 +44,14 @@ const rule = (sel) => { const m = css.match(new RegExp(`(^|\\n)${sel.replace(/[.
 // 3. 提示已在按钮下方，未就绪时按钮描述改成“原因见下方提示”
 assert.match(js, /'暂不可导出，原因见下方提示'/);
 assert.doesNotMatch(js, /原因见上方/);
+// 4. 减少动态效果：进度条是静止的一段（不满宽、不动画），不透明度 1
+{
+  const m = css.match(/@media \(prefers-reduced-motion: reduce\) \{\s*\.bar\.indeterminate > i \{([^}]*)\}/);
+  assert.ok(m, 'reduced-motion 下有 .bar.indeterminate > i 规则');
+  assert.match(m[1], /animation:\s*none/);
+  assert.match(m[1], /opacity:\s*1\b/, '不透明度 100%');
+  assert.doesNotMatch(m[1], /opacity:\s*\.5|opacity:\s*0\./);
+  const w = m[1].match(/width:\s*(\d+)%/);
+  assert.ok(w && +w[1] > 0 && +w[1] < 100, '是一段，不是满宽');
+}
 console.log('popup r05 tests passed');

@@ -42,6 +42,14 @@ expectLogin(await HotExporter.exportHotList(), 'HotExporter.exportHotList');
 setPage('https://www.zhihu.com/', LOGIN_MODAL);
 expectLogin(await FeedExporter.exportFeedItems('home'), 'FeedExporter.exportFeedItems');
 
+// 发版 QA ZR-06：热榜 front matter 的 url 与其他导出器一样加引号
+setPage('https://www.zhihu.com/hot?list=total#a', '<div class="HotItem"><div class="HotItem-rank">1</div><a href="https://www.zhihu.com/question/1" title="热榜问题一号"><h2 class="HotItem-title">热榜问题一号</h2></a></div>');
+{
+  const hot = await HotExporter.exportHotList();
+  assert.equal(hot.success, true);
+  assert.match(hot.data.content, /^url: "https:\/\/www\.zhihu\.com\/hot\?list=total#a"$/m);
+}
+
 // 安全验证（标题）也经由导出器透出
 setPage('https://zhuanlan.zhihu.com/p/123', '<div id="root"></div>', '安全验证 - 知乎');
 assert.equal((await ArticleExporter.exportMarkdown(false)).reason, 'security_check');

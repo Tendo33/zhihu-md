@@ -4,7 +4,7 @@
  */
 
 import { failureResult } from '../../../lib/failure-reason.js';
-import { extractHotFallback, extractHotItems } from '../zhihu-dom.js';
+import { extractHotFallback, extractHotItems, yamlQuote } from '../zhihu-dom.js';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -37,7 +37,7 @@ export const HotExporter = {
       const date = new Date().toISOString().split('T')[0];
       let markdown = `---
 title: "知乎热榜"
-url: ${window.location.href}
+url: ${yamlQuote(window.location.href)}
 date: ${date}
 count: ${items.length}
 ---

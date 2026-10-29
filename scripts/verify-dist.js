@@ -1,14 +1,15 @@
 // 检查 dist/manifest.json 引用的所有文件都存在于 dist 中，
 // 并检查扩展页面（popup/options 等 HTML）引用的本地脚本、样式、图片。
 // 还检查 background：Chrome 产物不能有 background.scripts，Firefox 产物必须有。
-// 用法：node scripts/verify-dist.js [distDir] [--target=chrome|firefox]（默认 chrome）
+// 用法：node scripts/verify-dist.js [distDir] [--target=chrome|firefox 或 --target chrome|firefox]（默认 chrome；写错就报错）
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseTargetArgs } from './parse-target.js';
 
-const args = process.argv.slice(2);
-const target = (args.find((a) => a.startsWith('--target='))?.slice(9) || 'chrome').toLowerCase();
-const dist = path.resolve(args.find((a) => !a.startsWith('--')) || 'dist');
+const parsed = parseTargetArgs(process.argv.slice(2));
+const target = parsed.target;
+const dist = path.resolve(parsed.rest?.find((a) => !a.startsWith('--')) || 'dist');
 const manifestPath = path.join(dist, 'manifest.json');
 
 export function manifestFiles(manifest) {
@@ -159,6 +160,10 @@ export function verifyLocales(dir, manifest) {
 // 和 argv[1] 比不上，会导致脚本什么都不做、以 0 退出。
 const isMain = Boolean(process.argv[1]) && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (parsed.error) {
+    console.error(`verify:dist 失败：${parsed.error}`);
+    process.exit(1);
+  }
   if (!fs.existsSync(manifestPath)) {
     console.error(`verify:dist 失败：找不到 ${manifestPath}，请先运行 npm run build`);
     process.exit(1);

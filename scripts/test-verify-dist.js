@@ -89,6 +89,7 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'zhihu md 测试 '));
 const repo = path.join(root, '知乎 导出', 'zhihu-md');
 fs.mkdirSync(path.join(repo, 'scripts'), { recursive: true });
 fs.copyFileSync(script, path.join(repo, 'scripts', 'verify-dist.js'));
+fs.copyFileSync(fileURLToPath(new URL('./parse-target.js', import.meta.url)), path.join(repo, 'scripts', 'parse-target.js'));
 const put = (f, c = '') => { const p = path.join(repo, 'dist', f); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, c); };
 put('manifest.json', JSON.stringify({ manifest_version: 3, action: { default_popup: 'popup/popup.html' }, background: { service_worker: 'bg.js' } }));
 put('popup/popup.html', '<script src="popup.js"></script>');

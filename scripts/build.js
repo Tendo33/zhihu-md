@@ -2,16 +2,19 @@ import esbuild from 'esbuild';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { parseTargetArgs } from './parse-target.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-// 目标浏览器：默认 chrome（Chrome / Edge，产出 dist/）；--target=firefox 产出 dist-firefox/。
+// 目标浏览器：默认 chrome（Chrome / Edge，产出 dist/）；--target=firefox 或 --target firefox 产出 dist-firefox/。
+// --target 写错（空值、缺值、未知值）时报错退出，不再静默打 Chrome 包。
 // Chrome 对 MV3 的 background.scripts 报「requires manifest version of 2 or lower」，
 // 所以 Chrome 包去掉 scripts；Firefox 不支持 service_worker，Firefox 包保留 scripts。
-const target = (process.argv.find((a) => a.startsWith('--target='))?.slice(9) || 'chrome').toLowerCase();
-if (!['chrome', 'firefox'].includes(target)) {
-  console.error(`未知的 --target=${target}，只支持 chrome / firefox`);
+const parsed = parseTargetArgs(process.argv.slice(2));
+if (parsed.error) {
+  console.error(`build 失败：${parsed.error}`);
   process.exit(1);
 }
+const { target } = parsed;
 const out = path.join(root, target === 'firefox' ? 'dist-firefox' : 'dist');
 
 fs.rmSync(out, { recursive: true, force: true });

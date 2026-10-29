@@ -29,47 +29,47 @@
   },
   "ballTooltipIdlePart1": {
     "message": "点击下载 ·",
-    "description": "悬浮球悬停提示前半句（不换行，含末尾「·」）；与后半句之间有一个空格，窄屏只在这里折行。"
+    "description": "First half of the idle tooltip, kept on one line, ending with \"·\". A space separates it from the second half; narrow screens wrap only there."
   },
   "ballTooltipIdlePart2": {
     "message": "右键复制",
-    "description": "悬浮球悬停提示后半句（不换行）。"
+    "description": "Second half of the idle tooltip, kept on one line."
   },
   "ballTooltipIdle": {
     "message": "点击下载 · 右键复制",
-    "description": "悬浮球悬停提示（空闲态）。"
+    "description": "Floating ball hover tooltip (idle)."
   },
   "ballAriaIdle": {
     "message": "导出 Markdown（点击下载，右键复制）",
-    "description": "悬浮球读屏名称（aria-label，空闲态）。"
+    "description": "Floating ball accessible name (aria-label) when idle."
   },
   "ballLoadingContent": {
     "message": "正在加载内容…",
-    "description": "悬浮球：问题页/信息流导出前加载内容。"
+    "description": "Floating ball: loading content before exporting a question page or feed."
   },
   "ballExportingHot": {
     "message": "正在导出热榜…",
-    "description": "悬浮球：热榜导出中。"
+    "description": "Floating ball: exporting the hot list."
   },
   "ballDownloadingImages": {
     "message": "正在下载图片…",
-    "description": "悬浮球：开启下载图片时导出中。"
+    "description": "Floating ball: exporting with image download turned on."
   },
   "ballExporting": {
     "message": "正在导出…",
-    "description": "悬浮球：导出中。"
+    "description": "Floating ball: exporting."
   },
   "ballCopying": {
     "message": "正在复制…",
-    "description": "悬浮球：复制中。"
+    "description": "Floating ball: copying."
   },
   "ballExported": {
     "message": "已导出",
-    "description": "悬浮球：导出成功。"
+    "description": "Floating ball: export succeeded."
   },
   "ballExportedImagesFailed": {
     "message": "已导出，$ARG1$ 张图片未能下载，已保留在线链接",
-    "description": "悬浮球：导出成功但部分图片失败。$1 = 图片数。",
+    "description": "Floating ball: export succeeded but some images failed. $1 = number of images (2 or more).",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -78,7 +78,7 @@
   },
   "ballExportedImagesFailedOne": {
     "message": "已导出，$ARG1$ 张图片未能下载，已保留在线链接",
-    "description": "Singular form of ballExportedImagesFailed (count is 1).",
+    "description": "Singular form of ballExportedImagesFailed, used when the count is 1. $1 = 1.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -87,19 +87,19 @@
   },
   "ballCopied": {
     "message": "已复制",
-    "description": "悬浮球：复制本页成功。"
+    "description": "Floating ball: page copied."
   },
   "ballCopiedSelection": {
     "message": "已复制选中内容",
-    "description": "悬浮球：复制选中内容成功。"
+    "description": "Floating ball: selection copied."
   },
   "ballNoSelection": {
     "message": "没有选中内容，先选中一段文字再复制",
-    "description": "悬浮球：复制选中内容时没有选区。"
+    "description": "Floating ball: copy selection was used with nothing selected."
   },
   "ballPartial": {
     "message": "部分导出：已导出 $ARG1$/$ARG2$ 条，$ARG3$ 条未能加载",
-    "description": "悬浮球：部分导出警告。$1 已导出，$2 总数，$3 未加载数。",
+    "description": "Floating ball: partial export warning. $1 = exported, $2 = total, $3 = not loaded.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -114,7 +114,7 @@
   },
   "ballImagesFailed": {
     "message": "$ARG1$ 张图片未能下载，已保留在线链接",
-    "description": "悬浮球读屏补充：有图片未能下载。$1 = 图片数。",
+    "description": "Screen reader extra: some images couldn't be downloaded. $1 = number of images (2 or more).",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -123,7 +123,7 @@
   },
   "ballImagesFailedOne": {
     "message": "$ARG1$ 张图片未能下载，已保留在线链接",
-    "description": "Singular form of ballImagesFailed (count is 1).",
+    "description": "Singular form of ballImagesFailed, used when the count is 1. $1 = 1.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -132,7 +132,7 @@
   },
   "ballImagesKept": {
     "message": "$ARG1$ 张图片保留为在线链接",
-    "description": "悬浮球读屏补充：图片保留为在线链接。$1 = 图片数。",
+    "description": "Screen reader extra: images kept as online links. $1 = number of images (2 or more).",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -141,7 +141,7 @@
   },
   "ballImagesKeptOne": {
     "message": "$ARG1$ 张图片保留为在线链接",
-    "description": "Singular form of ballImagesKept (count is 1).",
+    "description": "Singular form of ballImagesKept, used when the count is 1. $1 = 1.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -150,7 +150,7 @@
   },
   "ballImagesKeptMore": {
     "message": "另有 $ARG1$ 张保留为在线链接",
-    "description": "悬浮球读屏补充：失败之外另有保留的图片。$1 = 图片数。",
+    "description": "Screen reader extra: images kept as links in addition to the failed ones. $1 = number of images.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -159,19 +159,19 @@
   },
   "ballImagesKeptReason": {
     "message": "这些图片的格式或来源不支持保存到本地",
-    "description": "悬浮球读屏补充：图片保留为在线链接的原因。"
+    "description": "Screen reader extra: why images were kept as online links."
   },
   "ballSep": {
     "message": "，",
-    "description": "悬浮球读屏：两段提示之间的分隔符（逗号）。"
+    "description": "Screen reader: separator between two phrases (comma, keep the trailing space in English)."
   },
   "ballPartialSep": {
     "message": "；",
-    "description": "悬浮球读屏：部分导出概况和图片情况之间的分隔符（分号）。"
+    "description": "Screen reader: separator between the partial-export summary and the image details (semicolon)."
   },
   "ballAriaLoading": {
     "message": "正在导出：$ARG1$",
-    "description": "悬浮球读屏名称：导出中。$1 = 当前步骤。",
+    "description": "Floating ball accessible name while exporting. $1 = current step.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -180,11 +180,11 @@
   },
   "ballAriaWait": {
     "message": "请稍候",
-    "description": "悬浮球读屏名称：导出中无步骤时。"
+    "description": "Floating ball accessible name while exporting when there is no step text."
   },
   "ballAriaDone": {
     "message": "$ARG1$。再次点击可重新导出",
-    "description": "悬浮球读屏名称：成功/部分导出。$1 = 结果。",
+    "description": "Floating ball accessible name after success or partial export. $1 = result.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -193,11 +193,11 @@
   },
   "ballAriaSuccess": {
     "message": "导出成功",
-    "description": "悬浮球读屏名称：成功但无具体文字时。"
+    "description": "Floating ball accessible name after success when there is no result text."
   },
   "ballAriaError": {
     "message": "导出失败：$ARG1$。按回车重试",
-    "description": "悬浮球读屏名称：失败。$1 = 原因。",
+    "description": "Floating ball accessible name on failure. $1 = reason.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -206,30 +206,30 @@
   },
   "ballAriaErrorDefault": {
     "message": "请刷新页面后重试",
-    "description": "悬浮球读屏名称：失败但无原因时。"
+    "description": "Floating ball accessible name on failure when there is no reason."
   },
   "failSecurityCheck": {
     "message": "被知乎限流或需要验证：请在知乎页面完成验证，或稍等几分钟后刷新再导出",
-    "description": "悬浮球失败原因：限流或安全验证。"
+    "description": "Floating ball failure reason: rate limited or security check."
   },
   "failLoginRequired": {
     "message": "需要登录知乎才能查看这部分内容，请登录后重新导出",
-    "description": "悬浮球失败原因：需要登录。"
+    "description": "Floating ball failure reason: sign-in required."
   },
   "failNotLoaded": {
     "message": "页面未加载完，请等几秒或刷新页面后再试",
-    "description": "悬浮球失败原因：页面未加载完。"
+    "description": "Floating ball failure reason: page not fully loaded."
   },
   "failClipboard": {
     "message": "无法写入剪贴板：请保持弹窗打开后重试，或改用“导出 Markdown”",
-    "description": "悬浮球失败原因：剪贴板写入失败（与弹窗共用中文文案）。"
+    "description": "Floating ball failure reason: clipboard write failed (same text as the popup)."
   },
   "failExportUnknown": {
     "message": "导出失败，请刷新知乎页面后重试",
-    "description": "悬浮球失败原因：未知导出错误。"
+    "description": "Floating ball failure reason: unknown export error."
   },
   "failCopyUnknown": {
     "message": "复制失败，请刷新知乎页面后重试",
-    "description": "悬浮球失败原因：未知复制错误。"
+    "description": "Floating ball failure reason: unknown copy error."
   }
 }

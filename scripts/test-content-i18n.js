@@ -32,6 +32,12 @@ function getMessageFrom(msgs) {
 const { t, ZH_FALLBACK } = await import('../content/modules/i18n.js');
 // 中文回退与 zh_CN/messages.json 逐条一致；每个 key 两种语言都有
 const zhGet = getMessageFrom(zh);
+// 审查 P3-3：悬浮球新增条目的 description 用英文（给译者看），两份 locale 一致
+for (const k of Object.keys(ZH_FALLBACK)) {
+  for (const [loc, m] of [['en', en], ['zh_CN', zh]]) assert.ok(m[k].description && !CJK.test(m[k].description), `${loc} ${k} 的 description 不是英文`);
+  assert.equal(en[k].description, zh[k].description, `${k} 的 description 两份 locale 不一致`);
+}
+
 for (const k of Object.keys(ZH_FALLBACK)) {
   assert.ok(zh[k] && en[k], `${k} 两种语言都要有`);
   assert.equal(zhGet(k, ['$1', '$2', '$3']), ZH_FALLBACK[k], `${k} 中文回退要和 zh_CN 一致`);

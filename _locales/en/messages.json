@@ -8,7 +8,7 @@
     "description": "Extension description shown in the Chrome Web Store and chrome://extensions. 132 characters max."
   },
   "cmdExportPage": {
-    "message": "Export current page as Markdown",
+    "message": "Export this page as Markdown",
     "description": "快捷键说明（Alt+Shift+K），显示在 chrome://extensions/shortcuts。"
   },
   "menuPageExport": {
@@ -24,7 +24,7 @@
     "description": "右键菜单：把选中的内容复制为 Markdown。"
   },
   "menuLinkExport": {
-    "message": "Open and export this Zhihu link",
+    "message": "Export linked Zhihu page as Markdown",
     "description": "右键菜单：在知乎问题、回答或专栏链接上，打开并导出该页。"
   }
 }

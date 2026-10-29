@@ -25,7 +25,7 @@ whole.querySelector('p').textContent = '正文 <T> 泛型';
 const md = (el) => createTurndownService(false).turndown(ArticleExporter.preprocessContainer(el));
 const answer = md(split);
 const column = md(whole);
-assert.equal(column, '## 井号 <尖括号> 竖线\n\n正文 <T> 泛型');
+assert.equal(column, '## 井号 <尖括号> 竖线\n\n正文 \\<T> 泛型'); // batch7 ZB6-03：<T> 写成 \<T>
 assert.equal(answer, column);
 assert.doesNotMatch(answer, /\\>/);
 // 行首的「>」仍要转义（否则会被当成引用块），合并文本节点不影响这条

@@ -59,10 +59,9 @@
 }
 
 #zhihu-md-floating-ball:focus-visible {
-  /* 设计验收 R3：单层焦点环 */
+  /* 设计验收 R3 / L-07：单层 2px 焦点环，偏移 2px；聚焦不叠加、不改投影（沿用当前状态的投影） */
   outline: 2px solid var(--focus-ring);
-  outline-offset: 3px;
-  box-shadow: 0 4px 12px rgb(0 0 0/.15);
+  outline-offset: 2px;
 }
 
 /* Hover State - Normal */
@@ -102,7 +101,6 @@
 }
 
 #zhihu-md-floating-ball.docked-left:hover,
-#zhihu-md-floating-ball.docked-left:focus-visible,
 #zhihu-md-floating-ball.docked-left.loading,
 #zhihu-md-floating-ball.docked-left.error,
 #zhihu-md-floating-ball.docked-left.warning {
@@ -110,6 +108,14 @@
   opacity: 1;
   border-radius: 50%;
   box-shadow: 0 4px 16px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+/* L-07：收边时键盘聚焦只把球展开，不换投影（保持收边时的投影，尺寸不变） */
+#zhihu-md-floating-ball.docked-left:focus-visible,
+#zhihu-md-floating-ball.docked-right:focus-visible {
+  transform: translateX(0);
+  opacity: 1;
+  border-radius: 50%;
 }
 
 /* Docked Right - Preview visible */
@@ -123,7 +129,6 @@
 }
 
 #zhihu-md-floating-ball.docked-right:hover,
-#zhihu-md-floating-ball.docked-right:focus-visible,
 #zhihu-md-floating-ball.docked-right.loading,
 #zhihu-md-floating-ball.docked-right.error,
 #zhihu-md-floating-ball.docked-right.warning {
@@ -285,7 +290,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
   --accent-active: #3b82f6;
   --accent-inverse: #06142b;
   --blue: #60a5fa;
-  --focus-ring: #60a5fa;
+  --focus-ring: #93c5fd; /* L-07：与 ui-v2 知乎深色 --focus 一致，≠ --accent */
   --success: #4ade80;
   --error: #f87171;
   --warning: #fbbf24;

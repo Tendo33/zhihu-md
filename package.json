@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "test:e2e": "npm run build && node scripts/e2e-shortcut.js",
     "e2e:tooltip": "node scripts/e2e-tooltip-edges.mjs",
-    "e2e:focus": "node scripts/e2e-focus-tokens.mjs"
+    "e2e:focus": "node scripts/e2e-focus-tokens.mjs",
+    "e2e:ball-focus": "node scripts/e2e-ball-focus.mjs"
   },
   "keywords": [
     "chrome-extension",

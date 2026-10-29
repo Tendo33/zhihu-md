@@ -22,3 +22,18 @@ for (const [f, s] of Object.entries(css)) {
 }
 assert.match(css['options/options.css'], /--focus-ring: var\(--focus\);/);
 console.log('focus token tests passed');
+// L-07 悬浮球：深色 --focus-ring #93c5fd（≠ --accent #60a5fa），单层 2px outline、偏移 2px；
+// 聚焦规则里不写 box-shadow，收边状态的 :focus-visible 也不并进换投影的规则组
+const ct = read('content/content.css');
+const darkBall = ct.match(/html\[data-theme="dark"\] #zhihu-md-floating-ball \{([^}]*)\}/)[1];
+assert.match(darkBall, /--focus-ring: #93c5fd;/, '悬浮球深色 --focus-ring');
+assert.match(darkBall, /--accent: #60a5fa;/);
+assert.match(ct, /\n {2}--focus-ring: #0a5fd1;\n/, '浅色 --focus-ring 不变');
+const ballFv = ct.match(/#zhihu-md-floating-ball:focus-visible \{([^}]*)\}/)[1];
+assert.match(ballFv, /outline: 2px solid var\(--focus-ring\);/);
+assert.match(ballFv, /outline-offset: 2px;/);
+assert.ok(!/box-shadow/.test(ballFv), '悬浮球聚焦不加 box-shadow');
+for (const m of ct.matchAll(/([^{}]*)\{([^}]*)\}/g)) {
+  if (/floating-ball[^,{]*:focus-visible(?![^,{]*\.tooltip)/.test(m[1])) assert.ok(!/box-shadow/.test(m[2]), `聚焦规则不改投影：${m[1].trim()}`);
+}
+console.log('ball focus token tests passed');

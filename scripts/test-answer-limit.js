@@ -1,0 +1,87 @@
+// 「最大下载回答数」上限 1000：保存路径（options）和使用路径（问题页 / 动态页导出）都截到 1000
+import assert from 'assert';
+import fs from 'fs';
+import { parseHTML } from 'linkedom';
+import { capAnswerCount, MAX_ANSWER_LIMIT } from '../lib/answer-limit.js';
+
+assert.strictEqual(MAX_ANSWER_LIMIT, 1000);
+for (const [v, want] of [[999, 999], [1000, 1000], [1001, 1000], [1e9, 1000], [0, 0], [20, 20], ['5000', 1000], [-3, -3]]) {
+  assert.strictEqual(capAnswerCount(v), want, `cap(${v})`);
+}
+
+// options.html：输入框带 max=1000，其余不变
+const html = fs.readFileSync(new URL('../options/options.html', import.meta.url), 'utf8');
+assert.match(html, /<input type="number" id="maxAnswerCount" name="maxAnswerCount" min="0" max="1000" value="20"/);
+
+// 保存路径：真的加载 options.js，改输入框触发 change
+const { window, document } = parseHTML(`<!doctype html><html><body>
+<input type="checkbox" id="showFloatingBall" checked><input type="number" id="maxAnswerCount" value="20">
+<input type="checkbox" id="downloadImages"><div id="status"></div><span id="app-version"></span></body></html>`);
+globalThis.window = window;
+globalThis.document = document;
+let stored = { showFloatingBall: true, maxAnswerCount: 5000, downloadImages: false };
+const saved = [];
+globalThis.chrome = { storage: { sync: {
+  get: (defaults, done) => done({ ...defaults, ...stored }),
+  set: (obj, done) => { saved.push(obj.maxAnswerCount); stored = { ...stored, ...obj }; done && done(); },
+} } };
+await import('../options/options.js');
+const input = document.getElementById('maxAnswerCount');
+document.dispatchEvent(new window.Event('DOMContentLoaded'));
+assert.strictEqual(String(input.value), '1000', '旧的大值显示时截到 1000');
+const save = (raw) => { input.value = raw; input.dispatchEvent(new window.Event('change')); return saved.at(-1); };
+assert.strictEqual(save('999'), 999);
+assert.strictEqual(save('1000'), 1000);
+assert.strictEqual(save('1001'), 1000);
+assert.strictEqual(String(input.value), '1000', '截断后回填输入框');
+assert.strictEqual(save('99999999999'), 1000);
+assert.strictEqual(save('0'), 0, '0 仍表示尽量全部');
+// 原有处理不变：负数 → 0，非数字 → 20，小数取整
+assert.strictEqual(save('-5'), 0);
+assert.strictEqual(save('abc'), 20);
+assert.strictEqual(save('12.7'), 12);
+assert.strictEqual(save('1000.5'), 1000);
+
+// 使用路径：问题页。第 1 页接口失败 → partial.total 就是实际目标条数
+const { QuestionExporter } = await import('../content/modules/exporters/question.js');
+const { FeedExporter } = await import('../content/modules/exporters/feed.js');
+async function questionTarget(stored) {
+  const q = parseHTML(`<!doctype html><html><body><h4 class="List-headerText">99999 个回答</h4>
+<div class="AnswerItem" name="7"><span class="AuthorInfo-name">甲</span><div class="RichText ztext"><p>甲</p></div></div></body></html>`);
+  globalThis.window = q.window;
+  globalThis.document = q.document;
+  q.window.scrollTo = () => {};
+  Object.defineProperty(q.window, 'location', { configurable: true, value: { href: 'https://www.zhihu.com/question/9', pathname: '/question/9' } });
+  globalThis.chrome = { storage: { sync: { get: (_d, done) => done({ maxAnswerCount: stored }) } } };
+  globalThis.fetch = async () => ({ ok: false, status: 500, json: async () => ({}) });
+  const r = await QuestionExporter.exportMultipleAnswers(false);
+  assert.strictEqual(r.success, true);
+  return r.data.partial.total;
+}
+assert.strictEqual(await questionTarget(999), 999);
+assert.strictEqual(await questionTarget(1000), 1000);
+assert.strictEqual(await questionTarget(1001), 1000);
+assert.strictEqual(await questionTarget(5000), 1000, 'storage 里的旧大值');
+assert.strictEqual(await questionTarget(1e9), 1000);
+assert.strictEqual(await questionTarget(0), 1000, '0：按页面声明数，最多 1000（原逻辑）');
+
+// 使用路径：首页 / 关注动态，看传给滚动加载的目标条数
+async function feedTarget(stored) {
+  const f = parseHTML('<!doctype html><html><body></body></html>');
+  globalThis.window = f.window;
+  globalThis.document = f.document;
+  globalThis.chrome = { storage: { sync: { get: (_d, done) => done({ maxAnswerCount: stored }) } } };
+  let got;
+  const orig = FeedExporter.scrollToLoadFeedItems;
+  FeedExporter.scrollToLoadFeedItems = async (n) => { got = n; };
+  try { await FeedExporter.exportFeedItems('follow'); } finally { FeedExporter.scrollToLoadFeedItems = orig; }
+  return got;
+}
+assert.strictEqual(await feedTarget(999), 999);
+assert.strictEqual(await feedTarget(1000), 1000);
+assert.strictEqual(await feedTarget(1001), 1000);
+assert.strictEqual(await feedTarget(5000), 1000, 'storage 里的旧大值');
+assert.strictEqual(await feedTarget(1e9), 1000);
+assert.strictEqual(await feedTarget(0), Number.POSITIVE_INFINITY, '0 的原有语义不变');
+
+console.log('answer limit tests passed');

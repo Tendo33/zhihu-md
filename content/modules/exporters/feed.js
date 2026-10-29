@@ -3,6 +3,7 @@
  * Handles export for home page and follow page feeds
  */
 
+import { capAnswerCount } from '../../../lib/answer-limit.js';
 import { failureResult } from '../../../lib/failure-reason.js';
 import { CONSTANTS, normalizeUrl, scrollToLoadItems } from '../constants.js';
 import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
@@ -98,7 +99,7 @@ export const FeedExporter = {
         const settings = await new Promise(resolve => {
           chrome.storage.sync.get({ maxAnswerCount: 20 }, resolve);
         });
-        maxItemCount = settings.maxAnswerCount;
+        maxItemCount = capAnswerCount(settings.maxAnswerCount); // 旧值或同步来的大数字也截到 1000
       } catch (e) {
         // Use default
       }

@@ -1,4 +1,5 @@
 import { createLogger } from '../lib/logger.js';
+import { capAnswerCount } from '../lib/answer-limit.js';
 
 const Logger = createLogger('[Zhihu-MD Options]');
 
@@ -8,7 +9,7 @@ function saveOptions() {
   const downloadImages = document.getElementById('downloadImages').checked;
 
   // Validate: 0 means unlimited, otherwise must be >= 1
-  const validCount = Math.max(0, isNaN(maxAnswerCount) ? 20 : maxAnswerCount);
+  const validCount = capAnswerCount(Math.max(0, isNaN(maxAnswerCount) ? 20 : maxAnswerCount));
   document.getElementById('maxAnswerCount').value = validCount;
 
   chrome.storage.sync.set({
@@ -34,7 +35,7 @@ function restoreOptions() {
   }, (items) => {
     Logger.info('已读取设置:', items);
     document.getElementById('showFloatingBall').checked = items.showFloatingBall;
-    document.getElementById('maxAnswerCount').value = items.maxAnswerCount;
+    document.getElementById('maxAnswerCount').value = capAnswerCount(items.maxAnswerCount);
     document.getElementById('downloadImages').checked = items.downloadImages;
   });
 }

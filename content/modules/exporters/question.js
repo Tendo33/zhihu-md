@@ -3,6 +3,7 @@
  * Handles export for multiple answers on question pages
  */
 
+import { capAnswerCount } from '../../../lib/answer-limit.js';
 import { failureResult } from '../../../lib/failure-reason.js';
 import { partialHint, partialText } from '../../../lib/partial-export.js';
 import { parseHtmlInert } from '../../../lib/safe-dom.js';
@@ -124,7 +125,7 @@ export const QuestionExporter = {
         const settings = await new Promise((resolve) => {
           chrome.storage.sync.get({ maxAnswerCount: 20 }, resolve);
         });
-        maxAnswerCount = settings.maxAnswerCount;
+        maxAnswerCount = capAnswerCount(settings.maxAnswerCount); // 旧值或同步来的大数字也截到 1000
       } catch {
         // Use default
       }

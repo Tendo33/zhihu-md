@@ -334,6 +334,9 @@ export const FloatingBall = {
     const placeNextFrame = () => requestAnimationFrame(place);
     newBall.addEventListener('mouseup', placeNextFrame);
     newBall.addEventListener('touchend', placeNextFrame);
+    // 审查 P3：resize 监听挂在 window 上，重建或 remove() 时摘掉，避免对已移除的球继续排版
+    this.detachResize();
+    this._onResize = place;
     window.addEventListener('resize', place);
     place();
 
@@ -376,7 +379,13 @@ export const FloatingBall = {
   /**
    * Remove floating ball
    */
+  detachResize() {
+    if (this._onResize) window.removeEventListener('resize', this._onResize);
+    this._onResize = null;
+  },
+
   remove() {
+    this.detachResize();
     const ball = document.getElementById('zhihu-md-floating-ball');
     if (ball) {
       ball.remove();

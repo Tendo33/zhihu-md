@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import { parseHTML } from 'linkedom';
 import { createTurndownService, tidyMarkdown } from '../content/modules/turndown-rules.js';
 import { extractHotItems, findAnswerItem } from '../content/modules/zhihu-dom.js';
+import { loadMarkdownIt, maskMathInDom, htmlTokens, summaryLine } from './lib/rendered-check.js';
 
 const FIX = new URL('../tests/fixtures/', import.meta.url);
 const SNAP = new URL('../tests/snapshots/', import.meta.url);
@@ -35,6 +36,23 @@ function common(name, md) {
 
 const convert = (root) => createTurndownService(false).turndown(root).trim();
 
+// batch8：每个样本都做 raw HTML token 检查（markdown-it html:true；没装 markdown-it 时跳过，设了 MD_RENDERER_DIR 却加载失败会直接抛错）。
+// 公式在 DOM 阶段遮蔽（克隆节点后把 data-tex 换成占位符），不对 Markdown 做 $…$ 正则替换。
+// 允许的 token：知乎正文的上下标按设计输出为 <sup>/<sub>（见下方 footnote 断言 x<sup>2</sup>）。
+const renderer = loadMarkdownIt();
+const ALLOWED_HTML = /^<\/?(?:sup|sub)>$/;
+let renderSamples = 0;
+let allowedTokens = 0;
+function renderCheck(name, md) {
+  if (!renderer) return;
+  const tokens = htmlTokens(renderer.MarkdownIt, md);
+  const bad = tokens.filter((t) => !ALLOWED_HTML.test(t));
+  assert.deepEqual(bad, [], `${name}: 渲染出 raw HTML token ${JSON.stringify(bad.slice(0, 5))}`);
+  allowedTokens += tokens.length;
+  renderSamples += 1;
+}
+const convertMasked = (el, service = createTurndownService(false)) => service.turndown(maskMathInDom(el.cloneNode(true))).trim();
+
 // 公式
 {
   const doc = load('answer-latex.html');
@@ -45,6 +63,7 @@ const convert = (root) => createTurndownService(false).turndown(root).trim();
   const mathCount = (md.match(/\$\$[\s\S]+?\$\$|\$[^$\n]+\$/g) || []).length;
   assert.equal(mathCount, texCount, '每个 data-tex 公式都输出为 $…$');
   assert.match(md, /\$\$e\^\{iz\}=\\cos z\+i\\sin z\$\$/);
+  renderCheck('answer-latex', convertMasked(item.querySelector('.RichText')));
   common('answer-latex', md);
   snapshot('answer-latex', md);
 }
@@ -58,6 +77,7 @@ const convert = (root) => createTurndownService(false).turndown(root).trim();
   assert.match(md, /```python3\nfrom PIL import Image, ImageFont, ImageDraw/);
   assert.doesNotMatch(md, /<span class="(?:kn|nn|k)">/, '代码高亮 span 被剥掉');
   assert.match(md, /ImageDraw\n\n\ndef watermark_Image/, '代码块里的连续空行原样保留');
+  renderCheck('answer-code', convertMasked(findAnswerItem(doc, '3278589663').querySelector('.RichText')));
   common('answer-code', md);
   snapshot('answer-code', md);
 }
@@ -70,6 +90,7 @@ const convert = (root) => createTurndownService(false).turndown(root).trim();
   assert.equal((md.match(/!\[[^\]]*\]\(https:\/\/pic/g) || []).length, doc.querySelectorAll('figure img').length, '每张图都输出');
   assert.match(md, /^## 准备工作$/m, '标题里不留多余 **');
   assert.match(md, /\]\(https:\/\/www\.zhihu\.com\/people\//, '协议相对链接补全为 https');
+  renderCheck('answer-long', convertMasked(findAnswerItem(doc, '2571795386').querySelector('.RichText')));
   common('answer-long', md);
   snapshot('answer-long', md);
 }
@@ -81,6 +102,7 @@ const convert = (root) => createTurndownService(false).turndown(root).trim();
   const separators = (md.match(/^\| (?:--- \| )*--- \|$/gm) || []).length;
   assert.equal(separators, doc.querySelectorAll('table').length, '每张表都输出 GFM 表头分隔行');
   assert.match(md, /\| 1 \| MiniMax M3 \| 59\.0% \|/);
+  renderCheck('article-tables', convertMasked(doc.querySelector('.Post-RichText')));
   common('article-tables', md);
   snapshot('article-tables', md);
 }
@@ -97,6 +119,7 @@ const convert = (root) => createTurndownService(false).turndown(root).trim();
   assert.equal(parts.length, 3);
   parts.forEach((p) => assert.ok(p.length > 0));
   const md = parts.join('\n\n---\n\n');
+  ['1334631491', '1261862523', '1266832607'].forEach((id) => renderCheck(`question-multi#${id}`, convertMasked(findAnswerItem(doc, id).querySelector('.RichText'), service)));
   common('question-multi', md);
   snapshot('question-multi', md);
 }
@@ -111,7 +134,9 @@ const convert = (root) => createTurndownService(false).turndown(root).trim();
     assert.ok(it.title.length > 3);
     assert.match(it.url, /^https:\/\/www\.zhihu\.com\/question\/\d+$/);
   });
-  snapshot('hot', items.map((it) => `${it.rank}. [${it.title}](${it.url}) ${it.metrics}`.trim()).join('\n'));
+  const hotMd = items.map((it) => `${it.rank}. [${it.title}](${it.url}) ${it.metrics}`.trim()).join('\n');
+  renderCheck('hot', hotMd);
+  snapshot('hot', hotMd);
 }
 
 // 参考脚注（手写 fixture）
@@ -125,10 +150,16 @@ const convert = (root) => createTurndownService(false).turndown(root).trim();
   assert.equal((md.match(/^\[\^\d+\]:/gm) || []).length, 3);
   assert.doesNotMatch(md, /^1\.\s+Attention/m, '页面自带参考列表不重复输出');
   assert.match(md, /x<sup>2<\/sup>/);
+  renderCheck('footnote', convertMasked(doc.querySelector('.RichText')));
   common('footnote', md);
   snapshot('footnote', md);
 }
 
+if (renderer) {
+  console.log(`${summaryLine(renderer.version, renderSamples, 0)} (test-fixtures; allowed <sup>/<sub>: ${allowedTokens})`);
+} else {
+  console.log('rendered check: skipped (markdown-it not found; set MD_RENDERER_DIR to enable)');
+}
 console.log(`fixture snapshot tests passed${update ? ' (snapshots updated)' : ''}`);
 
 // 隐私：fixture 和快照里不留第三方用户主页 ID

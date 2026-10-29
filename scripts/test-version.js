@@ -11,4 +11,9 @@ assert.equal(JSON.parse(read('manifest.src.json')).version, v);
 assert.match(read('CHANGELOG.md'), new RegExp(`^## \\[${v.replace(/\./g, '\\.')}\\] - \\d{4}-\\d{2}-\\d{2}$`, 'm'));
 assert.match(read('README.md'), new RegExp(`${v.replace(/\./g, '\\.')} 起新安装默认`));
 assert.match(read('README.en.md'), new RegExp(`From ${v.replace(/\./g, '\\.')}, fresh installs`));
+{
+  const cl = read('CHANGELOG.md');
+  const sec = cl.slice(cl.indexOf(`## [${v}]`), cl.indexOf('\n## [', cl.indexOf(`## [${v}]`) + 1) >>> 0);
+  assert.match(sec, /Chrome 121/, 'CHANGELOG 当前版本写明最低 Chrome 121');
+}
 console.log('version consistency tests passed');

@@ -13,7 +13,7 @@ for (const [v, want] of [[NaN, NaN], [null, null], [undefined, undefined], ['', 
 const html = fs.readFileSync(new URL('../options/options.html', import.meta.url), 'utf8');
 assert.match(html, /<input type="number" id="maxAnswerCount" name="maxAnswerCount" min="0" max="1000" value="20"/);
 
-assert.ok(html.includes('问题页回答和信息流（首页、关注）的下载上限。填 0 时尽量全部下载，最多 1000 条；问题页没下完时文件会标 truncated。'), '说明文案');
+assert.ok(html.includes('问题页回答和信息流（首页、关注）的下载上限。填 0 时尽量全部下载，最多 1000 条；没下完时文件会标 truncated。'), '说明文案');
 const css = fs.readFileSync(new URL('../options/options.css', import.meta.url), 'utf8');
 const rule = css.match(/\.status-msg \{([^}]*)\}/)[1];
 assert.match(rule, /width: max-content;/);
@@ -120,5 +120,10 @@ assert.strictEqual((await feedRun(0, 1005)).processed, 1000, '设 0：1005 张�
 assert.strictEqual((await feedRun(1000, 1005)).processed, 1000, '设 1000：只处理 1000 条');
 assert.strictEqual((await feedRun(20, 25)).processed, 20);
 assert.strictEqual((await feedRun(0, 30)).processed, 30);
+// 信息流被上限截断时文首写 truncated: true，没截断时不写
+assert.match((await feedRun(0, 1005)).md, /^item_count: 1000\ntruncated: true$/m);
+assert.match((await feedRun(20, 25)).md, /^item_count: 20\ntruncated: true$/m);
+assert.doesNotMatch((await feedRun(1000, 1000)).md, /truncated/, '恰好取完不标');
+assert.doesNotMatch((await feedRun(0, 30)).md, /truncated/);
 
 console.log('answer limit tests passed');

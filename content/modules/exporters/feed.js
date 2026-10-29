@@ -134,6 +134,8 @@ export const FeedExporter = {
       }
 
       const itemsToProcess = uniqueItems.slice(0, targetCount);
+      // 和问题页一致：还有没导出的卡片（被上限截掉）时，文首写 truncated: true
+      const truncated = uniqueItems.length > itemsToProcess.length;
 
       if (itemsToProcess.length === 0) {
         return failureResult();
@@ -160,7 +162,7 @@ export const FeedExporter = {
 title: ${yamlQuote(pageTitle)}
 url: ${yamlQuote(window.location.href)}
 date: ${date}
-item_count: ${processedItems.length}
+item_count: ${processedItems.length}${truncated ? '\ntruncated: true' : ''}
 ---
 
 `;

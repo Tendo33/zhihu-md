@@ -91,7 +91,7 @@ Long exports started from the popup (such as a question page) need the popup to 
 | Setting | Description | Default |
 | --- | --- | --- |
 | 悬浮导出球 (floating button) | Show the floating ball | On |
-| 最大下载回答数 (max items) | Limit for question pages and feeds. Max 1000; larger numbers count as 1000. 0 means no limit within the cap: as many answers as the question page lists, or scroll until no new cards on feeds, up to 1000 either way | 20 |
+| 最大下载回答数 (max items) | Limit for question pages and feeds. Max 1000; larger numbers count as 1000. 0 means no limit within the cap: as many answers as the question page lists, or scroll until no new cards on feeds, up to 1000 either way; files that stop early get `truncated: true` | 20 |
 | 下载图片到本地 (download images) | Bundle images into a ZIP for column, answer and question downloads; copy, feed and hot exports keep remote images | Off |
 
 Settings live in `chrome.storage.sync` (synced with your browser account when browser sync is on); the ball position and recent exports in `chrome.storage.local`.

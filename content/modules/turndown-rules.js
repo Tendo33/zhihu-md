@@ -323,7 +323,8 @@ export function createTurndownService(downloadImages = false) {
     filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
     replacement: (content, node) => {
       const level = Number(node.nodeName.charAt(1));
-      const text = content.replace(/^(\s*(?:\*\*|__|[*_])?)(\d+)\\\. /, '$1$2. ');
+      // batch7：标题本身是链接时（「## [1\\. 链接](x)」）也还原；前缀允许 [ 以及 [ 前后的加粗/斜体标记
+      const text = content.replace(/^(\s*(?:\*\*|__|[*_])?\[?(?:\*\*|__|[*_])?)(\d+)\\\. /, '$1$2. ');
       return `\n\n${'#'.repeat(level)} ${text}\n\n`;
     }
   });

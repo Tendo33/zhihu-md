@@ -14,6 +14,10 @@ function md(body) {
 assert.strictEqual(md('<h2>1. 先记结论</h2>'), '## 1. 先记结论');
 assert.strictEqual(md('<h3>12. 第十二条</h3>'), '### 12. 第十二条');
 assert.strictEqual(md('<h2><strong>2. 加粗标题</strong></h2>'), '## 2. 加粗标题');
+// batch7：标题本身是链接
+assert.strictEqual(md('<h2><a href="https://x.com/a">1. 链接标题</a></h2>'), '## [1. 链接标题](https://x.com/a)');
+assert.strictEqual(md('<h3><a href="https://x.com/b"><strong>3. 加粗链接</strong></a></h3>'), '### [3. 加粗链接](https://x.com/b)' /* 标题里的加粗本来就去掉 */);
+assert.strictEqual(md('<h2><strong><a href="https://x.com/c">4. 外层加粗</a></strong></h2>'), '## [4. 外层加粗](https://x.com/c)');
 // 标题里其它位置的「1. 」本来就不转义，保持不变
 assert.strictEqual(md('<h2>第 1. 节</h2>'), '## 第 1. 节');
 

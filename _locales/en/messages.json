@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Zhihu to Markdown",
+    "description": "Extension name shown in the Chrome Web Store and chrome://extensions. Same in every language; do not translate."
+  },
+  "extDescription": {
+    "message": "Convert Zhihu columns, answers, question pages and hot lists to Markdown, with math, code and images kept. Download or copy.",
+    "description": "Extension description shown in the Chrome Web Store and chrome://extensions. 132 characters max."
+  }
+}

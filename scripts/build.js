@@ -43,6 +43,8 @@ copyFile('lib/ui-v2.css');
 // The source manifest references unbundled modules, so it is named
 // manifest.src.json to stop Chrome from loading the repo root by mistake.
 fs.copyFileSync(path.join(root, 'manifest.src.json'), path.join(out, 'manifest.json'));
+// 商店多语言：name / description 用 __MSG_*__，_locales 必须打进 dist 和 zip
+fs.cpSync(path.join(root, '_locales'), path.join(out, '_locales'), { recursive: true });
 copyFile('README.md');
 copyFile('PRIVACY.md');
 

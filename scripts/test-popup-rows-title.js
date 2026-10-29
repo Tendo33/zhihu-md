@@ -35,4 +35,16 @@ const rows = ($) => $('recent-list').children.length;
   const $ = await run({ failedImages: 0, keptImages: 0 });
   assert.equal(rows($), 3, '普通成功仍 3 行');
 }
+// F2：部分导出，两者都有
+{
+  const $ = await run({ failedImages: 1, keptImages: 2 }, { partial: { exported: 3, total: 10, failedPage: 2 } });
+  const el = $('feedback-img');
+  assert.ok(!el.classList.contains('hidden'));
+  const sr = el.querySelector('.sr-only');
+  assert.ok(sr && sr.textContent === '，另有 2 张保留为在线链接', 'F2：保留数在 .sr-only');
+  assert.equal(el.textContent.replace(sr.textContent, ''), '1 张图片下载失败，已保留在线链接', 'F2：屏幕上只显示失败句');
+  assert.equal(el.getAttribute('title'), '1 张图片下载失败，另有 2 张保留为在线链接', 'F2：title 全句');
+  assert.equal($('action-feedback').getAttribute('title'), null, '容器不带 title');
+  assert.equal(rows($), 2, 'F2：最近导出 2 行');
+}
 console.log('popup rows/title tests passed');

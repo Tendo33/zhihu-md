@@ -10,7 +10,7 @@ import { describeFailure, ExportFailure } from '../lib/failure-text.js';
 import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 import { partialHint, partialText } from '../lib/partial-export.js';
-import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
+import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
 import { svgIcon } from '../lib/safe-dom.js';
 import { splitFilename } from '../lib/filename-split.js';
 
@@ -377,7 +377,18 @@ async function handleExport() {
       {
         const f = (res && res.failedImages) || 0;
         const k = (res && res.keptImages) || 0;
-        setImageLine('feedback-img', imagePartialLine(f, k), f === 0 && k > 0);
+        if (f > 0 && k > 0) {
+          // 设计复核 4193502 F2：与方案 B 一致，屏幕上只显示失败句，保留数放进 .sr-only，全句写在 title
+          setImageLine('feedback-img', imageFailText(f));
+          const el = $('feedback-img');
+          const sr = document.createElement('span');
+          sr.className = 'sr-only';
+          sr.textContent = `，${imageKeptMoreShortText(k)}`;
+          el.append(sr);
+          el.title = imagePartialLine(f, k);
+        } else {
+          setImageLine('feedback-img', imagePartialLine(f, k), f === 0 && k > 0);
+        }
       }
       exportLabel.textContent = PRIMARY;
       setExportActionsEnabled(true);

@@ -63,9 +63,9 @@ assert.strictEqual(save('NaN'), 20);
 // 审查第 5 条：负数 → 1 并在数字框下方提示；非数字 → 20，小数向下取整
 assert.strictEqual(save('-5'), 1);
 assert.strictEqual(String(input.value), '1', '回填 1');
-assert.strictEqual(note.textContent, '至少 1 条，已保存为 1', '小于 1 时数字框下方提示');
+assert.strictEqual(note.textContent, '需为 0 或正整数，已保存为 1', '小于 1 时数字框下方提示');
 assert.strictEqual(save('0.5'), 1);
-assert.strictEqual(note.textContent, '至少 1 条，已保存为 1');
+assert.strictEqual(note.textContent, '需为 0 或正整数，已保存为 1');
 assert.strictEqual(save('0'), 0, '0 仍表示尽量全部（待决策）');
 assert.strictEqual(note.textContent, '', '0 不出提示');
 assert.strictEqual(save('abc'), 20);
@@ -197,9 +197,10 @@ console.log('answer limit tests passed');
 
 // 审查第 5 条：小于 1 的处理（0 仍是「尽量全部」，见待决策）
 {
-  const { normalizeAnswerCount, MIN_ANSWER_NOTE } = await import('../lib/answer-limit.js');
+  const { normalizeAnswerCount, MIN_ANSWER_NOTE, MIN_ANSWER_NOTE_EN } = await import('../lib/answer-limit.js');
+  assert.equal(MIN_ANSWER_NOTE_EN, 'Enter 0 or a whole number. Saved as 1.', '设计复核 M1 英文备用');
   const eq = (raw, value, note) => assert.deepEqual(normalizeAnswerCount(raw), { value, note }, `输入 ${JSON.stringify(raw)}`);
-  assert.equal(MIN_ANSWER_NOTE, '至少 1 条，已保存为 1');
+  assert.equal(MIN_ANSWER_NOTE, '需为 0 或正整数，已保存为 1');
   eq('0', 0, '');
   eq('-5', 1, MIN_ANSWER_NOTE);
   eq('-0.5', 1, MIN_ANSWER_NOTE);

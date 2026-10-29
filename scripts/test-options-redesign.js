@@ -64,3 +64,11 @@ console.log('options redesign tests passed');
   assert.match(read('options/options.js'), /\}, 2500\);/, '2.5 秒后淡出');
   console.log('options redesign M3 passed');
 }
+
+// M4：标题改为「最大下载条数」
+{
+  const html = read('options/options.html');
+  assert.match(html, /id="label-maxAnswerCount"[^>]*>最大下载条数</);
+  assert.ok(!html.includes('最大下载回答数'), 'M4：旧标题不再出现');
+  console.log('options redesign M4 passed');
+}

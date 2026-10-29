@@ -118,7 +118,7 @@ function showArticleInfo(info) {
   pageBadge = badge;
   updateStatus('idle', badge);
   articleTitle.textContent = info.title || '（无标题）';
-  articleTitle.setAttribute('title', info.title || '');
+  articleTitle.setAttribute('title', articleTitle.textContent); // 单行省略：title 写完整标题
   articleType.textContent = label;
   articleAuthor.textContent = info.author || '未知作者';
   authorWrap.classList.toggle('hidden', !info.author);
@@ -139,6 +139,7 @@ function showUnsupported(desc) {
 /** 内容脚本还没就绪：info alert，按钮置灰，可刷新 */
 function showNotReady(tab, text, showRefresh) {
   articleTitle.textContent = (tab && tab.title) || '知乎页面';
+  articleTitle.setAttribute('title', articleTitle.textContent); // 单行省略：title 写完整标题
   updateStatus('idle', '不可用');
   $('info-text').textContent = text;
   refreshBtn.classList.toggle('hidden', !showRefresh);

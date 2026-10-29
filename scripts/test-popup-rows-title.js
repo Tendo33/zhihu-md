@@ -6,21 +6,21 @@ import { parseHTML } from 'linkedom';
 const flush = async () => { for (let i = 0; i < 12; i++) await new Promise((r) => setImmediate(r)); };
 const RECENT = Array.from({ length: 4 }, (_, i) => ({ title: `R${i}`, ok: true, ts: Date.now() - i * 1000 }));
 let n = 0;
-async function run(bg, data = {}) {
+let TITLE = 'P';
+async function run(bg, data = {}, { click = true, fail = false, notReady = false } = {}) {
   const html = fs.readFileSync(new URL('../popup/popup.html', import.meta.url), 'utf8').replace(/<script[^>]*><\/script>/g, '');
   const { window, document } = parseHTML(html);
   globalThis.window = window; globalThis.document = document;
   globalThis.chrome = {
-    tabs: { query: async () => [{ id: 1, url: 'https://zhuanlan.zhihu.com/p/1', title: 'p' }], sendMessage: async (id, m) => (m.action === 'getArticleInfo' ? { success: true, data: { title: 'P', author: '' } } : { success: true, data: { filename: 'p.md', content: '#', images: [{ url: 'u', filename: 'f' }], ...data } }), reload() {} },
-    runtime: { sendMessage: async () => ({ success: true, downloadId: 5, filename: 'p_with_images.zip', ...bg }), openOptionsPage() {}, getURL: (p) => p, getManifest: () => ({ version: '0' }) },
+    tabs: { query: async () => [{ id: 1, url: 'https://zhuanlan.zhihu.com/p/1', title: TITLE }], sendMessage: async (id, m) => (m.action === 'getArticleInfo' ? (notReady ? { success: false, error: 'x' } : { success: true, data: { title: TITLE, author: '' } }) : { success: true, data: { filename: 'p.md', content: '#', images: [{ url: 'u', filename: 'f' }], ...data } }), reload() {} },
+    runtime: { sendMessage: async () => (fail ? { success: false, error: 'x' } : { success: true, downloadId: 5, filename: 'p_with_images.zip', ...bg }), openOptionsPage() {}, getURL: (p) => p, getManifest: () => ({ version: '0' }) },
     commands: { getAll: async () => [] },
     downloads: { show() {} },
     storage: { sync: { get: (d, cb) => cb({ ...d, downloadImages: true }) }, local: { get: async (d) => ({ ...d, recentExports: RECENT }), set: async () => {} } },
   };
   await import(`../popup/popup.js?rt${n++}`);
   await flush();
-  document.getElementById('export-btn').dispatchEvent(new window.Event('click'));
-  await flush();
+  if (click) { document.getElementById('export-btn').dispatchEvent(new window.Event('click')); await flush(); }
   return (id) => document.getElementById(id);
 }
 const rows = ($) => $('recent-list').children.length;
@@ -46,5 +46,27 @@ const rows = ($) => $('recent-list').children.length;
   assert.equal(el.getAttribute('title'), '1 张图片下载失败，另有 2 张保留为在线链接', 'F2：title 全句');
   assert.equal($('action-feedback').getAttribute('title'), null, '容器不带 title');
   assert.equal(rows($), 2, 'F2：最近导出 2 行');
+}
+// 状态卡标题：单行、末尾省略；title 和 textContent 都是完整标题（空闲、成功、部分导出、失败）
+{
+  const css = fs.readFileSync(new URL('../lib/ui-v2.css', import.meta.url), 'utf8');
+  const rule = css.match(/\.ctx \.t\{[^}]*\}/)[0];
+  for (const d of ['white-space:nowrap', 'overflow:hidden', 'text-overflow:ellipsis', 'min-width:0']) assert.ok(rule.includes(d), d);
+  assert.ok(!/line-clamp/.test(css), '没有 line-clamp');
+  assert.match(css, /\.ctx \.badge\{[^}]*flex:none/, '徽标不被挤压');
+  TITLE = '如何评价某某在二〇二六年发布的新一代大模型以及它对整个行业未来十年发展可能产生的深远影响？';
+  const cases = [
+    ['空闲', [{}, {}, { click: false }]],
+    ['成功', [{ failedImages: 0 }]],
+    ['部分导出', [{ failedImages: 0 }, { partial: { exported: 3, total: 10, failedPage: 2 } }]],
+    ['失败', [{}, {}, { fail: true }]],
+    ['不可用（用标签页标题）', [{}, {}, { click: false, notReady: true }]],
+  ];
+  for (const [name, args] of cases) {
+    const $ = await run(...args);
+    assert.equal($('article-title').textContent, TITLE, `${name}：textContent 全名`);
+    assert.equal($('article-title').getAttribute('title'), TITLE, `${name}：title 全名`);
+  }
+  TITLE = 'P';
 }
 console.log('popup rows/title tests passed');

@@ -41,6 +41,7 @@ const status = document.getElementById('status');
 assert.strictEqual(save('999'), 999);
 assert.strictEqual(status.textContent, '设置已保存');
 assert.strictEqual(save('1000'), 1000);
+assert.strictEqual(status.textContent, '设置已保存', '恰好 1000 不提示已按上限');
 assert.strictEqual(save('1001'), 1000);
 assert.strictEqual(String(input.value), '1000', '截断后回填输入框');
 assert.strictEqual(status.textContent, '已按上限保存为 1000', '超过上限时提示');
@@ -98,5 +99,26 @@ assert.strictEqual(await feedTarget(1e9), 1000);
 assert.strictEqual(await feedTarget(0), 1000, '0：上限内不限，信息流按 1000');
 assert.strictEqual(await feedTarget(null), null, 'null 原样（原逻辑）');
 assert.strictEqual(await feedTarget('abc'), 'abc', '非数字原样（原逻辑）');
+
+// 信息流：DOM 里卡片多于上限时只处理上限条（锁住 slice）
+async function feedRun(stored, cards) {
+  const items = Array.from({ length: cards }, (_, i) => `<div class="TopstoryItem"><h2 class="ContentItem-title"><a href="https://www.zhihu.com/question/1/answer/${i + 1}">t${i + 1}</a></h2><div class="RichText">b</div></div>`).join('');
+  const f = parseHTML(`<!doctype html><html><body>${items}</body></html>`);
+  globalThis.window = f.window;
+  globalThis.document = f.document;
+  globalThis.chrome = { storage: { sync: { get: (_d, done) => done({ maxAnswerCount: stored }) } } };
+  let processed = 0;
+  const orig = [FeedExporter.scrollToLoadFeedItems, FeedExporter.processFeedItem];
+  FeedExporter.scrollToLoadFeedItems = async () => {};
+  FeedExporter.processFeedItem = async () => { processed++; return { title: 't', author: 'a', content: 'c' }; };
+  try {
+    const r = await FeedExporter.exportFeedItems('home');
+    return { processed, md: r.data.content };
+  } finally { [FeedExporter.scrollToLoadFeedItems, FeedExporter.processFeedItem] = orig; }
+}
+assert.strictEqual((await feedRun(0, 1005)).processed, 1000, '设 0：1005 张卡片只处理 1000 条');
+assert.strictEqual((await feedRun(1000, 1005)).processed, 1000, '设 1000：只处理 1000 条');
+assert.strictEqual((await feedRun(20, 25)).processed, 20);
+assert.strictEqual((await feedRun(0, 30)).processed, 30);
 
 console.log('answer limit tests passed');

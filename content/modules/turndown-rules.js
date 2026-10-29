@@ -4,6 +4,7 @@
  */
 
 import TurndownService from '../../lib/turndown.min.js';
+import { markdownImageUrl } from '../../lib/image-pack.js';
 
 /**
  * Configure Turndown with custom rules for Zhihu.
@@ -128,7 +129,8 @@ export function createTurndownService(downloadImages = false) {
         return `![${alt}](${localPath})`;
       }
       
-      return `![${alt}](${cleanSrc})`;
+      // QA P2Z-01：不打包图片时同样把 // 开头的地址补成 https://
+      return `![${alt}](${markdownImageUrl(cleanSrc)})`;
     }
   });
 

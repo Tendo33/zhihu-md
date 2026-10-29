@@ -155,3 +155,16 @@ console.log('options redesign tests passed');
   assert.match(fv, /outline-offset: 2px;/);
   console.log('options redesign S2 passed');
 }
+
+// 审查第 3 条：1.1.8 未发布，条目并入 1.1.8 段，[Unreleased] 留空，不重复
+{
+  const log = read('CHANGELOG.md');
+  const unrel = log.slice(log.indexOf('## [Unreleased]'), log.indexOf('## [1.1.8]'));
+  assert.ok(log.includes('## [Unreleased]') && !/^- /m.test(unrel), '[Unreleased] 留空');
+  const sec = log.slice(log.indexOf('## [1.1.8]'), log.indexOf('## [1.1.7]'));
+  assert.match(sec, /### 改进[\s\S]*导出本页为 Markdown[\s\S]*设置页按设计稿重做/);
+  assert.match(sec, /### 修复[\s\S]*background\.scripts[\s\S]*### 改进/, 'bg-scripts 条目并入 1.1.8 修复');
+  assert.equal(sec.split('超过上限，已保存为 1000').length - 1, 1, '超限提示只写一次');
+  assert.ok(!log.includes('嵌入对话框'), '不再提嵌入对话框');
+  console.log('changelog merge passed');
+}

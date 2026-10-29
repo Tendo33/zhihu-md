@@ -2,15 +2,6 @@
 
 ## [Unreleased]
 
-### 修复
-
-- Chrome / Edge 包的 manifest 不再带 `background.scripts`，Chrome 扩展页不再提示「'background.scripts' requires manifest version of 2 or lower」。Firefox 包另用 `npm run build:firefox` 构建到 `dist-firefox/`，保留 `background.scripts`。
-
-### 改进
-
-- 右键菜单和快捷键说明的中文统一为「导出本页为 Markdown」「复制本页为 Markdown」；英文版改为「Export this page as Markdown」「Export linked Zhihu page as Markdown」。
-- 设置页按设计稿重做：开关只显示一个圆钮，标题改为「最大下载条数」并加单位「条」，三项说明换成新文案；保存后在页脚显示「✓ 已保存」，输入超过上限时在输入框下方提示「超过上限，已保存为 1000」；标签可点击，开关对读屏软件报为「开关」。
-
 ## [1.1.8] - 2026-10-29
 
 ### 新增
@@ -25,6 +16,12 @@
 - 知乎图床（zhimg.com）的 http 图片写进 Markdown 时改用 `https://`；其他网站的 http 图片地址保持不变。
 - 「最大下载条数」按说明最多 1000 条：设置页输入框限制为 1000，保存时超过 1000 的数字改成 1000；以前保存过或从其他设备同步来的更大数字，导出时也按 1000 条算。填 0 表示上限内不限：问题页和信息流都最多 1000 条。设置页输入超过 1000 时，保存后提示「超过上限，已保存为 1000」。
 - 首页推荐和关注动态导出时，如果滚动停在上限、滚动超时，或页面上的卡片超过上限被截掉，文首和问题页一样写 `truncated: true`；只有连续 3 轮没有新卡片且全部导出时才不写。
+- Chrome / Edge 包的 manifest 不再带 `background.scripts`，Chrome 扩展页不再提示「'background.scripts' requires manifest version of 2 or lower」。Firefox 包另用 `npm run build:firefox` 构建到 `dist-firefox/`，保留 `background.scripts`。
+
+### 改进
+
+- 右键菜单和快捷键说明的中文统一为「导出本页为 Markdown」「复制本页为 Markdown」；英文版改为「Export this page as Markdown」「Export linked Zhihu page as Markdown」。
+- 设置页按设计稿重做：开关只显示一个圆钮，标题改为「最大下载条数」并加单位「条」，三项说明换成新文案；保存后在页脚显示「✓ 已保存」；标签可点击，开关对读屏软件报为「开关」。
 
 ## [1.1.7] - 2026-10-29
 

@@ -191,6 +191,8 @@ input:checked + .slider:before {
   color: var(--bg-secondary);
   padding: 10px 20px;
   border-radius: 20px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
   font-size: 13px;
   font-weight: 500;
   opacity: 0;

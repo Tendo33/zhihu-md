@@ -8,7 +8,7 @@ assert.equal(manifest.commands['export-page'].suggested_key.default, 'Alt+Shift+
 assert.equal(manifest.commands['export-page'].suggested_key.mac, 'Alt+Shift+K');
 assert.ok(!JSON.stringify(manifest.commands).includes('Alt+Shift+Z'), 'Alt+Shift+Z 在 Win/Linux 被 Chrome 标签组占用');
 assert.ok(!manifest.permissions.includes('commands'), 'commands 不是权限');
-assert.equal(manifest.minimum_chrome_version, '111', 'color-mix 需要 Chrome 111+（复审建议 1）');
+assert.equal(manifest.minimum_chrome_version, '121', 'MV3 background.scripts（Firefox 支持）需要 Chrome 121+；也覆盖 color-mix 的 111+');
 
 const L = {}; const sent = [];
 const ev = (n) => ({ addListener: (fn) => { L[n] = fn; } });

@@ -52,7 +52,7 @@ Not a crawler: it only handles what your browser already shows, does not bypass 
 
 ## Install
 
-**Chrome**: install from the [Chrome Web Store](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh). Requires Chrome 111+.
+**Chrome**: install from the [Chrome Web Store](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh). Requires Chrome 121+.
 
 **Edge / Firefox**: planned, not yet listed.
 

@@ -89,7 +89,7 @@ console.log('options redesign tests passed');
   console.log('options redesign M6 passed');
 }
 
-// M7：层级与间距、语义（<label for>、role="switch"、aria-checked 同步）
+// M7：层级与间距、语义（<label for>、role="switch"、原生 checkbox 不写 aria-checked，审查第 2 条）
 {
   const html = read('options/options.html');
   assert.match(css, /\nbody \{\s*background-color: var\(--bg\);/, 'M7：页面 --bg');
@@ -104,9 +104,11 @@ console.log('options redesign tests passed');
     assert.match(html, new RegExp(`<label class="option-label" id="label-${k}" for="${k}">`), `${k} 用 <label for>`);
   }
   assert.ok(!html.includes('<label class="switch">'), '开关外层不再是 label（避免嵌套 label）');
-  assert.equal((html.match(/<input type="checkbox" role="switch" aria-checked="false"/g) || []).length, 2);
+  assert.equal((html.match(/<input type="checkbox" role="switch" id=/g) || []).length, 2);
+  assert.ok(!html.includes('aria-checked'), '审查第 2 条：原生 checkbox 不写 aria-checked');
+  assert.ok(!/aria-checked|syncSwitchState/.test(read('options/options.js')), '审查第 2 条：JS 不再同步 aria-checked');
   assert.equal((html.match(/<span class="slider" aria-hidden="true"><\/span>/g) || []).length, 2);
-  // aria-checked 跟随 checked：读取设置时、切换时
+  // 读取设置、切换后保存（状态由原生 checked 表达）
   const { parseHTML } = await import('linkedom');
   const page = parseHTML(html.replace(/<script[\s\S]*?<\/script>/g, ''));
   globalThis.window = page.window; globalThis.document = page.document;
@@ -116,10 +118,9 @@ console.log('options redesign tests passed');
   page.document.dispatchEvent(new page.window.Event('DOMContentLoaded'));
   const ball = page.document.getElementById('showFloatingBall');
   const img = page.document.getElementById('downloadImages');
-  assert.equal(ball.getAttribute('aria-checked'), 'true', '读取后同步');
-  assert.equal(img.getAttribute('aria-checked'), 'false');
+  assert.equal(ball.checked, true, '读取后勾选');
+  assert.equal(img.checked, false);
   img.checked = true; img.dispatchEvent(new page.window.Event('change'));
-  assert.equal(img.getAttribute('aria-checked'), 'true', '切换后同步');
   assert.equal(store.downloadImages, true);
   assert.equal(page.document.getElementById('status').textContent, '✓ 已保存');
   console.log('options redesign M7 passed');

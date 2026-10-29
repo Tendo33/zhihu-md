@@ -3,14 +3,7 @@ import { capAnswerCount, MAX_ANSWER_LIMIT } from '../lib/answer-limit.js';
 
 const Logger = createLogger('[Zhihu-MD Options]');
 
-/** 设计 M7：开关用 role="switch"，aria-checked 与 checked 保持同步 */
-export function syncSwitchState(input) {
-  if (input) input.setAttribute('aria-checked', input.checked ? 'true' : 'false');
-}
-
 function saveOptions() {
-  syncSwitchState(document.getElementById('showFloatingBall'));
-  syncSwitchState(document.getElementById('downloadImages'));
   const showFloatingBall = document.getElementById('showFloatingBall').checked;
   const maxAnswerCount = parseInt(document.getElementById('maxAnswerCount').value, 10);
   const downloadImages = document.getElementById('downloadImages').checked;
@@ -48,8 +41,6 @@ function restoreOptions() {
     document.getElementById('showFloatingBall').checked = items.showFloatingBall;
     document.getElementById('maxAnswerCount').value = capAnswerCount(items.maxAnswerCount);
     document.getElementById('downloadImages').checked = items.downloadImages;
-    syncSwitchState(document.getElementById('showFloatingBall'));
-    syncSwitchState(document.getElementById('downloadImages'));
   });
 }
 

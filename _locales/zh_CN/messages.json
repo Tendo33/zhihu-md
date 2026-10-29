@@ -76,6 +76,15 @@
       }
     }
   },
+  "ballExportedImagesFailedOne": {
+    "message": "已导出，$ARG1$ 张图片未能下载，已保留在线链接",
+    "description": "Singular form of ballExportedImagesFailed (count is 1).",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
   "ballCopied": {
     "message": "已复制",
     "description": "悬浮球：复制本页成功。"
@@ -112,9 +121,27 @@
       }
     }
   },
+  "ballImagesFailedOne": {
+    "message": "$ARG1$ 张图片未能下载，已保留在线链接",
+    "description": "Singular form of ballImagesFailed (count is 1).",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
   "ballImagesKept": {
     "message": "$ARG1$ 张图片保留为在线链接",
     "description": "悬浮球读屏补充：图片保留为在线链接。$1 = 图片数。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballImagesKeptOne": {
+    "message": "$ARG1$ 张图片保留为在线链接",
+    "description": "Singular form of ballImagesKept (count is 1).",
     "placeholders": {
       "arg1": {
         "content": "$1"

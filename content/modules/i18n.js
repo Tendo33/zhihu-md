@@ -13,12 +13,15 @@ export const ZH_FALLBACK = {
   ballCopying: "正在复制…",
   ballExported: "已导出",
   ballExportedImagesFailed: "已导出，$1 张图片未能下载，已保留在线链接",
+  ballExportedImagesFailedOne: "已导出，$1 张图片未能下载，已保留在线链接",
   ballCopied: "已复制",
   ballCopiedSelection: "已复制选中内容",
   ballNoSelection: "没有选中内容，先选中一段文字再复制",
   ballPartial: "部分导出：已导出 $1/$2 条，$3 条未能加载",
   ballImagesFailed: "$1 张图片未能下载，已保留在线链接",
+  ballImagesFailedOne: "$1 张图片未能下载，已保留在线链接",
   ballImagesKept: "$1 张图片保留为在线链接",
+  ballImagesKeptOne: "$1 张图片保留为在线链接",
   ballImagesKeptMore: "另有 $1 张保留为在线链接",
   ballImagesKeptReason: "这些图片的格式或来源不支持保存到本地",
   ballSep: "，",
@@ -44,4 +47,9 @@ export function t(key, ...subs) {
   let msg = '';
   try { msg = globalThis.chrome?.i18n?.getMessage?.(key, subs.map(String)) || ''; } catch { msg = ''; }
   return msg || fill(ZH_FALLBACK[key] ?? key, subs);
+}
+
+/** 带数量的条目：数量为 1 且有 `${key}One` 时用单数（英文 1 image / N images；中文两条相同） */
+export function tn(key, n, ...rest) {
+  return Number(n) === 1 && Object.hasOwn(ZH_FALLBACK, `${key}One`) ? t(`${key}One`, n, ...rest) : t(key, n, ...rest);
 }

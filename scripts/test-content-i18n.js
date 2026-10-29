@@ -51,6 +51,18 @@ assert.equal(t('ballAriaIdle'), '导出 Markdown（点击下载，右键复制�
 globalThis.chrome = { i18n: { getMessage: getMessageFrom(en) }, storage: {}, runtime: {} };
 assert.equal(t('ballTooltipIdle'), 'Click to export · Right-click to copy');
 assert.equal(t('ballAriaIdle'), 'Export Markdown (click to download, right-click to copy)');
+// 审查 P3-3：英文单复数（1 image / N images），aria 完成提示不重复 again；中文单复数同一句
+{
+  const { tn } = await import('../content/modules/i18n.js');
+  assert.equal(tn('ballExportedImagesFailed', 1), 'Exported. 1 image couldn\'t be downloaded; online link kept');
+  assert.equal(tn('ballExportedImagesFailed', 2), 'Exported. 2 images couldn\'t be downloaded; online links kept');
+  assert.equal(tn('ballImagesFailed', 1), '1 image couldn\'t be downloaded; online link kept');
+  assert.equal(tn('ballImagesKept', 1), '1 image kept as an online link');
+  assert.equal(tn('ballImagesKept', 3), '3 images kept as online links');
+  assert.equal(t('ballAriaDone', 'Exported'), 'Exported. Click to export again');
+  for (const k of Object.keys(en)) assert.ok(!/again.*again/i.test(en[k].message), `${k} 英文文案：${en[k].message}`);
+  for (const k of ['ballExportedImagesFailed', 'ballImagesFailed', 'ballImagesKept']) assert.equal(zhGet(`${k}One`, ['1']), zhGet(k, ['1']));
+}
 // 审查 P3-1：带占位符的条目断言完整英文（编号错位时会渲染出错误数字）
 assert.equal(t('ballPartial', 3, 10, 7), 'Partial export: 3/10 items exported, 7 couldn\'t load');
 assert.equal(t('ballExportedImagesFailed', 2), 'Exported. 2 images couldn\'t be downloaded; online links kept');
@@ -122,6 +134,13 @@ assert.ok(texts.includes('Export failed: Sign in to Zhihu to see this content, t
     assert.equal(shown[0], 'Export failed. Refresh the Zhihu page and try again');
     assert.ok(ball.classList.contains('error'));
   }
+  // 审查 P3-3：成功路径上 1 张图失败时，tooltip 和读屏用单数
+  ArticleExporter.exportMarkdown = async () => ({ success: true, data: { filename: 'a.md', content: '' } });
+  globalThis.chrome.runtime.sendMessage = async () => ({ failedImages: 1, keptImages: 1 });
+  FloatingBall.busy = false;
+  await FloatingBall.handleBallClick(ball);
+  assert.equal(ball.querySelector('.tooltip').textContent, 'Exported. 1 image couldn\'t be downloaded; online link kept');
+  assert.ok(!/\b1 images\b/.test(live() + ball.getAttribute('aria-label')), `读屏单数：${live()}`);
   PageDetector.detectPageType = saved.detect; ArticleExporter.exportMarkdown = saved.exp;
 }
 globalThis.setTimeout = realSetTimeout;

@@ -12,7 +12,7 @@ import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
 import { floatingBallDrag } from './floating-ball-drag.js';
 import { applyBallA11y, idleAriaLabel } from './ball-a11y.js';
-import { t } from './i18n.js';
+import { t, tn } from './i18n.js';
 import { ballFailureText, ballImageSrExtra, ballKeptSrExtra } from './ball-text.js';
 import { span, svgIcon } from '../../lib/safe-dom.js';
 import { placeTooltip } from './tooltip-layout.js';
@@ -208,7 +208,7 @@ export const FloatingBall = {
           const failedN = (dl && dl.failedImages) || 0;
           const keptN = (dl && dl.keptImages) || 0;
           const srExtra = ballKeptSrExtra(failedN, keptN);
-          this.finishBall(ball, generation, 'success', failedN > 0 ? t('ballExportedImagesFailed', failedN) : t('ballExported'), srExtra);
+          this.finishBall(ball, generation, 'success', failedN > 0 ? tn('ballExportedImagesFailed', failedN) : t('ballExported'), srExtra);
         }
       } else if (result.reason) {
         // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办

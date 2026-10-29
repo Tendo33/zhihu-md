@@ -25,6 +25,7 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
+  align-items: flex-start; /* 设计 M2：卡片高度随内容，不再被拉成整屏高 */
   padding: clamp(20px, 5vw, 40px) 20px;
 }
 
@@ -231,25 +232,11 @@ h1 {
   }
 
   .option-item {
-    align-items: flex-start;
     padding: 16px 20px;
   }
 }
 
-@media (max-width: 480px) {
-  .option-item {
-    flex-direction: column;
-  }
-
-  .option-content {
-    padding-right: 0;
-  }
-
-  .number-input {
-    width: 100%;
-    text-align: left;
-  }
-}
+/* 设计 M2：开关行在任何宽度都与标题、说明同一行、垂直居中（删掉 ≤480 改竖排的规则） */
 
 /* Series control and focus rules */
 .switch input:focus-visible + .slider { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
@@ -259,3 +246,28 @@ h1 {
 @media (prefers-color-scheme: dark) {
   .container { box-shadow: none; }
 }
+
+/* 设计 M2：嵌入式选项对话框（chrome://extensions 内，没有所属标签页）——页面即卡片，不留底色条，宽 520 */
+html.embedded,
+html.embedded body {
+  background: var(--surface);
+  min-height: 0;
+}
+
+html.embedded body {
+  padding: 0;
+  display: block;
+  width: 520px;
+  max-width: 100%;
+}
+
+html.embedded .container {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html.embedded .header { padding: 16px 20px; }
+html.embedded .option-item { padding: 14px 20px; }
+html.embedded .footer { padding: 10px 20px; }

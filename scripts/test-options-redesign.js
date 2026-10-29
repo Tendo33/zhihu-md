@@ -27,3 +27,25 @@ assert.match(ui, /\.switch span::after\{content:"";position:absolute;top:3px;lef
   assert.match(css, /@media \(prefers-color-scheme: dark\) \{\s*\.switch \.slider::after \{ box-shadow: none; \}/, '深色下旋钮无阴影');
 }
 console.log('options redesign tests passed');
+
+// M2：同行居中、卡片随内容、嵌入式对话框
+{
+  assert.ok(!/@media \(max-width: 480px\) \{\s*\.option-item \{\s*flex-direction: column/.test(css), 'M2：不再在 ≤480 改竖排');
+  assert.match(rule('.option-item'), /align-items: center;/);
+  assert.match(css, /\nbody \{[^}]*min-height: 100vh;[^}]*align-items: flex-start;/, 'M2：卡片不被拉伸');
+  assert.match(css, /html\.embedded body \{[^}]*padding: 0;[^}]*width: 520px;/);
+  assert.match(css, /html\.embedded,\s*html\.embedded body \{[^}]*min-height: 0;/);
+  const { parseHTML } = await import('linkedom');
+  const { window, document } = parseHTML('<!doctype html><html><body><input id="showFloatingBall" type="checkbox"><input id="maxAnswerCount"><input id="downloadImages" type="checkbox"><span id="status"></span><div id="note-maxAnswerCount"></div><span id="app-version"></span></body></html>');
+  globalThis.window = window; globalThis.document = document;
+  globalThis.chrome = { storage: { sync: { get: (d, cb) => cb(d), set: (_o, cb) => cb && cb() } }, runtime: { getManifest: () => ({ version: '9.9.9' }) } };
+  const { markEmbedded } = await import('../options/options.js');
+  const root = document.documentElement;
+  markEmbedded({ getCurrent: (cb) => cb(undefined) }, root);
+  assert.ok(root.classList.contains('embedded'), '嵌入（无所属标签页）→ html.embedded');
+  markEmbedded({ getCurrent: (cb) => cb({ id: 1 }) }, root);
+  assert.ok(!root.classList.contains('embedded'), '新标签页 → 不加');
+  markEmbedded(undefined, root);
+  assert.ok(!root.classList.contains('embedded'), '没有 tabs API 时不动');
+  console.log('options redesign M2 passed');
+}

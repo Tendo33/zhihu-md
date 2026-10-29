@@ -12,5 +12,5 @@ assert.match(opt, /box-shadow: var\(--shadow-2\);/, 'S1：用 ui-v2 shadow token
 const js = read('popup/popup.js');
 const nr = js.match(/function showNotReady\([^)]*\) \{([\s\S]*?)\n\}/)[1];
 assert.ok(!/setExportActionsEnabled\(false, text\)/.test(nr), 'S2：不可导出原因只在提示框里出现一次');
-assert.match(nr, /setExportActionsEnabled\(false, '暂不可导出，原因见上方提示'\)/);
+assert.match(nr, /setExportActionsEnabled\(false, '暂不可导出，原因见下方提示'\)/);
 console.log('design-recheck-r3 tests passed');

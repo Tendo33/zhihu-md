@@ -145,8 +145,8 @@ function showNotReady(tab, text, showRefresh) {
   refreshBtn.classList.toggle('hidden', !showRefresh);
   actionInfo.classList.remove('hidden');
   setRecentRows(2);
-  // 设计复验 S2：原因已在上方提示框里显示（#info-text），按钮的描述不再重复同一句
-  setExportActionsEnabled(false, '暂不可导出，原因见上方提示');
+  // 设计复验 S2：原因已在下方状态区提示框里显示（#info-text），按钮的描述不再重复同一句
+  setExportActionsEnabled(false, '暂不可导出，原因见下方提示');
 }
 
 /** popup 里主按钮就是「重试」，下一步写短一点（与样稿一致） */

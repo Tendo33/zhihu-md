@@ -41,4 +41,7 @@ const rule = (sel) => { const m = css.match(new RegExp(`(^|\\n)${sel.replace(/[.
   assert.match(rule('.status-zone'), /gap:8px/);
   assert.match(css, /\.status-zone:not\(:has\(> :not\(\.hidden\)\)\)\{display:none\}/, '全隐藏时状态区不占位');
 }
+// 3. 提示已在按钮下方，未就绪时按钮描述改成“原因见下方提示”
+assert.match(js, /'暂不可导出，原因见下方提示'/);
+assert.doesNotMatch(js, /原因见上方/);
 console.log('popup r05 tests passed');

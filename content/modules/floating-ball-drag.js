@@ -1,3 +1,16 @@
+/**
+ * QA e2fa5da P4：恢复位置时夹到视口内（QA 在 1280 左上角看到 -12,-12）。
+ * 存储里的值可能是负数、超出当前窗口或不是数字；窗口比球还小时贴在 0。
+ */
+export function clampBallPosition(x, y, w, h, vw, vh) {
+  const fix = (v, max) => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(n, max));
+  };
+  return { x: fix(x, vw - w), y: fix(y, vh - h) };
+}
+
 export const floatingBallDrag = {
   /**
    * Initialize drag functionality
@@ -237,6 +250,16 @@ export const floatingBallDrag = {
    * Restore floating ball position
    * @param {HTMLElement} ball 
    */
+  /** QA e2fa5da P4：窗口缩放后，已经设过 left/top 的球拉回视口内 */
+  clampToViewport(ball) {
+    if (!ball || !ball.style.left || ball.style.left === 'auto') return;
+    const w = ball.offsetWidth || 44;
+    const h = ball.offsetHeight || 44;
+    const { x, y } = clampBallPosition(parseFloat(ball.style.left), parseFloat(ball.style.top), w, h, window.innerWidth, window.innerHeight);
+    ball.style.left = `${x}px`;
+    ball.style.top = `${y}px`;
+  },
+
   restorePosition(ball) {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       chrome.storage.local.get(['floatingBallPosition'], (result) => {
@@ -245,11 +268,7 @@ export const floatingBallDrag = {
 
           const ballWidth = ball.offsetWidth || 44;
           const ballHeight = ball.offsetHeight || 44;
-          const maxLeft = window.innerWidth - ballWidth;
-          const maxTop = window.innerHeight - ballHeight;
-
-          let validX = Math.max(0, Math.min(x, maxLeft));
-          let validY = Math.max(0, Math.min(y, maxTop));
+          const { x: validX, y: validY } = clampBallPosition(x, y, ballWidth, ballHeight, window.innerWidth, window.innerHeight);
 
           ball.style.right = 'auto';
           ball.style.bottom = 'auto';

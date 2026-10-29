@@ -306,7 +306,6 @@ export const FloatingBall = {
    */
   setupBallElement() {
     const existingBall = this.createFloatingBall();
-    this.restorePosition(existingBall);
     const newBall = existingBall.cloneNode(true);
     const checkHasMoved = this.initDrag(newBall);
 
@@ -325,6 +324,8 @@ export const FloatingBall = {
     } else {
       document.body.appendChild(newBall);
     }
+    // QA e2fa5da P4：位置恢复写在页面上的这个球上（之前写在被替换掉的原球上），量得到真实尺寸再夹到视口内
+    this.restorePosition(newBall);
 
     // R12：显示提示前按球的当前位置重新排版（拖动、吸边、窗口缩放后都成立）
     const place = () => placeTooltip(newBall);
@@ -336,8 +337,8 @@ export const FloatingBall = {
     newBall.addEventListener('touchend', placeNextFrame);
     // 审查 P3：resize 监听挂在 window 上，重建或 remove() 时摘掉，避免对已移除的球继续排版
     this.detachResize();
-    this._onResize = place;
-    window.addEventListener('resize', place);
+    this._onResize = () => { this.clampToViewport(newBall); place(); };
+    window.addEventListener('resize', this._onResize);
     place();
 
     this.ball = newBall;

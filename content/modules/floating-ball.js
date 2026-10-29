@@ -8,7 +8,7 @@ import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
 import { PARTIAL_PREFIX, partialText } from '../../lib/partial-export.js';
-import { imageFailText, imageKeptMoreShortText, imageKeptText } from '../../lib/image-pack.js';
+import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptText } from '../../lib/image-pack.js';
 import { PageDetector } from './detector.js';
 import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
@@ -189,7 +189,7 @@ export const FloatingBall = {
           // 第三轮 B：只有 kept 按普通成功处理，tooltip 不变，读屏末尾补一句；数字只算失败
           const failedN = (dl && dl.failedImages) || 0;
           const keptN = (dl && dl.keptImages) || 0;
-          const srExtra = keptN > 0 ? (failedN > 0 ? imageKeptMoreShortText(keptN) : imageKeptText(keptN)) : '';
+          const srExtra = keptN > 0 ? (failedN > 0 ? imageKeptMoreShortText(keptN) : `${imageKeptText(keptN)}，${IMAGE_KEPT_REASON}`) : '';
           this.finishBall(ball, generation, 'success', failedN > 0 ? `已导出，${imageFailText(failedN)}` : '已导出', srExtra);
         }
       } else if (result.reason) {

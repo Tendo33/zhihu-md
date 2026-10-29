@@ -106,6 +106,7 @@ const shown = (el) => !el.classList.contains('hidden');
   assert.ok(ball.getAttribute('aria-label').includes('2 张图片保留为在线链接'));
   globalThis.setTimeout = realSetTimeout;
   const src = fs.readFileSync(new URL('../content/modules/floating-ball.js', import.meta.url), 'utf8');
-  assert.match(src, /keptN > 0 \? \(failedN > 0 \? imageKeptMoreShortText\(keptN\) : imageKeptText\(keptN\)\) : ''/);
+  // 设计复核 4193502：只有保留时读屏补上原因
+  assert.ok(src.includes("keptN > 0 ? (failedN > 0 ? imageKeptMoreShortText(keptN) : `${imageKeptText(keptN)}，${IMAGE_KEPT_REASON}`) : ''"));
 }
 console.log('image kept/failed split tests passed');

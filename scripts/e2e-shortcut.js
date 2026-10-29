@@ -55,6 +55,8 @@ function requireDisplay() {
   const display = process.env.DISPLAY;
   if (display) {
     // batch7 ZB6-01：本机显示 :N 要有 /tmp/.X11-unix/XN；没有就说明 X server 不在（远程 host:N 不检查，交给启动处兜底）
+    // 只检查本地 socket：host:N / localhost:N 这类 TCP 形式的 DISPLAY 不做任何连通性检查（不探测 6000+N 端口），
+    // 连不上时由后面 chromium.launch 失败的 catch 给出提示；测试里用 localhost:99 跳过本检查正是依赖这一点。
     const m = /^:(\d+)(?:\.\d+)?$/.exec(display);
     if (!m || fs.existsSync(`/tmp/.X11-unix/X${m[1]}`)) return;
     console.error(`e2e: DISPLAY=${display} 连接不上（找不到 /tmp/.X11-unix/X${m[1]}）。请用 xvfb-run 运行，例如：\n  xvfb-run -a npm run test:e2e`);

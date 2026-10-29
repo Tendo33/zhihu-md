@@ -27,6 +27,7 @@ assert.match(css, /Zhihu Blue Theme \*\/\n {2}background: var\(--ball-bg\);/, '�
 for (const [name, d] of [['知乎夜间模式', zhihuDark], ['系统深色', sysDark]]) {
   assert.strictEqual(d['--ball-bg'], '#1a6ae0', `${name}：球底色为设计裁定的 #1a6ae0`);
   assert.strictEqual(d['--ball-fg'], '#FFFFFF', `${name}：球上图标白色`);
+  // 阈值依据：WCAG 2.x 1.4.11（非文本对比度）要求界面组件对相邻颜色 ≥3:1；3.4 是我们在 3:1 之上留的余量
   for (const k of ['--ball-bg', '--ball-bg-hover', '--ball-bg-active']) {
     for (const page of ['#191b1f', '#121212']) assert.ok(ratio(d[k], page) >= 3.4, `${name} ${k} ${d[k]} 对 ${page} 只有 ${ratio(d[k], page).toFixed(2)}`);
     assert.ok(ratio(d[k], '#ffffff') >= 4.5, `${name} ${k} 白字对比度不足 4.5`);

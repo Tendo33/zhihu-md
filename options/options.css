@@ -97,56 +97,62 @@ h1 {
 }
 
 /* Controls */
-/* Custom Toggle Switch */
+/* 设计 M1：开关只保留一颗旋钮（沿用 lib/ui-v2.css 的 .switch span::after），删掉原来自画的 before 伪元素那颗。
+   几何：轨道 40×24（无边框），旋钮 18，内边距 3 → translateX = 40 − 18 − 2×3 = 16；上下 (24 − 18) / 2 = 3 */
 .switch {
   position: relative;
   display: inline-block;
-  width: 44px;
+  width: 40px;
   height: 24px;
-  flex-shrink: 0;
+  flex: none;
 }
 
 .switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
+  margin: 0;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--switch-off);
-  transition: background-color var(--duration-normal) var(--ease-smooth),
-    border-color var(--duration-normal) var(--ease-smooth);
-  border-radius: 24px;
-  border: 1px solid var(--text-tertiary); /* 设计建议 2：关闭态轨道可辨 */
+  z-index: 1;
 }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
+.switch .slider {
+  border: 0;
+  border-radius: 12px;
+  background: var(--switch-off);
+  box-shadow: inset 0 0 0 1px var(--text-2); /* 关闭态描边 */
+}
+
+.switch .slider::before {
+  content: none;
+}
+
+.switch .slider::after {
+  top: 3px;
+  left: 3px;
   width: 18px;
-  left: 2px;
-  bottom: 2px;
-  background-color: var(--text-tertiary); /* Inactive knob color */
-  transition: transform var(--duration-normal) var(--ease-smooth),
-    background-color var(--duration-normal) var(--ease-smooth);
-  border-radius: 50%;
+  height: 18px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .18);
 }
 
-input:checked + .slider {
-  background-color: var(--accent); /* 设计建议 1：打开态用品牌色 */
-  border-color: var(--accent);
+.switch input:checked + .slider {
+  background: var(--brand);
+  box-shadow: none;
 }
 
-input:checked + .slider:before {
-  transform: translateX(20px);
-  background-color: var(--accent-inverse); /* Active knob: black */
+.switch input:checked + .slider::after {
+  transform: translateX(16px);
+}
+
+.switch:hover .slider {
+  filter: brightness(1.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .switch .slider::after { box-shadow: none; }
 }
 
 /* Number Input */

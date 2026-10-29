@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const opt = fs.readFileSync(new URL('../options/options.css', import.meta.url), 'utf8');
 const content = fs.readFileSync(new URL('../content/content.css', import.meta.url), 'utf8');
-assert.match(opt, /input:checked \+ \.slider \{\s*background-color: var\(--accent\);[^}]*border-color: var\(--accent\);/);
-assert.match(opt, /\.slider \{[^}]*border: 1px solid var\(--text-tertiary\)/);
+// 设置页重做 M1：打开态品牌色；关闭态描边改为 inset 1px --text-2（--text-tertiary 即 --text-2），轨道无边框
+assert.match(opt, /\.switch input:checked \+ \.slider \{\s*background: var\(--brand\);/);
+assert.match(opt, /\.switch \.slider \{[^}]*box-shadow: inset 0 0 0 1px var\(--text-2\)/);
 assert.ok(!/focus-visible \+ \.slider \{\s*box-shadow/.test(opt), 'no double focus ring');
 assert.match(opt, /\.switch input:focus-visible \+ \.slider \{ outline: 2px solid var\(--focus-ring\); outline-offset: 2px; \}/);
 assert.match(opt, /@media \(prefers-color-scheme: dark\) \{\s*\.container \{ box-shadow: none; \}/);
@@ -18,7 +19,7 @@ console.log('design css tests passed');
   const cut = shared.indexOf('@media (prefers-color-scheme: dark)');
   const L = parseTokens(shared.slice(0, cut), (s) => s === ':root');
   const D = { ...L, ...parseTokens(shared.slice(cut, shared.indexOf('@media', cut + 10)), (s) => s === ':root') };
-  assert.match(opt, /\.slider \{[^}]*background-color: var\(--switch-off\)/);
+  assert.match(opt, /\.switch \.slider \{[^}]*background: var\(--switch-off\)/);
   for (const [n, v, min] of [['light', L, 1.5], ['dark', D, 1.3]]) {
     const page = resolve('var(--bg-card)', v);
     const fill = over(resolve('var(--switch-off)', v), page);

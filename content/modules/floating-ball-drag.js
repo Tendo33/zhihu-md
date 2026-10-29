@@ -11,6 +11,16 @@ export function clampBallPosition(x, y, w, h, vw, vh) {
   return { x: fix(x, vw - w), y: fix(y, vh - h) };
 }
 
+/**
+ * 审查 a833a13 P3-2：存储的 x/y 只有是有限数（或能转成有限数的非空字符串）才恢复；
+ * 否则保持默认位置，不要落到 0,0 再吸左。
+ */
+export function isStoredCoord(v) {
+  if (typeof v === 'number') return Number.isFinite(v);
+  if (typeof v === 'string' && v.trim() !== '') return Number.isFinite(Number(v));
+  return false;
+}
+
 export const floatingBallDrag = {
   /**
    * Initialize drag functionality
@@ -265,6 +275,7 @@ export const floatingBallDrag = {
       chrome.storage.local.get(['floatingBallPosition'], (result) => {
         if (result.floatingBallPosition) {
           const { x, y } = result.floatingBallPosition;
+          if (!isStoredCoord(x) || !isStoredCoord(y)) return;
 
           const ballWidth = ball.offsetWidth || 44;
           const ballHeight = ball.offsetHeight || 44;

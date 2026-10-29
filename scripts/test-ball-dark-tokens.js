@@ -1,4 +1,4 @@
-// 悬浮球深色取值（R13 球底色 + B2 提示框）：两种深色判定都要覆盖，且对比度达标
+// 悬浮球深色取值（三态对 #191b1f/#121212 ≥3.4，白色图标 ≥4.5，深色悬停/按下变亮）（R13 球底色 + B2 提示框）：两种深色判定都要覆盖，且对比度达标
 import assert from 'assert';
 import fs from 'fs';
 const css = fs.readFileSync(new URL('../content/content.css', import.meta.url), 'utf8');
@@ -28,10 +28,12 @@ for (const [name, d] of [['知乎夜间模式', zhihuDark], ['系统深色', sys
   assert.strictEqual(d['--ball-bg'], '#1a6ae0', `${name}：球底色为设计裁定的 #1a6ae0`);
   assert.strictEqual(d['--ball-fg'], '#FFFFFF', `${name}：球上图标白色`);
   for (const k of ['--ball-bg', '--ball-bg-hover', '--ball-bg-active']) {
-    for (const page of ['#191b1f', '#121212']) assert.ok(ratio(d[k], page) >= 3, `${name} ${k} ${d[k]} 对 ${page} 只有 ${ratio(d[k], page).toFixed(2)}`);
+    for (const page of ['#191b1f', '#121212']) assert.ok(ratio(d[k], page) >= 3.4, `${name} ${k} ${d[k]} 对 ${page} 只有 ${ratio(d[k], page).toFixed(2)}`);
     assert.ok(ratio(d[k], '#ffffff') >= 4.5, `${name} ${k} 白字对比度不足 4.5`);
   }
-  assert.ok(lum(d['--ball-bg-hover']) < lum(d['--ball-bg']) && lum(d['--ball-bg-active']) < lum(d['--ball-bg-hover']), `${name}：悬停/按下和亮色一样逐级加深`);
+  assert.strictEqual(d['--ball-bg-hover'], '#2a73e0', `${name}：悬停色为设计给定的 #2a73e0`);
+  assert.strictEqual(d['--ball-bg-active'], '#1f6fe5', `${name}：按下色为设计给定的 #1f6fe5`);
+  assert.ok(lum(d['--ball-bg-hover']) > lum(d['--ball-bg']) && lum(d['--ball-bg-active']) > lum(d['--ball-bg']), `${name}：深色下悬停/按下要比静止更亮`);
 }
 // 两种判定取值一致
 for (const k of ['--ball-bg', '--ball-bg-hover', '--ball-bg-active', '--ball-fg']) assert.strictEqual(zhihuDark[k], sysDark[k], `${k} 两种深色判定不一致`);

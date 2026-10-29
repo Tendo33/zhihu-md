@@ -292,16 +292,16 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
    提示框沿用上面夜间模式已有的 #1b1d22 / #e6e8eb / #33373e。 */
 html[data-theme="dark"] #zhihu-md-floating-ball {
   --ball-bg: #1a6ae0;
-  --ball-bg-hover: #1864d6;
-  --ball-bg-active: #1862d2;
+  --ball-bg-hover: #2a73e0;
+  --ball-bg-active: #1f6fe5;
   --ball-fg: #FFFFFF;
 }
 
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) #zhihu-md-floating-ball {
     --ball-bg: #1a6ae0;
-    --ball-bg-hover: #1864d6;
-    --ball-bg-active: #1862d2;
+    --ball-bg-hover: #2a73e0;
+    --ball-bg-active: #1f6fe5;
     --ball-fg: #FFFFFF;
     --bg-secondary: #1b1d22;
     --border-subtle: #33373e;

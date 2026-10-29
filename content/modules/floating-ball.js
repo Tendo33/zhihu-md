@@ -15,6 +15,7 @@ import { applyBallA11y, idleAriaLabel } from './ball-a11y.js';
 import { t } from './i18n.js';
 import { ballFailureText, ballImageSrExtra, ballKeptSrExtra } from './ball-text.js';
 import { span, svgIcon } from '../../lib/safe-dom.js';
+import { placeTooltip } from './tooltip-layout.js';
 
 // 悬浮球上面向用户的文字都走 _locales（chrome.i18n），见 i18n.js / ball-text.js
 const idleLabel = () => t('ballTooltipIdle');
@@ -132,6 +133,7 @@ export const FloatingBall = {
     }
     const current = state || (ball.classList.contains('loading') ? 'loading' : 'normal');
     applyBallA11y(ball, current, spoken);
+    placeTooltip(ball);
   },
 
   finishBall(ball, generation, state, message, srExtra = '', srSep = t('ballSep')) {
@@ -304,6 +306,17 @@ export const FloatingBall = {
     } else {
       document.body.appendChild(newBall);
     }
+
+    // R12：显示提示前按球的当前位置重新排版（拖动、吸边、窗口缩放后都成立）
+    const place = () => placeTooltip(newBall);
+    newBall.addEventListener('mouseenter', place);
+    newBall.addEventListener('focus', place);
+    // 拖动结束（含吸边）后下一帧再排，此时 .dragging 已去掉、提示可测量
+    const placeNextFrame = () => requestAnimationFrame(place);
+    newBall.addEventListener('mouseup', placeNextFrame);
+    newBall.addEventListener('touchend', placeNextFrame);
+    window.addEventListener('resize', place);
+    place();
 
     this.ball = newBall;
     this.checkHasMoved = checkHasMoved;

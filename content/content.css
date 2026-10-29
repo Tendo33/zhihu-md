@@ -218,9 +218,9 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
 
 #zhihu-md-floating-ball .tooltip {
   position: absolute;
-  right: 60px; /* Position to the left */
+  right: 60px; /* Position to the left；有 JS 时由 tooltip-layout.js 改写 left/top/max-width */
   top: 50%;
-  transform: translateY(-50%) translateX(8px);
+  transform: translateY(var(--tip-ty, -50%)) translateX(var(--tip-tx, 8px));
   padding: 6px 10px;
   background: color-mix(in oklab, var(--bg-secondary) 90%, transparent);
   color: var(--text-primary);
@@ -228,7 +228,13 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
   font-weight: 500;
   border-radius: 6px;
   border: 1px solid var(--border-subtle);
-  white-space: nowrap;
+  /* R12：不再整行 nowrap；空间不够时只在两个 .nw 短语之间折行，四边到视口 ≥8px */
+  white-space: normal;
+  width: max-content;
+  max-width: calc(100vw - 68px - 16px - 8px); /* 球 44 + 右边距 24、间距 16、边距 8；JS 定位后写内联值 */
+  box-sizing: border-box;
+  line-height: 18px;
+  text-align: left;
   
   opacity: 0;
   visibility: hidden;
@@ -247,7 +253,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
 #zhihu-md-floating-ball.success .tooltip { /* 发版审计 N3：快捷键/键盘导出成功后不悬停也能看到提示，回到 idle 自然收起 */
   opacity: 1;
   visibility: visible;
-  transform: translateY(-50%) translateX(0);
+  transform: translateY(var(--tip-ty, -50%)) translateX(0);
 }
 
 /* 设计建议 3：成功提示较长（图片未能下载数量）时换行，375 宽不出屏；与错误提示同一宽度上限 */
@@ -333,13 +339,12 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
 #zhihu-md-floating-ball.warning .tooltip {
   opacity: 1;
   visibility: visible;
-  transform: translateY(-50%) translateX(0);
+  transform: translateY(var(--tip-ty, -50%)) translateX(0);
   color: var(--error);
   white-space: normal;
   width: max-content;
   max-width: min(280px, calc(100vw - 96px)); /* 设计建议 5 */
   box-sizing: border-box; /* Z2-01：宽度上限把内边距和边框算进去，375px 下不再左溢 */
-  line-height: 1.5;
   text-align: left;
 }
 

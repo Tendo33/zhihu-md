@@ -47,4 +47,39 @@ Object.assign(window, { innerWidth: 600, innerHeight: 400 });
 window.dispatchEvent(new window.Event('resize'));
 assert.deepEqual([live().style.left, live().style.top], ['556px', '356px']);
 FloatingBall.remove();
+// 审查 a9bbc6e P4：只认十进制数字字符串
+{
+  const { isStoredCoord } = await import('../content/modules/floating-ball-drag.js');
+  for (const bad of ['0x10', '0X10', '1e2', 'Infinity', '0b1', '0o7', '', '  ', '12px', '+5']) assert.equal(isStoredCoord(bad), false, `坏字符串 ${bad}`);
+  for (const ok of ['300', ' 300 ', '-20', '12.5', '0']) assert.equal(isStoredCoord(ok), true, `十进制 ${ok}`);
+  stored = { x: '0x10', y: '100' };
+  FloatingBall.setupBallElement();
+  assert.deepEqual([live().style.left, live().style.top], ['', ''], "'0x10' 不能当 16 恢复");
+  FloatingBall.remove();
+}
+// 审查 a9bbc6e P3：clampBallPosition / clampToViewport / handleSnapAndDock / restorePosition 都按 clientWidth（不含滚动条）
+{
+  const de = document.documentElement;
+  Object.assign(window, { innerWidth: 1280, innerHeight: 800 });
+  Object.defineProperty(de, 'clientWidth', { configurable: true, get: () => 1265 });
+  Object.defineProperty(de, 'clientHeight', { configurable: true, get: () => 785 });
+  const { viewportSize, floatingBallDrag } = await import('../content/modules/floating-ball-drag.js');
+  assert.deepEqual(viewportSize(), { vw: 1265, vh: 785 });
+  stored = { x: 9999, y: 9999 };
+  FloatingBall.setupBallElement();
+  assert.deepEqual([live().style.left, live().style.top], ['1221px', '741px'], 'restorePosition 夹到 clientWidth/clientHeight');
+  live().style.left = '1250px'; live().style.top = '790px';
+  floatingBallDrag.clampToViewport(live());
+  assert.deepEqual([live().style.left, live().style.top], ['1221px', '741px'], 'clampToViewport 用 clientWidth');
+  const saved = [];
+  const fake = { style: {}, classList: { add() {} } };
+  fake.getBoundingClientRect = () => ({ left: 1200, right: 1244, top: 100, width: 44 });
+  const orig = floatingBallDrag.savePosition; floatingBallDrag.savePosition = (x, y) => saved.push([x, y]);
+  floatingBallDrag.handleSnapAndDock(fake);
+  floatingBallDrag.savePosition = orig;
+  assert.equal(fake.style.left, '1221px', 'handleSnapAndDock 吸右到 clientWidth - w，不压在滚动条下');
+  assert.deepEqual(saved.at(-1), [1221, 100]);
+  FloatingBall.remove();
+  delete de.clientWidth; delete de.clientHeight;
+}
 console.log('ball position tests passed');

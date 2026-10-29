@@ -17,8 +17,18 @@ export function clampBallPosition(x, y, w, h, vw, vh) {
  */
 export function isStoredCoord(v) {
   if (typeof v === 'number') return Number.isFinite(v);
-  if (typeof v === 'string' && v.trim() !== '') return Number.isFinite(Number(v));
+  // 审查 a9bbc6e P4：字符串只接受十进制（可带负号、小数、首尾空白）；'0x10'、'1e2'、'Infinity' 不算
+  if (typeof v === 'string') return /^\s*-?\d+(\.\d+)?\s*$/.test(v);
   return false;
+}
+
+/**
+ * 审查 a9bbc6e P3 / 设计 R12：可见视口用 documentElement.clientWidth/clientHeight（不含滚动条），
+ * 和 CSS `right:0` 的落点一致；取不到时退回 innerWidth/innerHeight。
+ */
+export function viewportSize() {
+  const de = typeof document !== 'undefined' ? document.documentElement : null;
+  return { vw: (de && de.clientWidth) || window.innerWidth, vh: (de && de.clientHeight) || window.innerHeight };
 }
 
 export const floatingBallDrag = {
@@ -100,8 +110,9 @@ export const floatingBallDrag = {
       let newLeft = initialLeft + dx;
       let newTop = initialTop + dy;
 
-      const maxLeft = window.innerWidth - ballWidth;
-      const maxTop = window.innerHeight - ballHeight;
+      const { vw, vh } = viewportSize();
+      const maxLeft = vw - ballWidth;
+      const maxTop = vh - ballHeight;
 
       newLeft = Math.max(0, Math.min(newLeft, maxLeft));
       newTop = Math.max(0, Math.min(newTop, maxTop));
@@ -168,8 +179,9 @@ export const floatingBallDrag = {
       let newLeft = initialLeft + dx;
       let newTop = initialTop + dy;
 
-      const maxLeft = window.innerWidth - ballWidth;
-      const maxTop = window.innerHeight - ballHeight;
+      const { vw, vh } = viewportSize();
+      const maxLeft = vw - ballWidth;
+      const maxTop = vh - ballHeight;
 
       newLeft = Math.max(0, Math.min(newLeft, maxLeft));
       newTop = Math.max(0, Math.min(newTop, maxTop));
@@ -198,7 +210,7 @@ export const floatingBallDrag = {
     ball.addEventListener('mouseleave', () => {
       if (!isDragging) {
         const rect = ball.getBoundingClientRect();
-        const winWidth = window.innerWidth;
+        const winWidth = viewportSize().vw;
         if (rect.left <= 5) {
           dockTimeout = setTimeout(() => ball.classList.add('docked-left'), 800);
         } else if (rect.right >= winWidth - 5) {
@@ -221,7 +233,7 @@ export const floatingBallDrag = {
    */
   handleSnapAndDock(ball) {
     const rect = ball.getBoundingClientRect();
-    const winWidth = window.innerWidth;
+    const winWidth = viewportSize().vw;
 
     this.savePosition(rect.left, rect.top);
 
@@ -265,7 +277,8 @@ export const floatingBallDrag = {
     if (!ball || !ball.style.left || ball.style.left === 'auto') return;
     const w = ball.offsetWidth || 44;
     const h = ball.offsetHeight || 44;
-    const { x, y } = clampBallPosition(parseFloat(ball.style.left), parseFloat(ball.style.top), w, h, window.innerWidth, window.innerHeight);
+    const { vw, vh } = viewportSize();
+    const { x, y } = clampBallPosition(parseFloat(ball.style.left), parseFloat(ball.style.top), w, h, vw, vh);
     ball.style.left = `${x}px`;
     ball.style.top = `${y}px`;
   },
@@ -279,7 +292,8 @@ export const floatingBallDrag = {
 
           const ballWidth = ball.offsetWidth || 44;
           const ballHeight = ball.offsetHeight || 44;
-          const { x: validX, y: validY } = clampBallPosition(x, y, ballWidth, ballHeight, window.innerWidth, window.innerHeight);
+          const { vw, vh } = viewportSize();
+          const { x: validX, y: validY } = clampBallPosition(x, y, ballWidth, ballHeight, vw, vh);
 
           ball.style.right = 'auto';
           ball.style.bottom = 'auto';
@@ -289,7 +303,7 @@ export const floatingBallDrag = {
           const dockThreshold = 5;
           if (validX <= dockThreshold) {
             setTimeout(() => ball.classList.add('docked-left'), 800);
-          } else if (validX >= window.innerWidth - ballWidth - dockThreshold) {
+          } else if (validX >= vw - ballWidth - dockThreshold) {
             setTimeout(() => ball.classList.add('docked-right'), 800);
           }
         }

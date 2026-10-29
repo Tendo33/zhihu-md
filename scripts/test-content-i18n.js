@@ -76,10 +76,11 @@ assert.equal(t('ballAriaIdle'), 'Export Markdown (click to download, right-click
   assert.equal(bt.ballKeptSrExtra(2, 3), '3 more kept as online links');
   assert.equal(bt.ballImageSrExtra(2, 1), '2 images couldn\'t be downloaded; online links kept, 1 more kept as an online link');
   // QA e2fa5da P4：保留原因单独成句（不再逗号拼接），不分单复数；中文不说「这些」
-  assert.equal(bt.ballKeptSrExtra(0, 1), '1 image kept as an online link. The image format isn\'t supported');
-  assert.equal(bt.ballKeptSrExtra(0, 3), '3 images kept as online links. The image format isn\'t supported');
-  assert.equal(bt.ballImageSrExtra(0, 1), '1 image kept as an online link. The image format isn\'t supported');
+  assert.equal(bt.ballKeptSrExtra(0, 1), '1 image kept as an online link. The format or source can\'t be saved locally');
+  assert.equal(bt.ballKeptSrExtra(0, 3), '3 images kept as online links. The format or source can\'t be saved locally');
+  assert.equal(bt.ballImageSrExtra(0, 1), '1 image kept as an online link. The format or source can\'t be saved locally');
   assert.ok(!/these|images'/.test(en.ballImagesKeptReason.message));
+  assert.equal(en.ballImagesKeptReason.message, "The format or source can't be saved locally", '审查 P3-1：按设计稿 design-injected-triage:175，含「来源」');
   assert.equal(en.ballReasonSep.message, '. ');
   assert.equal(zh.ballImagesKeptReason.message, '图片格式或来源不支持保存到本地');
   assert.equal(zh.ballReasonSep.message, '。');

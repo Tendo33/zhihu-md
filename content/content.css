@@ -238,6 +238,14 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
   transform: translateY(-50%) translateX(0);
 }
 
+/* 设计建议 3：成功提示较长（图片下载失败数量）时换行，375 宽不出屏；与错误提示同一宽度上限 */
+#zhihu-md-floating-ball.success .tooltip {
+  white-space: normal;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 96px));
+  box-sizing: border-box;
+}
+
 #zhihu-md-floating-ball.dragging .tooltip,
 #zhihu-md-floating-ball.docked-left:not(:hover):not(:focus-visible):not(.loading):not(.error):not(.warning) .tooltip,
 #zhihu-md-floating-ball.docked-right:not(:hover):not(:focus-visible):not(.loading):not(.error):not(.warning) .tooltip {

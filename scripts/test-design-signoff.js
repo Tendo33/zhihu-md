@@ -12,5 +12,8 @@ assert.ok(!opt.includes('右下角'));
 // 建议 2：信息提示用「i」，和错误的叹号区分
 const info = html.slice(html.indexOf('id="action-info"'), html.indexOf('id="info-text"'));
 assert.match(info, /<path d="M12 16v-5M12 8v\.5"\/>/);
+// 建议 3：悬浮球成功提示有宽度上限并换行
+const ccss = read('content/content.css');
+assert.match(ccss, /\.success \.tooltip \{\s*white-space: normal;\s*width: max-content;\s*max-width: min\(280px, calc\(100vw - 96px\)\);\s*box-sizing: border-box;/);
 //NEXT
 console.log('design signoff tests passed');

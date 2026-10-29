@@ -12,8 +12,18 @@ assert.deepEqual(parseTargetArgs(['--target=firefox']), { target: 'firefox', res
 assert.deepEqual(parseTargetArgs(['--target', 'firefox']), { target: 'firefox', rest: [] });
 assert.deepEqual(parseTargetArgs(['dist-firefox', '--target', 'Firefox']), { target: 'firefox', rest: ['dist-firefox'] });
 assert.deepEqual(parseTargetArgs(['--target', 'firefox', 'dist-firefox']), { target: 'firefox', rest: ['dist-firefox'] }, '空格形式的取值不当成目录');
-for (const bad of [['--target='], ['--target'], ['--target', '--x'], ['--target=edge'], ['--target', 'safari'], ['--target=  '], ['--target=chrome', '--target=firefox']]) {
-  assert.ok(parseTargetArgs(bad).error, `应报错：${bad.join(' ')}`);
+for (const [bad, msg] of [
+  [['--target='], /--target 的值为空/],
+  [['--target=  '], /--target 的值为空/],
+  [['--target'], /--target 后面缺少取值/],
+  [['--target', '--x'], /--target 后面缺少取值/],
+  [['--target=edge'], /未知的 --target 值「edge」/],
+  [['--target', 'safari'], /未知的 --target 值「safari」/],
+  [['--target=chrome', '--target=firefox'], /--target 写了 2 次/],
+]) {
+  const { error } = parseTargetArgs(bad);
+  assert.ok(error, `应报错：${bad.join(' ')}`);
+  assert.match(error, msg, `报错文字：${bad.join(' ')}`); // 审查 P3：空值检查删掉时会落到「未知值」，文字不同
 }
 
 const run = (script, args) => spawnSync(process.execPath, [path.join(root, 'scripts', script), ...args], { cwd: root, encoding: 'utf8' });

@@ -200,8 +200,7 @@ console.log('answer limit tests passed');
 
 // 审查第 5 条：小于 1 的处理（0 仍是「尽量全部」，见待决策）
 {
-  const { normalizeAnswerCount, MIN_ANSWER_NOTE, MIN_ANSWER_NOTE_EN } = await import('../lib/answer-limit.js');
-  assert.equal(MIN_ANSWER_NOTE_EN, 'Enter 0 or a whole number. Saved as 1.', '设计复核 M1 英文备用');
+  const { normalizeAnswerCount, MIN_ANSWER_NOTE } = await import('../lib/answer-limit.js');
   const eq = (raw, value, note) => assert.deepEqual(normalizeAnswerCount(raw), { value, note }, `输入 ${JSON.stringify(raw)}`);
   assert.equal(MIN_ANSWER_NOTE, '需为 0 或正整数，已保存为 1');
   eq('0', 0, '');

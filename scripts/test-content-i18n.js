@@ -102,6 +102,28 @@ texts.push(ball.querySelector('.tooltip').textContent, ball.getAttribute('aria-l
 for (const s of ['loading', 'success', 'warning', 'error', 'normal']) texts.push(ballA11y(s).label, ballA11y(s, 'Copying…').label);
 for (const s of texts) assert.ok(!CJK.test(s), `en 下注入页文字含中文：${s}`);
 assert.ok(texts.includes('Export failed: Sign in to Zhihu to see this content, then export again. Press Enter to retry'));
+// 审查 P3-2：导出失败的 catch 分支（floating-ball.js 的 try/catch）。exporter 抛出或返回内部中文错误时，
+// tooltip、aria-label 和播报里都只能是英文的通用失败文案
+{
+  const { ArticleExporter } = await import('../content/modules/exporters/article.js');
+  const { PageDetector } = await import('../content/modules/detector.js');
+  const saved = { detect: PageDetector.detectPageType, exp: ArticleExporter.exportMarkdown };
+  PageDetector.detectPageType = () => 'article';
+  const cases = [
+    () => { throw new Error('导出失败: 无法解析内容'); },
+    async () => ({ success: false, error: '无法解析内容' }),
+  ];
+  for (const impl of cases) {
+    ArticleExporter.exportMarkdown = impl;
+    FloatingBall.busy = false;
+    await FloatingBall.handleBallClick(ball);
+    const shown = [ball.querySelector('.tooltip').textContent, ball.getAttribute('aria-label'), live()];
+    for (const x of shown) assert.ok(!CJK.test(x), `catch 分支 en 下含中文：${x}`);
+    assert.equal(shown[0], 'Export failed. Refresh the Zhihu page and try again');
+    assert.ok(ball.classList.contains('error'));
+  }
+  PageDetector.detectPageType = saved.detect; ArticleExporter.exportMarkdown = saved.exp;
+}
 globalThis.setTimeout = realSetTimeout;
 
 // 源码兜底：注入页面向用户的模块里，除注释和内部 Error 外不再有中文字面量；CSS content: 也不带中文

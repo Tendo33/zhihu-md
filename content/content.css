@@ -209,7 +209,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
   right: 60px; /* Position to the left */
   top: 50%;
   transform: translateY(-50%) translateX(8px);
-  padding: 5px 10px;
+  padding: 6px 10px;
   background: color-mix(in oklab, var(--bg-secondary) 90%, transparent);
   color: var(--text-primary);
   font-size: 12px;

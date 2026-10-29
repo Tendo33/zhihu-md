@@ -14,4 +14,11 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
   const lits = [...ball.matchAll(/'([^'\n]*)'/g)].map((m) => m[1]);
   assert.deepEqual(lits.filter((x) => /\.\.\.$|!$/.test(x)), [], '悬浮球文案不用半角 ... 或 !');
 }
+// B2：设置页悬浮球标题与适用范围
+{
+  const html = read('options/options.html');
+  assert.match(html, /id="label-showFloatingBall">悬浮导出球</);
+  assert.match(html, /id="desc-showFloatingBall">在知乎回答、问题和专栏页面右下角显示导出悬浮球（点击下载，右键复制）。</);
+  assert.ok(!html.includes('悬浮导出按钮') && !html.includes('知乎文章页面'));
+}
 console.log('release-polish tests passed');

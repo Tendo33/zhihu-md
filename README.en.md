@@ -90,7 +90,7 @@ Long exports started from the popup (such as a question page) need the popup to 
 
 | Setting | Description | Default |
 | --- | --- | --- |
-| 悬浮导出按钮 (floating button) | Show the floating ball | On |
+| 悬浮导出球 (floating button) | Show the floating ball | On |
 | 最大下载回答数 (max items) | Limit for question pages and feeds. 0 means up to 1000 answers on question pages, and scroll until no new cards on feeds | 20 |
 | 下载图片到本地 (download images) | Bundle images into a ZIP for column, answer and question downloads; copy, feed and hot exports keep remote images | Off |
 

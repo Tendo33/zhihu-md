@@ -98,8 +98,9 @@ function setSavedFilename(name) {
 /**
  * 设计 R05 / R09：中文状态文案里不能从中间断开的词组和“数字+量词”。
  * 320 宽时「条未能加/载」被拆到两行；这些片段包进 .nw（white-space:nowrap），textContent 不变。
+ * 设计定稿分词规格（2026-10-29）：长串在前，逗号随前一段，只在逗号后折行；覆盖 PM 合并句和「文件已保存，可稍后重新导出」。
  */
-const NOWRAP_RE = /文件已保存|已保存|可稍后|不支持保存|均已保留|第 \d+ 页|\d+(?:\/\d+)? (?:张图片|条|张)|未能加载|未能下载|加载失败|未加载完|在线链接|重新导出|刷新页面|知乎页面|几分钟后|剪贴板|登录|验证|限流/g;
+const NOWRAP_RE = /\d+ 张图片未能下载，|\d+ 张不支持保存，|均已保留在线链接|文件已保存，|可稍后重新导出|第 \d+ 页|\d+(?:\/\d+)? (?:张图片|条|张)|未能加载|未能下载|加载失败|未加载完|在线链接|重新导出|刷新页面|知乎页面|几分钟后|剪贴板|登录|验证|限流/g;
 function noWrapNodes(text) {
   const out = [];
   const s = String(text ?? '');
@@ -411,8 +412,8 @@ async function handleExport() {
         } else {
           setImageLine('feedback-img', imagePartialLine(f, k), f === 0 && k > 0);
         }
-        // 设计复核 32569cb：部分导出一律缩为 1 行（不再按 f/k 分情况，也不按宽度切换），320 宽不出内滚动
-        setRecentRows(1);
+        // 设计复核 32569cb：部分导出缩为 1 行；设计定稿 2026-10-29：f>0 且 k>0 时合并句两行化，再缩到 0 行，320 宽不出内滚动（实测原为 5px）
+        setRecentRows(f > 0 && k > 0 ? 0 : 1);
       }
       exportLabel.textContent = PRIMARY;
       setExportActionsEnabled(true);
@@ -438,7 +439,8 @@ async function handleExport() {
       $('info-text').removeAttribute('title');
       $('refresh-btn').classList.add('hidden');
       actionInfo.classList.remove('hidden');
-      setRecentRows(2); // 设计建议 1：多一条提示时最近导出缩为 2 行，320 宽不出内滚动
+      // 设计建议 1：多一条提示时最近导出缩为 2 行；设计定稿 2026-10-29：合并句时 1 行（原 2 行在 320/360/2x 有 13px 内滚动）
+      setRecentRows(keptImages > 0 ? 1 : 2);
     }
     exportLabel.textContent = PRIMARY;
     setExportActionsEnabled(true);

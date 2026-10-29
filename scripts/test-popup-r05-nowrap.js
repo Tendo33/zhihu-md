@@ -32,24 +32,24 @@ const nws = (el) => [...el.querySelectorAll('.nw')].map((x) => x.textContent);
   assert.equal(t.textContent, '已导出 3/10 条，7 条未能加载', 'textContent 不变');
   assert.ok(nws(t).includes('未能加载'), `「未能加载」在 .nw 里：${nws(t)}`);
   assert.ok(nws(t).includes('3/10 条') && nws(t).includes('7 条'), '数字和量词不拆开');
-  assert.ok(nws($('feedback-hint')).includes('第 2 页') && nws($('feedback-hint')).includes('重新导出'));
+  assert.ok(nws($('feedback-hint')).includes('第 2 页') && nws($('feedback-hint')).includes('可稍后重新导出'));
   // 设计验收必改 2：320 宽「文件已保/存」「可稍/后」被拆开
   assert.equal($('feedback-hint').textContent, '第 2 页起加载失败，文件已保存，可稍后重新导出');
-  assert.ok(nws($('feedback-hint')).includes('文件已保存') && nws($('feedback-hint')).includes('可稍后'), `${nws($('feedback-hint'))}`);
+  assert.ok(nws($('feedback-hint')).includes('文件已保存，') && nws($('feedback-hint')).includes('可稍后重新导出'), `${nws($('feedback-hint'))}`);
   // 徽标也走 .nw（设计验收建议）
   assert.equal(globalThis.document.querySelector('.status-text').textContent, '部分导出');
-  assert.ok(nws($('feedback-img')).includes('123 张图片') && nws($('feedback-img')).includes('未能下载') && nws($('feedback-img')).includes('在线链接'));
+  assert.deepEqual(nws($('feedback-img')), ['123 张图片未能下载，', '在线链接'], '只有 f：句子不变，长串在前');
 }
 {
   const { $, click } = await run({ success: true, downloadId: 9, filename: 'q.md', failedImages: 2, keptImages: 1 },
     () => ({ success: true, data: { filename: 'q.md', content: '#' } }));
   await click();
   // PM 定稿 2026-10-29：合并句只允许在逗号后折行
-  assert.deepEqual(nws($('info-text')), ['2 张图片', '未能下载', '1 张', '不支持保存', '均已保留', '在线链接']);
+  assert.deepEqual(nws($('info-text')), ['2 张图片未能下载，', '1 张不支持保存，', '均已保留在线链接']);
   assert.equal($('info-text').textContent, '2 张图片未能下载，1 张不支持保存，均已保留在线链接');
   // 逗号之间的文字全在 .nw 里（无可折行的空隙）
   const loose = [...$('info-text').childNodes].filter((c) => c.nodeType === 3).map((c) => c.textContent).join('');
-  assert.equal(loose.replace(/，/g, ''), '', `只有逗号在 .nw 外：「${loose}」`);
+  assert.equal(loose, '', `整句都在 .nw 里，只在逗号后折行：「${loose}」`);
 }
 {
   const { $, click } = await run({ success: true, downloadId: 9, filename: 'q.md', failedImages: 123, keptImages: 1000 },
@@ -57,7 +57,8 @@ const nws = (el) => [...el.querySelectorAll('.nw')].map((x) => x.textContent);
   await click();
   assert.equal($('feedback-img').textContent, '123 张图片未能下载，1000 张不支持保存，均已保留在线链接');
   const loose = [...$('feedback-img').childNodes].filter((c) => c.nodeType === 3).map((c) => c.textContent).join('');
-  assert.equal(loose.replace(/，/g, ''), '', `partial：只有逗号在 .nw 外：「${loose}」`);
+  assert.equal(loose, '', `partial：整句都在 .nw 里：「${loose}」`);
+  for (const n of ['1 张图片未能下载，', '12345 张不支持保存，']) assert.ok(n.match(/\d+ 张图片未能下载，|\d+ 张不支持保存，/), n);
   assert.equal($('feedback-img').querySelector('.sr-only'), null);
   assert.equal($('feedback-img').getAttribute('title'), null);
 }
@@ -83,4 +84,11 @@ for (const reason of ['login_required', 'security_check']) {
   assert.equal($('action-hint').textContent, '暂不可导出，原因见下方提示');
 }
 assert.match(fs.readFileSync(new URL('../popup/popup.css', import.meta.url), 'utf8'), /(^|\n)\.nw\{white-space:nowrap\}/);
+// 设计 R17（800% 缩放）：头部图标 24px 显示，源图用 icon128（48px 在 8x 下发虚）；只换分辨率来源
+{
+  const html = fs.readFileSync(new URL('../popup/popup.html', import.meta.url), 'utf8');
+  assert.match(html, /<div class="logo"><img src="\.\.\/icons\/icon128\.png" alt="" width="24" height="24"><\/div>/);
+  const png = fs.readFileSync(new URL('../icons/icon128.png', import.meta.url));
+  assert.equal(png.readUInt32BE(16), 128);
+}
 console.log('popup r05 nowrap tests passed');

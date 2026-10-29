@@ -45,7 +45,8 @@ const rows = ($) => $('recent-list').children.length;
   assert.equal(el.textContent, '1 张图片未能下载，2 张不支持保存，均已保留在线链接', '合并句上屏');
   assert.equal(el.getAttribute('title'), null, '不加 title');
   assert.equal($('action-feedback').getAttribute('title'), null, '容器不带 title');
-  assert.equal(rows($), 1, '方案①：部分导出 + 失败和保留都有 → 最近导出 1 行');
+  assert.equal(rows($), 0, '设计定稿 2026-10-29：部分导出 + 失败和保留都有 → 最近导出 0 行');
+  assert.ok($('recent').classList.contains('hidden'), '0 行时整块隐藏');
 }
 // 部分导出其他情况仍是 2 行
 for (const img of [{ failedImages: 1, keptImages: 0 }, { failedImages: 12, keptImages: 0 }, { failedImages: 0, keptImages: 2 }, { failedImages: 0, keptImages: 34 }, { failedImages: 0, keptImages: 0 }]) {
@@ -53,7 +54,7 @@ for (const img of [{ failedImages: 1, keptImages: 0 }, { failedImages: 12, keptI
   assert.equal(rows($), 1, `复审 da941ab：部分导出 ${JSON.stringify(img)}→ 一律 1 行`);
 }
 // 非部分导出不受影响
-for (const [img, want] of [[{ failedImages: 0, keptImages: 0 }, 3], [{ failedImages: 0, keptImages: 2 }, 2], [{ failedImages: 1, keptImages: 0 }, 2], [{ failedImages: 1, keptImages: 2 }, 2]]) {
+for (const [img, want] of [[{ failedImages: 0, keptImages: 0 }, 3], [{ failedImages: 0, keptImages: 2 }, 2], [{ failedImages: 1, keptImages: 0 }, 2], [{ failedImages: 1, keptImages: 2 }, 1], [{ failedImages: 12345, keptImages: 10000 }, 1]]) {
   const $ = await run(img);
   assert.equal(rows($), want, `完整导出 ${JSON.stringify(img)} → ${want} 行`);
 }

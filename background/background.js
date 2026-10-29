@@ -6,7 +6,7 @@
 import { createLogger } from '../lib/logger.js';
 import { createZipWithImages } from '../lib/zip.js';
 import { recordRecent, titleFromFilename } from '../lib/recent-exports.js';
-import { applyImageResults, isAllowedImageUrl } from '../lib/image-pack.js';
+import { applyImageResults, normalizeImageUrl } from '../lib/image-pack.js';
 import { createMenus, handleMenuClick, openAndWait, showLinkFailure } from './context-menu.js';
 
 const Logger = createLogger('[Zhihu-MD Background]');
@@ -141,9 +141,10 @@ async function downloadImages(images) {
   const results = await Promise.allSettled(
     images.map(async (img) => {
       Logger.debug(`下载图片: ${img.url.substring(0, 50)}...`);
-      if (!isAllowedImageUrl(img.url)) throw new Error('只下载 https://*.zhimg.com 的图片');
+      const safeUrl = normalizeImageUrl(img.url);
+      if (!safeUrl) throw new Error('只下载 *.zhimg.com 的图片');
       // 审查 P3（release-polish-2 ①）：不跟随重定向，避免 zhimg 30x 跳到白名单外的主机
-      const response = await fetch(img.url, { redirect: 'error' });
+      const response = await fetch(safeUrl, { redirect: 'error' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();
       const arrayBuffer = await blob.arrayBuffer();

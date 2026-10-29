@@ -110,7 +110,7 @@ Settings live in `chrome.storage.sync` (synced with your browser account when br
 
 ## Privacy
 
-- No backend, no analytics, no data collection; nothing is sent to the developer or third parties.
+- No backend and no analytics. The extension reads Zhihu page content and processes it only locally; nothing is uploaded to the developer or third parties. Apart from normal requests to Zhihu and its image CDN, it makes no network requests.
 - Settings are stored in `chrome.storage.sync` and sync with your browser account when browser sync is on. That is the browser's own sync, carries settings only and no page content.
 - Only talks to Zhihu and its image CDN (`zhimg.com`, only when bundling images); all conversion happens in your browser.
 - See [PRIVACY.md](./PRIVACY.md).

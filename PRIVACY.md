@@ -6,17 +6,17 @@ Zhihu-md ("we", "us", or "our") is a browser extension for exporting Zhihu conte
 
 ## 1. What We Collect
 
-We do **not** operate a backend service for this extension, and we do **not** collect or store user content on our own servers.
+We do **not** operate a backend service for this extension. The extension reads Zhihu page content, processes it only locally in your browser, and does not upload it to the developer or any third party.
 
 The extension only processes:
 
 - The content in the current Zhihu page
 - On a question page, later answers requested from Zhihu's own question feed API in your current login session
 - On an answer page, that answer's record from Zhihu's own answer API when the page does not contain it
-
-These Zhihu API requests go only to `www.zhihu.com`, carry your existing Zhihu login cookies (the same as the page itself), and fetch answers that are not yet shown on the page. The responses are processed only in your browser and are not sent anywhere else.
 - Your extension settings stored in browser storage
 - Temporary image responses fetched directly by your browser when you enable local image packaging
+
+These Zhihu API requests go only to Zhihu's own domains (`*.zhihu.com`, normally `www.zhihu.com`), carry your existing Zhihu login cookies (the same as the page itself), and fetch answers that are not yet shown on the page. The responses are processed only in your browser and are not sent anywhere else.
 
 ## 2. How Data Is Used
 
@@ -52,7 +52,7 @@ This limits content-script execution to Zhihu pages. When local image packaging 
 The extension stores the following data through Chrome storage APIs:
 
 - `showFloatingBall` (`chrome.storage.sync`)
-- `maxAnswerCount` (`chrome.storage.sync`; capped at 1000)
+- `maxAnswerCount` (`chrome.storage.sync`; values above 1000 are treated as 1000)
 - `downloadImages` (`chrome.storage.sync`)
 - `floatingBallPosition` (`chrome.storage.local`)
 - `recentExports` (`chrome.storage.local`): the most recent exports shown in the popup, up to 20 entries. Each entry has only the title (at most 200 characters), whether the export succeeded, and the time. No page content or link is stored. When a 21st entry is added the oldest is dropped; exporting the same title again keeps only the newest entry. It stays in your browser until you clear the extension's data or remove the extension, and it never leaves your browser.

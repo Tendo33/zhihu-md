@@ -115,7 +115,7 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
     runtime: { sendMessage: async () => ({ success: true, downloadId: 5, filename: 'p_with_images.zip', failedImages: 3 }), openOptionsPage() {}, getURL: (p) => p, getManifest: () => ({ version: '0' }) },
     commands: { getAll: async () => [] },
     downloads: { show() {} },
-    storage: { sync: { get: (d, cb) => cb({ ...d, downloadImages: true }) }, local: { get: async (d) => d, set: async () => {} } },
+    storage: { sync: { get: (d, cb) => cb({ ...d, downloadImages: true }) }, local: { get: async (d) => ({ ...d, recentExports: [1, 2, 3].map((n) => ({ title: `t${n}`, ok: true, ts: Date.now() })) }), set: async () => {} } },
   };
   await import('../popup/popup.js?zr09');
   await flush();
@@ -126,6 +126,8 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
   assert.ok(!$('action-info').classList.contains('hidden'), '显示图片失败信息条');
   assert.equal($('info-text').textContent, '3 张图片下载失败，已保留在线链接');
   assert.ok($('refresh-btn').classList.contains('hidden'));
+  await flush();
+  assert.equal($('recent-list').children.length, 2, '设计建议 1：图片失败提示出现时最近导出缩为 2 行');
 }
 
 // 悬浮球：成功提示里带数量

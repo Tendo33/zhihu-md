@@ -348,6 +348,7 @@ async function handleExport() {
       $('info-text').textContent = imageFailText(res.failedImages);
       $('refresh-btn').classList.add('hidden');
       actionInfo.classList.remove('hidden');
+      setRecentRows(2); // 设计建议 1：多一条提示时最近导出缩为 2 行，320 宽不出内滚动
     }
     exportLabel.textContent = PRIMARY;
     setExportActionsEnabled(true);

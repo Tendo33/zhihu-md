@@ -7,17 +7,17 @@ import { ArticleExporter } from './exporters/article.js';
 import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
-import { PARTIAL_PREFIX, partialText } from '../../lib/partial-export.js';
-import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptText, imagePartialSrExtra, PARTIAL_SR_SEP } from '../../lib/image-pack.js';
 import { PageDetector } from './detector.js';
 import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
 import { floatingBallDrag } from './floating-ball-drag.js';
-import { applyBallA11y, IDLE_LABEL } from './ball-a11y.js';
-import { describeFailure } from '../../lib/failure-text.js';
+import { applyBallA11y, idleAriaLabel } from './ball-a11y.js';
+import { t } from './i18n.js';
+import { ballFailureText, ballImageSrExtra, ballKeptSrExtra } from './ball-text.js';
 import { span, svgIcon } from '../../lib/safe-dom.js';
 
-const idleLabel = '点击下载 · 右键复制';
+// 悬浮球上面向用户的文字都走 _locales（chrome.i18n），见 i18n.js / ball-text.js
+const idleLabel = () => t('ballTooltipIdle');
 
 // Z3-2：导出中保留 M↓ 字形，靠外圈进度环表示；成功/失败换成勾/叹号
 export const BALL_FACE = {
@@ -47,11 +47,11 @@ export const FloatingBall = {
     const ball = document.createElement('button');
     ball.id = 'zhihu-md-floating-ball';
     ball.type = 'button';
-    ball.setAttribute('aria-label', IDLE_LABEL);
+    ball.setAttribute('aria-label', idleAriaLabel());
     ball.append(
       span('ring', null, { 'aria-hidden': 'true' }),
       span('face'),
-      span('tooltip', idleLabel, { 'aria-hidden': 'true' }),
+      span('tooltip', idleLabel(), { 'aria-hidden': 'true' }),
     );
     ball.querySelector('.face').append(BALL_FACE.idle());
 
@@ -108,7 +108,7 @@ export const FloatingBall = {
   },
 
   /** 提示文字、读屏播报和 aria-label 一起更新 */
-  setMessage(ball, message, state, srExtra = '', srSep = '，') {
+  setMessage(ball, message, state, srExtra = '', srSep = t('ballSep')) {
     ball.querySelector('.tooltip').textContent = message;
     const spoken = srExtra ? `${message}${srSep}${srExtra}` : message;
     const live = this.getLiveRegion();
@@ -121,14 +121,14 @@ export const FloatingBall = {
     applyBallA11y(ball, current, spoken);
   },
 
-  finishBall(ball, generation, state, message, srExtra = '', srSep = '，') {
+  finishBall(ball, generation, state, message, srExtra = '', srSep = t('ballSep')) {
     if (generation !== this.operation) return;
     this.busy = false;
     this.updateBallState(ball, state);
     this.setMessage(ball, message, state, srExtra, srSep);
     // 成功提示短暂停留；失败原因一直显示，直到下一次操作（Round 2：错误持续可见）
     if (state === 'success') {
-      setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), 4000);
+      setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel()), 4000);
     }
   },
 
@@ -147,11 +147,11 @@ export const FloatingBall = {
     const downloadImages = settings.downloadImages;
 
     if (pageType === 'question' || pageType === 'home' || pageType === 'follow') {
-      this.setMessage(ball, '正在加载内容…');
+      this.setMessage(ball, t('ballLoadingContent'));
     } else if (pageType === 'hot') {
-      this.setMessage(ball, '正在导出热榜…');
+      this.setMessage(ball, t('ballExportingHot'));
     } else {
-      this.setMessage(ball, downloadImages ? '正在下载图片…' : '正在导出…');
+      this.setMessage(ball, downloadImages ? t('ballDownloadingImages') : t('ballExporting'));
     }
 
     try {
@@ -184,24 +184,25 @@ export const FloatingBall = {
         if (result.data.partial) {
           // 发版 QA ZR-02 / 设计 M1：文件已保存但不完整 → 警告态（琥珀色三角，持续显示，polite 播报）
           // QA P2Z-02：tooltip 不变，读屏末尾补上图片失败数和保留数（与弹窗琥珀提示的图片行一致）
-          const srExtra = imagePartialSrExtra((dl && dl.failedImages) || 0, (dl && dl.keptImages) || 0);
-          this.finishBall(ball, generation, 'warning', `${PARTIAL_PREFIX}${partialText(result.data.partial)}`, srExtra, PARTIAL_SR_SEP);
+          const srExtra = ballImageSrExtra((dl && dl.failedImages) || 0, (dl && dl.keptImages) || 0);
+          const { exported, total } = result.data.partial;
+          this.finishBall(ball, generation, 'warning', t('ballPartial', exported, total, total - exported), srExtra, t('ballPartialSep'));
         } else {
           // 发版 QA ZR-09：部分图片没打进 zip 时，成功提示里带上数量
           // 第三轮 B：只有 kept 按普通成功处理，tooltip 不变，读屏末尾补一句；数字只算失败
           const failedN = (dl && dl.failedImages) || 0;
           const keptN = (dl && dl.keptImages) || 0;
-          const srExtra = keptN > 0 ? (failedN > 0 ? imageKeptMoreShortText(keptN) : `${imageKeptText(keptN)}，${IMAGE_KEPT_REASON}`) : '';
-          this.finishBall(ball, generation, 'success', failedN > 0 ? `已导出，${imageFailText(failedN)}` : '已导出', srExtra);
+          const srExtra = ballKeptSrExtra(failedN, keptN);
+          this.finishBall(ball, generation, 'success', failedN > 0 ? t('ballExportedImagesFailed', failedN) : t('ballExported'), srExtra);
         }
       } else if (result.reason) {
         // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办
-        this.finishBall(ball, generation, 'error', result.error);
+        this.finishBall(ball, generation, 'error', ballFailureText(result, 'export'));
       } else {
         throw new Error(result.error || '导出失败');
       }
     } catch (error) {
-      this.finishBall(ball, generation, 'error', describeFailure(error, 'export').text);
+      this.finishBall(ball, generation, 'error', ballFailureText(error, 'export'));
     }
   },
 
@@ -226,14 +227,14 @@ export const FloatingBall = {
     const generation = ++this.operation;
     const md = selectionToMarkdown(selection);
     if (!md) {
-      this.finishBall(ball, generation, 'error', '没有选中内容，先选中一段文字再复制');
+      this.finishBall(ball, generation, 'error', t('ballNoSelection'));
       return Promise.resolve(false);
     }
     return copyText(md).then(() => {
-      this.finishBall(ball, generation, 'success', '已复制选中内容');
+      this.finishBall(ball, generation, 'success', t('ballCopiedSelection'));
       return true;
     }).catch((error) => {
-      this.finishBall(ball, generation, 'error', describeFailure(error, 'copy').text);
+      this.finishBall(ball, generation, 'error', ballFailureText(error, 'copy'));
       return false;
     });
   },
@@ -243,7 +244,7 @@ export const FloatingBall = {
     this.busy = true;
     const generation = ++this.operation;
     this.updateBallState(ball, 'loading');
-    this.setMessage(ball, '正在复制…');
+    this.setMessage(ball, t('ballCopying'));
     const pending = copyTextLater(async () => {
       const pageType = PageDetector.detectPageType();
       let result;
@@ -259,10 +260,10 @@ export const FloatingBall = {
       return result.data.content;
     });
     pending.then(() => {
-      this.finishBall(ball, generation, 'success', '已复制');
+      this.finishBall(ball, generation, 'success', t('ballCopied'));
     }).catch((error) => {
       console.error('[Zhihu-MD] copy failed', error);
-      this.finishBall(ball, generation, 'error', describeFailure(error, 'copy').text);
+      this.finishBall(ball, generation, 'error', ballFailureText(error, 'copy'));
     });
   },
 

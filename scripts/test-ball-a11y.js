@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { parseHTML } from 'linkedom';
-import { ballA11y, applyBallA11y, IDLE_LABEL } from '../content/modules/ball-a11y.js';
+import { ballA11y, applyBallA11y, idleAriaLabel } from '../content/modules/ball-a11y.js';
 
-assert.deepEqual(ballA11y('normal'), { label: IDLE_LABEL, busy: false });
+assert.deepEqual(ballA11y('normal'), { label: '导出 Markdown（点击下载，右键复制）', busy: false });
+assert.equal(idleAriaLabel(), '导出 Markdown（点击下载，右键复制）', '没有 chrome.i18n 时回退中文');
 assert.equal(ballA11y('loading', '下载图片中...').busy, true);
 assert.match(ballA11y('loading', '下载图片中...').label, /正在导出：下载图片中/);
 assert.match(ballA11y('error', '需要登录知乎才能查看这部分内容').label, /^导出失败：需要登录知乎.*按回车重试$/);

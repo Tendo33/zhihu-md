@@ -1,7 +1,10 @@
 /**
  * Z2：悬浮球的读屏状态。aria-label 随状态更新，导出中设 aria-busy。
  */
-export const IDLE_LABEL = '导出 Markdown（点击下载，右键复制）';
+import { t } from './i18n.js';
+
+/** 空闲态读屏名称，按界面语言（_locales）取 */
+export const idleAriaLabel = () => t('ballAriaIdle');
 
 const trimEnd = (text) => String(text || '').replace(/[!！。.…\s]+$/u, '');
 
@@ -9,15 +12,15 @@ export function ballA11y(state, message = '') {
   message = trimEnd(message);
   switch (state) {
     case 'loading':
-      return { label: `正在导出：${message || '请稍候'}`, busy: true };
+      return { label: t('ballAriaLoading', message || t('ballAriaWait')), busy: true };
     case 'success':
-      return { label: `${message || '导出成功'}。再次点击可重新导出`, busy: false };
+      return { label: t('ballAriaDone', message || t('ballAriaSuccess')), busy: false };
     case 'warning': // 设计 M1：部分导出是警告，读屏不说「失败」
-      return { label: `${message}。再次点击可重新导出`, busy: false };
+      return { label: t('ballAriaDone', message), busy: false };
     case 'error':
-      return { label: `导出失败：${message || '请刷新页面后重试'}。按回车重试`, busy: false };
+      return { label: t('ballAriaError', message || t('ballAriaErrorDefault')), busy: false };
     default:
-      return { label: IDLE_LABEL, busy: false };
+      return { label: idleAriaLabel(), busy: false };
   }
 }
 

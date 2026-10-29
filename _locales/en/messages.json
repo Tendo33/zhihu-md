@@ -26,5 +26,175 @@
   "menuLinkExport": {
     "message": "Export linked Zhihu page as Markdown",
     "description": "右键菜单：在知乎问题、回答或专栏链接上，打开并导出该页。"
+  },
+  "ballTooltipIdle": {
+    "message": "Click to export · Right-click to copy",
+    "description": "悬浮球悬停提示（空闲态）。"
+  },
+  "ballAriaIdle": {
+    "message": "Export Markdown (click to download, right-click to copy)",
+    "description": "悬浮球读屏名称（aria-label，空闲态）。"
+  },
+  "ballLoadingContent": {
+    "message": "Loading content…",
+    "description": "悬浮球：问题页/信息流导出前加载内容。"
+  },
+  "ballExportingHot": {
+    "message": "Exporting hot list…",
+    "description": "悬浮球：热榜导出中。"
+  },
+  "ballDownloadingImages": {
+    "message": "Downloading images…",
+    "description": "悬浮球：开启下载图片时导出中。"
+  },
+  "ballExporting": {
+    "message": "Exporting…",
+    "description": "悬浮球：导出中。"
+  },
+  "ballCopying": {
+    "message": "Copying…",
+    "description": "悬浮球：复制中。"
+  },
+  "ballExported": {
+    "message": "Exported",
+    "description": "悬浮球：导出成功。"
+  },
+  "ballExportedImagesFailed": {
+    "message": "Exported. $ARG1$ images couldn't be downloaded; online links kept",
+    "description": "悬浮球：导出成功但部分图片失败。$1 = 图片数。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballCopied": {
+    "message": "Copied",
+    "description": "悬浮球：复制本页成功。"
+  },
+  "ballCopiedSelection": {
+    "message": "Selection copied",
+    "description": "悬浮球：复制选中内容成功。"
+  },
+  "ballNoSelection": {
+    "message": "Nothing selected. Select some text, then copy",
+    "description": "悬浮球：复制选中内容时没有选区。"
+  },
+  "ballPartial": {
+    "message": "Partial export: $ARG1$/$ARG2$ items exported, $ARG3$ couldn't load",
+    "description": "悬浮球：部分导出警告。$1 已导出，$2 总数，$3 未加载数。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      },
+      "arg3": {
+        "content": "$3"
+      }
+    }
+  },
+  "ballImagesFailed": {
+    "message": "$ARG1$ images couldn't be downloaded; online links kept",
+    "description": "悬浮球读屏补充：有图片未能下载。$1 = 图片数。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballImagesKept": {
+    "message": "$ARG1$ images kept as online links",
+    "description": "悬浮球读屏补充：图片保留为在线链接。$1 = 图片数。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballImagesKeptMore": {
+    "message": "$ARG1$ more kept as online links",
+    "description": "悬浮球读屏补充：失败之外另有保留的图片。$1 = 图片数。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballImagesKeptReason": {
+    "message": "these images' format or source can't be saved locally",
+    "description": "悬浮球读屏补充：图片保留为在线链接的原因。"
+  },
+  "ballSep": {
+    "message": ", ",
+    "description": "悬浮球读屏：两段提示之间的分隔符（逗号）。"
+  },
+  "ballPartialSep": {
+    "message": "; ",
+    "description": "悬浮球读屏：部分导出概况和图片情况之间的分隔符（分号）。"
+  },
+  "ballAriaLoading": {
+    "message": "Exporting: $ARG1$",
+    "description": "悬浮球读屏名称：导出中。$1 = 当前步骤。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballAriaWait": {
+    "message": "please wait",
+    "description": "悬浮球读屏名称：导出中无步骤时。"
+  },
+  "ballAriaDone": {
+    "message": "$ARG1$. Click again to export again",
+    "description": "悬浮球读屏名称：成功/部分导出。$1 = 结果。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballAriaSuccess": {
+    "message": "Export succeeded",
+    "description": "悬浮球读屏名称：成功但无具体文字时。"
+  },
+  "ballAriaError": {
+    "message": "Export failed: $ARG1$. Press Enter to retry",
+    "description": "悬浮球读屏名称：失败。$1 = 原因。",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballAriaErrorDefault": {
+    "message": "refresh the page and try again",
+    "description": "悬浮球读屏名称：失败但无原因时。"
+  },
+  "failSecurityCheck": {
+    "message": "Zhihu is rate-limiting or asking for verification. Complete it on the Zhihu page, or wait a few minutes, refresh and export again",
+    "description": "悬浮球失败原因：限流或安全验证。"
+  },
+  "failLoginRequired": {
+    "message": "Sign in to Zhihu to see this content, then export again",
+    "description": "悬浮球失败原因：需要登录。"
+  },
+  "failNotLoaded": {
+    "message": "The page hasn't finished loading. Wait a few seconds or refresh, then try again",
+    "description": "悬浮球失败原因：页面未加载完。"
+  },
+  "failClipboard": {
+    "message": "Couldn't write to the clipboard. Keep the popup open and try again, or use “Export Markdown” instead",
+    "description": "悬浮球失败原因：剪贴板写入失败（与弹窗共用中文文案）。"
+  },
+  "failExportUnknown": {
+    "message": "Export failed. Refresh the Zhihu page and try again",
+    "description": "悬浮球失败原因：未知导出错误。"
+  },
+  "failCopyUnknown": {
+    "message": "Copy failed. Refresh the Zhihu page and try again",
+    "description": "悬浮球失败原因：未知复制错误。"
   }
 }

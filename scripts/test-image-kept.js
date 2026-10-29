@@ -107,6 +107,12 @@ const shown = (el) => !el.classList.contains('hidden');
   globalThis.setTimeout = realSetTimeout;
   const src = fs.readFileSync(new URL('../content/modules/floating-ball.js', import.meta.url), 'utf8');
   // 设计复核 4193502：只有保留时读屏补上原因
-  assert.ok(src.includes("keptN > 0 ? (failedN > 0 ? imageKeptMoreShortText(keptN) : `${imageKeptText(keptN)}，${IMAGE_KEPT_REASON}`) : ''"));
+  assert.ok(src.includes('const srExtra = ballKeptSrExtra(failedN, keptN);'));
+  const { ballKeptSrExtra, ballImageSrExtra } = await import('../content/modules/ball-text.js');
+  const ip = await import('../lib/image-pack.js');
+  assert.equal(ballKeptSrExtra(0, 2), `${ip.imageKeptText(2)}，${ip.IMAGE_KEPT_REASON}`);
+  assert.equal(ballKeptSrExtra(1, 2), ip.imageKeptMoreShortText(2));
+  assert.equal(ballKeptSrExtra(1, 0), '');
+  for (const [f, k] of [[3, 0], [3, 2], [0, 5], [0, 0]]) assert.equal(ballImageSrExtra(f, k), ip.imagePartialSrExtra(f, k), `读屏补充 ${f}/${k} 与弹窗一致`);
 }
 console.log('image kept/failed split tests passed');

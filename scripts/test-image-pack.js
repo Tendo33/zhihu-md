@@ -141,7 +141,8 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
 
 // 悬浮球：成功提示里带数量
 const ball = fs.readFileSync(new URL('../content/modules/floating-ball.js', import.meta.url), 'utf8');
-assert.match(ball, /failedN > 0 \? `已导出，\$\{imageFailText\(failedN\)\}` : '已导出'/);
+assert.match(ball, /failedN > 0 \? t\('ballExportedImagesFailed', failedN\) : t\('ballExported'\)/);
+{ const { t } = await import('../content/modules/i18n.js'); assert.equal(t('ballExportedImagesFailed', 2), `已导出，${imageFailText(2)}`); }
 console.log('image pack tests passed');
 
 // 审查 P3（release-polish-2 ③）：Content-Type 为 octet-stream 时，avif / bmp 只能靠文件头识别

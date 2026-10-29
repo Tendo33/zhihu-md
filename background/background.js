@@ -142,7 +142,8 @@ async function downloadImages(images) {
     images.map(async (img) => {
       Logger.debug(`下载图片: ${img.url.substring(0, 50)}...`);
       if (!isAllowedImageUrl(img.url)) throw new Error('只下载 https://*.zhimg.com 的图片');
-      const response = await fetch(img.url);
+      // 审查 P3（release-polish-2 ①）：不跟随重定向，避免 zhimg 30x 跳到白名单外的主机
+      const response = await fetch(img.url, { redirect: 'error' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();
       const arrayBuffer = await blob.arrayBuffer();

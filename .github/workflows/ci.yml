@@ -24,3 +24,21 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run verify:dist
+
+  # 可选：用真实 markdown-it（html:true）渲染检查 raw HTML 泄漏（scripts/test-html-like-text.js）。
+  # markdown-it 只临时装（--no-save），不进 package.json / package-lock；失败不阻断 check。
+  rendered-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save markdown-it@14
+      - run: npm test
+        env:
+          MD_RENDERER_DIR: ${{ github.workspace }}

@@ -39,3 +39,8 @@ body { min-width: 320px; }
 /* 第三轮 B（设计定稿）：图片保留/失败的次级说明行，无图标无底色，字号同 hint */
 .alert .img-sub{display:block;color:var(--text-2);font-size:inherit;font-weight:400}
 .alert .img-sub.hidden{display:none}
+
+/* 第三轮设计：已保存文件名单行，中间省略保住后缀 */
+#ok-file{display:flex;min-width:0}
+#ok-file .fn-stem{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#ok-file .fn-suffix{flex:none;white-space:nowrap}

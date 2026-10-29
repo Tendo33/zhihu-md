@@ -12,6 +12,7 @@ import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js
 import { partialHint, partialText } from '../lib/partial-export.js';
 import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
 import { svgIcon } from '../lib/safe-dom.js';
+import { splitFilename } from '../lib/filename-split.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
 
@@ -77,6 +78,21 @@ function hideAlerts() {
   $('info-kept').classList.add('hidden');
   actionInfo.removeAttribute('title');
   setImageLine('feedback-img', '');
+}
+
+/** 第三轮设计：「已保存」文件名单行，中间省略保住后缀；DOM 文字和 title 都是全名 */
+function setSavedFilename(name) {
+  const el = $('ok-file');
+  const full = String(name || '');
+  const [stem, suffix] = splitFilename(full);
+  const a = document.createElement('span');
+  a.className = 'fn-stem';
+  a.textContent = stem;
+  const b = document.createElement('span');
+  b.className = 'fn-suffix';
+  b.textContent = suffix;
+  el.replaceChildren(a, b);
+  el.title = full;
 }
 
 /** 第三轮 B：次级说明行；kept 时 title 和读屏文字补上原因 */
@@ -369,7 +385,7 @@ async function handleExport() {
       return;
     }
     updateStatus('ok', '已完成');
-    $('ok-file').textContent = (res && res.filename) || response.data.filename;
+    setSavedFilename((res && res.filename) || response.data.filename);
     openBtn.classList.toggle('hidden', lastDownloadId == null);
     actionOk.classList.remove('hidden');
     const keptImages = (res && res.keptImages) || 0;

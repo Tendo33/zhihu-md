@@ -138,11 +138,11 @@ export const FloatingBall = {
     const downloadImages = settings.downloadImages;
 
     if (pageType === 'question' || pageType === 'home' || pageType === 'follow') {
-      this.setMessage(ball, '加载内容中...');
+      this.setMessage(ball, '正在加载内容…');
     } else if (pageType === 'hot') {
-      this.setMessage(ball, '导出热榜...');
+      this.setMessage(ball, '正在导出热榜…');
     } else {
-      this.setMessage(ball, downloadImages ? '下载图片中...' : '导出中...');
+      this.setMessage(ball, downloadImages ? '正在下载图片…' : '正在导出…');
     }
 
     try {
@@ -172,7 +172,7 @@ export const FloatingBall = {
 
         await chrome.runtime.sendMessage(messageData);
 
-        this.finishBall(ball, generation, 'success', '导出成功!');
+        this.finishBall(ball, generation, 'success', '已导出');
       } else if (result.reason) {
         // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办
         this.finishBall(ball, generation, 'error', result.error);
@@ -222,7 +222,7 @@ export const FloatingBall = {
     this.busy = true;
     const generation = ++this.operation;
     this.updateBallState(ball, 'loading');
-    this.setMessage(ball, '复制中...');
+    this.setMessage(ball, '正在复制…');
     const pending = copyTextLater(async () => {
       const pageType = PageDetector.detectPageType();
       let result;

@@ -135,8 +135,8 @@ function setRunning(running, text = '正在导出…') {
   exportBtn.querySelector('.spinner').classList.toggle('hidden', !running);
   if (running) {
     exportBtn.setAttribute('aria-busy', 'true');
-    exportLabel.textContent = '转换中…';
-    updateStatus('run', '转换中');
+    exportLabel.textContent = '正在导出…';
+    updateStatus('run', '正在导出');
     $('progress-text').textContent = text;
     progress.classList.remove('hidden');
     setExportActionsEnabled(false, '正在导出，请稍候');

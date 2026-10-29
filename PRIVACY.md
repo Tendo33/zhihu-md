@@ -55,7 +55,7 @@ The extension stores the following data through Chrome storage APIs:
 - `maxAnswerCount` (`chrome.storage.sync`; values above 1000 are treated as 1000; 0 means up to 1000)
 - `downloadImages` (`chrome.storage.sync`)
 - `floatingBallPosition` (`chrome.storage.local`)
-- `recentExports` (`chrome.storage.local`): the most recent exports shown in the popup, up to 20 entries. Each entry has only the title (at most 200 characters), whether the export succeeded, and the time. No page content or link is stored. When a 21st entry is added the oldest is dropped; exporting the same title again keeps only the newest entry. It stays in your browser until you clear the extension's data or remove the extension, and it never leaves your browser.
+- `recentExports` (`chrome.storage.local`): the most recent exports shown in the popup, up to 20 entries. Each entry has only the title (at most 200 characters), whether the export succeeded, and the time. No page content or link is stored. When a 21st entry is added the oldest is dropped; exporting the same title again keeps only the newest entry. It stays in your browser until you clear the extension's data or remove the extension, and it never leaves your browser. Because these titles and times record which Zhihu pages you exported, the store listing declares this as web history (stored only locally, latest 20 entries).
 
 Settings in `chrome.storage.sync` are synced with your browser account when browser sync is turned on. That is the browser's own sync feature: it carries these three settings only, never page content, and is not sent to the developer. The other values stay on this device.
 

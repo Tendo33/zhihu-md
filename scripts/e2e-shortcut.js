@@ -38,15 +38,42 @@ function chromePath() {
     console.error(`e2e: CHROME_PATH 指向的是目录，不是可执行文件：${p}\n  请指向目录里的 chrome 可执行文件（例如 .../chrome-linux64/chrome）。`);
     process.exit(2);
   }
+  // batch7 ZB6-02：文件存在但没有执行权限时，Playwright 只会抛 spawn EACCES 堆栈
+  try {
+    fs.accessSync(p, fs.constants.X_OK);
+  } catch {
+    console.error(`e2e: CHROME_PATH 不是可执行文件（没有执行权限）：${p}\n  请指向 Chromium/Chrome 可执行文件（例如 .../chrome-linux64/chrome）。`);
+    process.exit(2);
+  }
   return p;
 }
 
 // batch6 ZB5-02：Linux 上没有显示器时，有界面的 Chrome 起不来；提示用 xvfb-run，而不是抛 Playwright 堆栈
 function requireDisplay() {
   if (process.platform !== 'linux') return;
-  if (process.env.DISPLAY || process.env.WAYLAND_DISPLAY) return;
+  if (process.env.WAYLAND_DISPLAY) return;
+  const display = process.env.DISPLAY;
+  if (display) {
+    // batch7 ZB6-01：本机显示 :N 要有 /tmp/.X11-unix/XN；没有就说明 X server 不在（远程 host:N 不检查，交给启动处兜底）
+    const m = /^:(\d+)(?:\.\d+)?$/.exec(display);
+    if (!m || fs.existsSync(`/tmp/.X11-unix/X${m[1]}`)) return;
+    console.error(`e2e: DISPLAY=${display} 连接不上（找不到 /tmp/.X11-unix/X${m[1]}）。请用 xvfb-run 运行，例如：\n  xvfb-run -a npm run test:e2e`);
+    process.exit(2);
+  }
   console.error('e2e: 没有可用的显示器（DISPLAY 未设置）。扩展需要有界面的 Chrome，请用 xvfb-run 运行，例如：\n  xvfb-run -a npm run test:e2e');
   process.exit(2);
+}
+
+// batch7 ZB6-01/02：把 Chrome 启动失败归成几类中文提示
+function launchFailureHint(e, executablePath) {
+  const msg = String((e && e.message) || e);
+  if (/X ?server|Missing X|cannot open display/i.test(msg)) {
+    return `e2e: Chrome 起不来：DISPLAY=${process.env.DISPLAY || ''} 上没有可用的 X server。请用 xvfb-run 运行，例如：\n  xvfb-run -a npm run test:e2e`;
+  }
+  if (/\b(?:EACCES|ENOEXEC|ENOENT)\b/.test(msg)) {
+    return `e2e: Chrome 起不来：CHROME_PATH 不是可执行的 Chrome：${executablePath}`;
+  }
+  return `e2e: Chrome 启动失败：${msg.split('\n')[0]}`;
 }
 
 // batch6 ZB5-01：没有 dist/ 时给出中文提示并以 2 退出，不再抛 ENOENT 堆栈
@@ -64,11 +91,19 @@ requireDist();
 const manifest = JSON.parse(fs.readFileSync(path.join(dist, 'manifest.json'), 'utf8'));
 const expected = manifest.commands[COMMAND].suggested_key.default;
 const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e-shortcut-'));
-const ctx = await chromium.launchPersistentContext(prof, {
-  headless: false,
-  executablePath,
-  args: [`--disable-extensions-except=${dist}`, `--load-extension=${dist}`],
-});
+let ctx;
+try {
+  ctx = await chromium.launchPersistentContext(prof, {
+    headless: false,
+    executablePath,
+    args: [`--disable-extensions-except=${dist}`, `--load-extension=${dist}`],
+  });
+} catch (e) {
+  // batch7 ZB6-01/02/04：启动失败也删临时 profile，并给中文提示、exit 2，不打 Playwright 堆栈
+  fs.rmSync(prof, { recursive: true, force: true });
+  console.error(launchFailureHint(e, executablePath));
+  process.exit(2);
+}
 let code = 1;
 try {
   const sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker', { timeout: 15000 });

@@ -34,7 +34,7 @@ body { min-width: 320px; }
 .sc-label{color:var(--text-2)}
 .sc-link{margin-left:-4px;min-height:24px;padding:0 4px;border:0;background:transparent;color:var(--brand-text);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;border-radius:4px}
 .sc-link:hover{background:var(--brand-soft)}
-.sc-link:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.sc-link:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
 
 /* 第三轮 B（设计定稿）：图片保留/失败的次级说明行，无图标无底色，字号同 hint */
 .alert .img-sub{display:block;color:var(--text-2);font-size:inherit;font-weight:400}

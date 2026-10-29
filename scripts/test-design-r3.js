@@ -10,7 +10,7 @@ const popup = read('popup/popup.css');
 
 assert.match(html, /<html[^>]*data-brand="zhihu"/);
 assert.ok(html.indexOf('../lib/shared.css') > 0 && html.indexOf('../lib/ui-v2.css') > html.indexOf('../lib/shared.css'), 'ui-v2.css 在 shared.css 之后引入，同名 token 以 v2 为准');
-for (const [k, v] of [['--bg-card', 'surface'], ['--text-primary', 'text'], ['--accent', 'brand'], ['--focus-ring', 'brand'], ['--border-subtle', 'border']]) {
+for (const [k, v] of [['--bg-card', 'surface'], ['--text-primary', 'text'], ['--accent', 'brand'], ['--focus-ring', 'focus'], ['--border-subtle', 'border']]) {
   assert.match(opt, new RegExp(`${k}: var\\(--${v}\\);`), k);
 }
 for (const hex of ['#f0f9ff', '#0c4a6e', '#0f172a']) assert.ok(![html, opt].some((s) => s.toLowerCase().includes(hex)), hex);

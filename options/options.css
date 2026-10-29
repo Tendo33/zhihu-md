@@ -11,7 +11,7 @@ body {
   --accent: var(--brand);
   --accent-inverse: var(--brand-on);
   --blue: var(--brand);
-  --focus-ring: var(--brand);
+  --focus-ring: var(--focus);
   font-family: var(--font-sans);
 }
 /**

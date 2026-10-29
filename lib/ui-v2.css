@@ -25,7 +25,7 @@
   --brand:#f87171;--brand-hover:#fb9191;--brand-press:#f05252;--brand-on:#1b0606;--brand-soft:#3a1717;--brand-text:#f87171;
   --state-hover:rgb(255 255 255/.06);--state-press:rgb(255 255 255/.1);
   --shadow-2:0 4px 12px rgb(0 0 0/.5);color-scheme:dark}
-[data-theme=dark][data-brand=zhihu]{--brand:#60a5fa;--brand-hover:#82b8fb;--brand-press:#3b8ef5;--brand-on:#06142b;--brand-soft:#152a47;--brand-text:#7cb2ff}
+[data-theme=dark][data-brand=zhihu]{--brand:#60a5fa;--brand-hover:#82b8fb;--brand-press:#3b8ef5;--brand-on:#06142b;--brand-soft:#152a47;--brand-text:#7cb2ff;--focus:#93c5fd}
 @media (prefers-color-scheme:dark){
 :root:not([data-theme=light]){
   --bg:#111317;--surface:#1b1d22;--surface-2:#24272d;--border:#33373e;--border-strong:#4a4f57;
@@ -34,7 +34,7 @@
   --brand:#f87171;--brand-hover:#fb9191;--brand-press:#f05252;--brand-on:#1b0606;--brand-soft:#3a1717;--brand-text:#f87171;
   --state-hover:rgb(255 255 255/.06);--state-press:rgb(255 255 255/.1);
   --shadow-2:0 4px 12px rgb(0 0 0/.5);color-scheme:dark}
-:root[data-brand=zhihu]:not([data-theme=light]){--brand:#60a5fa;--brand-hover:#82b8fb;--brand-press:#3b8ef5;--brand-on:#06142b;--brand-soft:#152a47;--brand-text:#7cb2ff}
+:root[data-brand=zhihu]:not([data-theme=light]){--brand:#60a5fa;--brand-hover:#82b8fb;--brand-press:#3b8ef5;--brand-on:#06142b;--brand-soft:#152a47;--brand-text:#7cb2ff;--focus:#93c5fd}
 }
 /* 组件 */
 *{box-sizing:border-box;margin:0}

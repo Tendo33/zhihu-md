@@ -342,4 +342,26 @@ assert.strictEqual(finished.success, true);
 assert.match(finished.data.content, /answer_count: 3/);
 assert.doesNotMatch(finished.data.content, /truncated/);
 
+// 发版 QA ZR-02：第 2 页接口失败、没凑够条数 → partial，正文末尾写明，front matter 仍 truncated
+{
+  let n = 0;
+  globalThis.chrome = { storage: { sync: { get: (_d, done) => done({ maxAnswerCount: 10 }) } } };
+  globalThis.fetch = async (url) => {
+    if (!String(url).includes('/feeds')) throw new Error('offline');
+    n += 1;
+    if (n === 1) return { ok: true, json: async () => ({ data: [{ target: { id: 7, content: '<p>接口回答甲</p>' } }], paging: { is_end: false, next: 'https://www.zhihu.com/api/v4/questions/9/feeds?offset=20' } }) };
+    return { ok: false, status: 500, json: async () => ({}) };
+  };
+  const part = await QuestionExporter.exportMultipleAnswers(false);
+  assert.strictEqual(part.success, true);
+  assert.deepStrictEqual(part.data.partial, { exported: 3, total: 10, failedPage: 2 });
+  assert.match(part.data.content, /truncated: true/);
+  assert.match(part.data.content, /> 已导出 3\/10 条，部分失败：第 2 页回答加载失败，内容不完整，可稍后重新导出。\n$/);
+  const p2 = await pageQuestionFeeds({ questionId: '9', targetCount: 5, fetchImpl: async () => { throw new Error('net'); } });
+  assert.strictEqual(p2.failedPage, 1);
+  assert.strictEqual(finished.data.partial, undefined, '完整导出没有 partial');
+  assert.strictEqual(merged.data.partial, undefined, '接口失败但页面回答已凑够条数 → 不算部分失败');
+  assert.strictEqual(fromDom.data.partial, undefined);
+}
+
 console.log('zhihu dom fixture assertions passed');

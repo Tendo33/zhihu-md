@@ -9,6 +9,7 @@ import { copyTextLater } from '../lib/clipboard.js';
 import { describeFailure, ExportFailure } from '../lib/failure-text.js';
 import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
+import { partialHint, partialText } from '../lib/partial-export.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
 
@@ -312,6 +313,15 @@ async function handleExport() {
     if (res && res.success === false) throw new Error(res.error || '下载失败');
     lastDownloadId = res && res.downloadId != null ? res.downloadId : null;
     setRunning(false);
+    if (response.data.partial) {
+      // 发版 QA ZR-02：文件已保存但不完整 → 失败样式 +「已导出 N/M 条，部分失败」，不显示「已保存」
+      updateStatus('err', '部分失败');
+      showActionFeedback({ text: `${partialText(response.data.partial)}：${partialHint(response.data.partial)}`, reason: 'partial' });
+      exportLabel.textContent = PRIMARY;
+      setExportActionsEnabled(true);
+      renderRecent().catch(() => {});
+      return;
+    }
     updateStatus('ok', '已完成');
     $('ok-file').textContent = (res && res.filename) || response.data.filename;
     openBtn.classList.toggle('hidden', lastDownloadId == null);

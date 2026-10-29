@@ -7,6 +7,7 @@ import { ArticleExporter } from './exporters/article.js';
 import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
+import { partialText } from '../../lib/partial-export.js';
 import { PageDetector } from './detector.js';
 import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
@@ -172,7 +173,12 @@ export const FloatingBall = {
 
         await chrome.runtime.sendMessage(messageData);
 
-        this.finishBall(ball, generation, 'success', '已导出');
+        if (result.data.partial) {
+          // 发版 QA ZR-02：文件已保存但不完整，不用成功样式
+          this.finishBall(ball, generation, 'error', partialText(result.data.partial));
+        } else {
+          this.finishBall(ball, generation, 'success', '已导出');
+        }
       } else if (result.reason) {
         // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办
         this.finishBall(ball, generation, 'error', result.error);

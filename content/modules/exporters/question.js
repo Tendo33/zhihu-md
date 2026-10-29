@@ -4,6 +4,7 @@
  */
 
 import { failureResult } from '../../../lib/failure-reason.js';
+import { partialHint, partialText } from '../../../lib/partial-export.js';
 import { ArticleExporter } from './article.js';
 import { CONSTANTS, cleanFilename } from '../constants.js';
 import { PageDetector } from '../detector.js';
@@ -180,6 +181,10 @@ export const QuestionExporter = {
           .map((record) => this.renderAnswer(record, questionId, turndownService));
       }
       const truncated = Boolean(questionId) && !feedState.isEnd && answers.length > 0;
+      // 发版 QA ZR-02：分页接口中途失败且没凑够条数 → 部分失败，正文末尾写明，UI 不显示成功
+      const partial = truncated && feedState.failedPage > 0 && answers.length < targetCount
+        ? { exported: answers.length, total: targetCount, failedPage: feedState.failedPage }
+        : null;
 
       if (answers.length === 0) {
         return failureResult();
@@ -219,6 +224,13 @@ ${answer.content}
 `;
       });
 
+      if (partial) {
+        markdown += `---
+
+> ${partialText(partial)}：${partialHint(partial)}。
+`;
+      }
+
       markdown = tidyMarkdown(markdown);
       const images = downloadImages && turndownService.imageCollector
         ? turndownService.imageCollector.images
@@ -231,6 +243,7 @@ ${answer.content}
           filename: cleanFilename(title) + '_多回答.md',
           images,
           downloadImages: downloadImages && images.length > 0,
+          ...(partial ? { partial } : {}),
         }
       };
     } catch (error) {

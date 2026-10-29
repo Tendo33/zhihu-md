@@ -270,6 +270,8 @@ export async function pageQuestionFeeds({ questionId, targetCount, fetchImpl = f
   const seenUrls = new Set();
   let pages = 0;
   let isEnd = false;
+  // 发版 QA ZR-02：接口失败（网络错误 / 非 2xx / 不是 JSON）时记下失败的页码，供导出器提示「部分失败」
+  let failedPage = 0;
 
   while (rows.length < targetCount && url && pages < 60) {
     if (!isZhihuHttpsUrl(url) || seenUrls.has(url)) break;
@@ -279,16 +281,18 @@ export async function pageQuestionFeeds({ questionId, targetCount, fetchImpl = f
     try {
       response = await fetchImpl(url, { credentials: 'include' });
     } catch {
+      failedPage = pages;
       break;
     }
-    if (!response?.ok || typeof response.json !== 'function') break;
+    if (!response?.ok || typeof response.json !== 'function') { failedPage = pages; break; }
     let json;
     try {
       json = await response.json();
     } catch {
+      failedPage = pages;
       break;
     }
-    if (!json || typeof json !== 'object') break;
+    if (!json || typeof json !== 'object') { failedPage = pages; break; }
     for (const row of json.data || []) {
       const target = row?.target;
       if (!target?.id) continue;
@@ -306,7 +310,7 @@ export async function pageQuestionFeeds({ questionId, targetCount, fetchImpl = f
     if (!isZhihuHttpsUrl(next)) break;
     url = next;
   }
-  return { rows, isEnd };
+  return { rows, isEnd, failedPage };
 }
 
 export async function fetchAnswerRecord(answerId, fetchImpl = fetch) {

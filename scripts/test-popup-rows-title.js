@@ -74,4 +74,13 @@ for (const img of [{ failedImages: 1, keptImages: 0 }, { failedImages: 0, keptIm
   }
   TITLE = 'P';
 }
+// 复审 51f7f33 P3：#info-text 的 title 在下一次导出时要被清掉（hideAlerts 与 kept=0 分支）
+for (const next of [{ failedImages: 1, keptImages: 0 }, { failedImages: 0, keptImages: 0 }, { failedImages: 0, keptImages: 2 }]) {
+  const bg = { failedImages: 1, keptImages: 2 };
+  const $ = await run(bg);
+  assert.equal($('info-text').getAttribute('title'), '1 张图片下载失败，另有 2 张保留为在线链接', '先 kept>0：有 title');
+  Object.assign(bg, next);
+  $('export-btn').dispatchEvent(new globalThis.window.Event('click')); await flush();
+  assert.equal($('info-text').getAttribute('title'), null, `再导出 ${JSON.stringify(next)}：#info-text 没有 title`);
+}
 console.log('popup rows/title tests passed');

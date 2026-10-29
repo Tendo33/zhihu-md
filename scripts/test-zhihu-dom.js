@@ -356,7 +356,7 @@ assert.doesNotMatch(finished.data.content, /truncated/);
   assert.strictEqual(part.success, true);
   assert.deepStrictEqual(part.data.partial, { exported: 3, total: 10, failedPage: 2 });
   assert.match(part.data.content, /truncated: true/);
-  assert.match(part.data.content, /> 已导出 3\/10 条，部分失败：第 2 页回答加载失败，内容不完整，可稍后重新导出。\n$/);
+  assert.match(part.data.content, /> 部分导出：已导出 3\/10 条，7 条未能加载。第 2 页起加载失败，文件已保存，可稍后重新导出。\n$/);
   const p2 = await pageQuestionFeeds({ questionId: '9', targetCount: 5, fetchImpl: async () => { throw new Error('net'); } });
   assert.strictEqual(p2.failedPage, 1);
   assert.strictEqual(finished.data.partial, undefined, '完整导出没有 partial');

@@ -228,7 +228,7 @@ ${answer.content}
       if (partial) {
         markdown += `---
 
-> ${partialText(partial)}：${partialHint(partial)}。
+> 部分导出：${partialText(partial)}。${partialHint(partial)}。
 `;
       }
 

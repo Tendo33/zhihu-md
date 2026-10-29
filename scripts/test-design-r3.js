@@ -21,7 +21,7 @@ assert.match(fv, /outline: 2px solid var\(--focus-ring\);/);
 assert.match(fv, /box-shadow: 0 4px 12px rgb\(0 0 0\/\.15\);/);
 assert.ok(!/color-mix/.test(fv), '单层焦点环：不再有 color-mix 外圈');
 assert.match(content, /font: 700 14px\/1 system-ui, [^;]*"Noto Sans", sans-serif;/);
-const err = content.match(/#zhihu-md-floating-ball\.error \.tooltip \{([^}]*)\}/)[1];
+const err = content.match(/#zhihu-md-floating-ball\.error \.tooltip,\n#zhihu-md-floating-ball\.warning \.tooltip \{([^}]*)\}/)[1];
 assert.match(err, /box-sizing: border-box;/);
 assert.match(popup, /\.row small \{[^}]*font-size: var\(--fs-xs\)/);
 console.log('design-r3 css tests passed');

@@ -7,6 +7,9 @@
   --accent-inverse: #FFFFFF;
   --success: #0f7a3d; /* Z3-2：与 ui-v2.css --success / --danger 一致 */
   --error: #b42318;
+  --warning: #f59e0b; /* 设计 M1：部分导出警告态 */
+  --on-warning: #1f1300;
+  --warning-text: #8a5200;
   --blue: #0a5fd1;
   --focus-ring: #0a5fd1;
   --bg-secondary: #FFFFFF;
@@ -96,7 +99,8 @@
 #zhihu-md-floating-ball.docked-left:hover,
 #zhihu-md-floating-ball.docked-left:focus-visible,
 #zhihu-md-floating-ball.docked-left.loading,
-#zhihu-md-floating-ball.docked-left.error {
+#zhihu-md-floating-ball.docked-left.error,
+#zhihu-md-floating-ball.docked-left.warning {
   transform: translateX(0);
   opacity: 1;
   border-radius: 50%;
@@ -116,7 +120,8 @@
 #zhihu-md-floating-ball.docked-right:hover,
 #zhihu-md-floating-ball.docked-right:focus-visible,
 #zhihu-md-floating-ball.docked-right.loading,
-#zhihu-md-floating-ball.docked-right.error {
+#zhihu-md-floating-ball.docked-right.error,
+#zhihu-md-floating-ball.docked-right.warning {
   transform: translateX(0);
   opacity: 1;
   border-radius: 50%;
@@ -177,6 +182,27 @@
   color: var(--accent-inverse);
 }
 
+/* Warning State（设计 M1：部分导出；浅色白底上加 1px #b45309 描边过 3:1） */
+#zhihu-md-floating-ball.warning {
+  background: var(--warning);
+  box-shadow: 0 0 0 1px #b45309, 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+#zhihu-md-floating-ball.warning .icon {
+  color: var(--on-warning);
+}
+
+#zhihu-md-floating-ball.docked-left.warning,
+#zhihu-md-floating-ball.docked-right.warning {
+  box-shadow: 0 0 0 1px #b45309, 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="dark"] #zhihu-md-floating-ball.warning,
+html[data-theme="dark"] #zhihu-md-floating-ball.docked-left.warning,
+html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
 /* Tooltip */
 #zhihu-md-floating-ball .tooltip {
   position: absolute;
@@ -213,8 +239,8 @@
 }
 
 #zhihu-md-floating-ball.dragging .tooltip,
-#zhihu-md-floating-ball.docked-left:not(:hover):not(:focus-visible):not(.loading):not(.error) .tooltip,
-#zhihu-md-floating-ball.docked-right:not(:hover):not(:focus-visible):not(.loading):not(.error) .tooltip {
+#zhihu-md-floating-ball.docked-left:not(:hover):not(:focus-visible):not(.loading):not(.error):not(.warning) .tooltip,
+#zhihu-md-floating-ball.docked-right:not(:hover):not(:focus-visible):not(.loading):not(.error):not(.warning) .tooltip {
   display: none;
 }
 
@@ -236,6 +262,8 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
   --focus-ring: #60a5fa;
   --success: #4ade80;
   --error: #f87171;
+  --warning: #fbbf24;
+  --warning-text: #fbbf24;
   --bg-secondary: #1b1d22;
   --border-subtle: #33373e;
   --border-strong: #4a4f57;
@@ -257,7 +285,8 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
 }
 
 /* 失败原因提示需要主动显示，不依赖悬停 */
-#zhihu-md-floating-ball.error .tooltip {
+#zhihu-md-floating-ball.error .tooltip,
+#zhihu-md-floating-ball.warning .tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(-50%) translateX(0);
@@ -268,6 +297,10 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
   box-sizing: border-box; /* Z2-01：宽度上限把内边距和边框算进去，375px 下不再左溢 */
   line-height: 1.5;
   text-align: left;
+}
+
+#zhihu-md-floating-ball.warning .tooltip {
+  color: var(--warning-text);
 }
 
 /* 读屏播报区：视觉隐藏 */

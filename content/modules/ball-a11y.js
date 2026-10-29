@@ -12,6 +12,8 @@ export function ballA11y(state, message = '') {
       return { label: `正在导出：${message || '请稍候'}`, busy: true };
     case 'success':
       return { label: `${message || '导出成功'}。再次点击可重新导出`, busy: false };
+    case 'warning': // 设计 M1：部分导出是警告，读屏不说「失败」
+      return { label: `${message}。再次点击可重新导出`, busy: false };
     case 'error':
       return { label: `导出失败：${message || '请刷新页面后重试'}。按回车重试`, busy: false };
     default:

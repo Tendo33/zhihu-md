@@ -112,7 +112,18 @@ function showNotReady(tab, text, showRefresh) {
 const POPUP_HINT = { security_check: '在知乎页面完成验证后点“重试”' };
 
 /** Z3-3：失败用内联 alert（原因 + 下一步），主按钮变成「重试」 */
+function setFeedbackTone(tone) {
+  // 设计 M1：部分导出是警告（琥珀色、三角、status/polite），其余失败是错误（红色、叹号、alert）
+  const warn = tone === 'warn';
+  actionFeedback.className = `alert ${warn ? 'warn' : 'err'}${actionFeedback.classList.contains('hidden') ? ' hidden' : ''}`;
+  actionFeedback.setAttribute('role', warn ? 'status' : 'alert');
+  const icon = svgIcon(warn ? 'warn' : 'alert');
+  icon.id = 'feedback-icon';
+  $('feedback-icon').replaceWith(icon);
+}
+
 function showActionFeedback(feedback) {
+  setFeedbackTone('err');
   if (!feedback) {
     actionFeedback.classList.add('hidden');
     delete actionFeedback.dataset.reason;
@@ -314,9 +325,15 @@ async function handleExport() {
     lastDownloadId = res && res.downloadId != null ? res.downloadId : null;
     setRunning(false);
     if (response.data.partial) {
-      // 发版 QA ZR-02：文件已保存但不完整 → 失败样式 +「已导出 N/M 条，部分失败」，不显示「已保存」
-      updateStatus('err', '部分失败');
-      showActionFeedback({ text: `${partialText(response.data.partial)}：${partialHint(response.data.partial)}`, reason: 'partial' });
+      // 发版 QA ZR-02 / 设计 M1：文件已保存但不完整 → 警告样式「部分导出」，同时给出「打开」
+      updateStatus('warn', '部分导出');
+      showActionFeedback({ text: partialText(response.data.partial), reason: 'partial' });
+      setFeedbackTone('warn');
+      $('feedback-title').textContent = partialText(response.data.partial);
+      $('feedback-hint').textContent = partialHint(response.data.partial);
+      $('ok-file').textContent = (res && res.filename) || response.data.filename;
+      openBtn.classList.toggle('hidden', lastDownloadId == null);
+      actionOk.classList.remove('hidden');
       exportLabel.textContent = PRIMARY;
       setExportActionsEnabled(true);
       renderRecent().catch(() => {});

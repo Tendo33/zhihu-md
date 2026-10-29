@@ -161,6 +161,20 @@ assert.ok(texts.includes('Export failed: Sign in to Zhihu to see this content, t
   await FloatingBall.handleBallClick(ball);
   assert.equal(ball.querySelector('.tooltip').textContent, 'Exported. 1 image couldn\'t be downloaded; online link kept');
   assert.ok(!/\b1 images\b/.test(live() + ball.getAttribute('aria-label')), `读屏单数：${live()}`);
+  // 设计复核 e2fa5da：成功提示里的 "couldn't be downloaded" 是一个 .nw 段，单数、复数都是；文字本身不变
+  {
+    const tipEl = ball.querySelector('.tooltip');
+    const nwOf = () => [...tipEl.querySelectorAll('.nw')].map((n) => n.textContent);
+    assert.deepEqual(nwOf(), ["couldn't be downloaded"]);
+    assert.equal(tipEl.querySelector('.nw').tagName, 'SPAN');
+    globalThis.chrome.runtime.sendMessage = async () => ({ failedImages: 3, keptImages: 0 });
+    FloatingBall.busy = false;
+    await FloatingBall.handleBallClick(ball);
+    assert.equal(tipEl.textContent, 'Exported. 3 images couldn\'t be downloaded; online links kept');
+    assert.deepEqual(nwOf(), ["couldn't be downloaded"]);
+    FloatingBall.setMessage(ball, 'Exported');
+    assert.deepEqual(nwOf(), []);
+  }
   PageDetector.detectPageType = saved.detect; ArticleExporter.exportMarkdown = saved.exp;
 }
 globalThis.setTimeout = realSetTimeout;

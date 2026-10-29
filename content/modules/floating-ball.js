@@ -25,11 +25,30 @@ export function idleTooltipNodes() {
   return [span('nw', t('ballTooltipIdlePart1')), ' ', span('nw', t('ballTooltipIdlePart2'))];
 }
 
-/** 写入提示：空闲文案用分段结构，其余状态文字直接 textContent */
+// 状态文字里不能从中间折开的短语（设计复核 e2fa5da：320 下成功提示曾折成 “couldn't be / downloaded”）
+export const NOWRAP_PHRASES = ["couldn't be downloaded"];
+
+/** 把状态文字切成文本节点和 .nw 不换行段（createElement，不用 innerHTML） */
+export function messageNodes(message) {
+  const out = [];
+  let rest = String(message);
+  for (;;) {
+    const hits = NOWRAP_PHRASES.map((p) => [rest.indexOf(p), p]).filter(([i]) => i >= 0).sort((a, b) => a[0] - b[0]);
+    if (!hits.length) break;
+    const [i, p] = hits[0];
+    if (i > 0) out.push(rest.slice(0, i));
+    out.push(span('nw', p));
+    rest = rest.slice(i + p.length);
+  }
+  if (rest) out.push(rest);
+  return out;
+}
+
+/** 写入提示：空闲文案用分段结构，其余状态文字按不换行短语切段 */
 export function setTooltipText(tip, message) {
   if (!tip) return;
   if (message === idleLabel()) tip.replaceChildren(...idleTooltipNodes());
-  else tip.textContent = message;
+  else tip.replaceChildren(...messageNodes(message));
 }
 
 // Z3-2：导出中保留 M↓ 字形，靠外圈进度环表示；成功/失败换成勾/叹号

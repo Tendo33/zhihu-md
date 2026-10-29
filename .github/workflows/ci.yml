@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -25,20 +25,28 @@ jobs:
       - run: npm run build
       - run: npm run verify:dist
 
-  # 可选：用真实 markdown-it（html:true）渲染检查 raw HTML 泄漏（scripts/test-html-like-text.js）。
-  # markdown-it 只临时装（--no-save），不进 package.json / package-lock；失败不阻断 check。
+  # 可选：用真实 markdown-it（html:true）渲染检查 raw HTML 泄漏（test-html-like-text + test-fixtures 全部样本）。
+  # markdown-it 只临时装（--no-save --ignore-scripts，精确版本），不进 package.json / package-lock。
+  # continue-on-error 暂时保留：首次真实运行通过后由主管移除。
   rendered-check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     continue-on-error: true
+    env:
+      MARKDOWN_IT_VERSION: 14.3.3
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm install --no-save markdown-it@14
-      - run: npm test
+      - run: npm install --no-save --ignore-scripts "markdown-it@${MARKDOWN_IT_VERSION}"
+      - name: npm test (markdown-it render assertions)
         env:
           MD_RENDERER_DIR: ${{ github.workspace }}
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/test.log"
+          # 渲染断言必须真的跑过：两处测试各打印一行 rendered check，且版本与安装的一致
+          test "$(grep -c "^rendered check: markdown-it ${MARKDOWN_IT_VERSION}, " "$RUNNER_TEMP/test.log")" -ge 2

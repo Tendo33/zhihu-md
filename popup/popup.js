@@ -392,6 +392,7 @@ async function handleExport() {
     if (!(res && res.failedImages > 0) && keptImages > 0) {
       // 第三轮 B：只有按规则保留的图片 → 仍是成功，「已保存」下加一行次级说明
       setImageLine('ok-kept', imageKeptText(keptImages), true);
+      setRecentRows(2); // 设计复核 4193502 F1：多一行次级说明时最近导出同样缩为 2 行
     }
     if (res && res.failedImages > 0) {
       // 发版 QA ZR-09：部分图片没打进 zip，正文里已保留在线链接（N 只算真正的失败）

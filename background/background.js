@@ -6,7 +6,7 @@
 import { createLogger } from '../lib/logger.js';
 import { createZipWithImages } from '../lib/zip.js';
 import { recordRecent, titleFromFilename } from '../lib/recent-exports.js';
-import { applyImageResults } from '../lib/image-pack.js';
+import { applyImageResults, isAllowedImageUrl } from '../lib/image-pack.js';
 import { createMenus, handleMenuClick, openAndWait, showLinkFailure } from './context-menu.js';
 
 const Logger = createLogger('[Zhihu-MD Background]');
@@ -141,6 +141,7 @@ async function downloadImages(images) {
   const results = await Promise.allSettled(
     images.map(async (img) => {
       Logger.debug(`下载图片: ${img.url.substring(0, 50)}...`);
+      if (!isAllowedImageUrl(img.url)) throw new Error('只下载 https://*.zhimg.com 的图片');
       const response = await fetch(img.url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();

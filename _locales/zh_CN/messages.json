@@ -24,7 +24,7 @@
     "description": "右键菜单：把选中的内容复制为 Markdown。"
   },
   "menuLinkExport": {
-    "message": "打开并导出这个知乎链接",
+    "message": "导出链接的知乎页面为 Markdown",
     "description": "右键菜单：在知乎问题、回答或专栏链接上，打开并导出该页。"
   }
 }

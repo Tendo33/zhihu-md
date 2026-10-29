@@ -20,7 +20,7 @@
 
 ### 改进
 
-- 右键菜单和快捷键说明的中文统一为「导出本页为 Markdown」「复制本页为 Markdown」；英文版改为「Export this page as Markdown」「Export linked Zhihu page as Markdown」。
+- 右键菜单和快捷键说明的中文统一为「导出本页为 Markdown」「复制本页为 Markdown」，知乎链接上的菜单改为「导出链接的知乎页面为 Markdown」；英文版改为「Export this page as Markdown」「Export linked Zhihu page as Markdown」。
 - 设置页按设计稿重做：开关只显示一个圆钮，标题改为「最大下载条数」并加单位「条」，三项说明换成新文案；保存后在页脚显示「✓ 已保存」；标签可点击，开关对读屏软件报为「开关」。
 
 ## [1.1.7] - 2026-10-29

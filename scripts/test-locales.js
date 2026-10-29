@@ -25,7 +25,7 @@ assert.equal(en.cmdExportPage.message, 'Export this page as Markdown');
 // 设计验收 S1：英文动词与指代统一（主管已定以设计和审查意见为准）
 assert.deepEqual([en.menuPageExport, en.menuPageCopy, en.menuSelectionCopy, en.menuLinkExport].map((x) => x.message),
   ['Export this page as Markdown', 'Copy this page as Markdown', 'Copy selection as Markdown', 'Export linked Zhihu page as Markdown']);
-const MENU = { menuPageExport: '导出本页为 Markdown', menuPageCopy: '复制本页为 Markdown', menuSelectionCopy: '复制选中内容为 Markdown', menuLinkExport: '打开并导出这个知乎链接' };
+const MENU = { menuPageExport: '导出本页为 Markdown', menuPageCopy: '复制本页为 Markdown', menuSelectionCopy: '复制选中内容为 Markdown', menuLinkExport: '导出链接的知乎页面为 Markdown' };
 for (const [k, v] of Object.entries(MENU)) { assert.equal(zh[k].message, v, k + ' 中文不变'); assert.ok(en[k].message && en[k].message !== v, k + ' 有英文'); }
 assert.deepEqual(Object.keys(zh).sort(), Object.keys(en).sort(), '两种语言条目一致');
 assert.deepEqual(manifestMessageKeys(m).sort(), ['cmdExportPage', 'extDescription', 'extName']);

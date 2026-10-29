@@ -78,7 +78,7 @@ Open `chrome://extensions`, enable Developer mode, click "Load unpacked" and pic
 | Toolbar popup | Page type, title, author; Export / Copy Markdown; recent exports |
 | Floating ball | Left-click downloads, right-click copies; preferred for question, feed and hot pages |
 | Shortcut | Exports the current page. From 1.1.7, fresh installs default to `Alt+Shift+K` (`Option+Shift+K` on macOS). On upgrade, a shortcut you already had (e.g. `Alt+Shift+Z`) is kept and is not switched to K; if you never had one assigned, Chrome may assign K after the upgrade. The popup footer shows the shortcut actually in effect. To change it, or if another extension or the browser itself has reserved it, go to `chrome://extensions/shortcuts` |
-| Context menu | 导出本页为 Markdown (export page), 复制本页为 Markdown (copy page), 复制选中内容为 Markdown (copy selection), 打开并导出这个知乎链接 (open and export a Zhihu link) |
+| Context menu | 导出本页为 Markdown (export page), 复制本页为 Markdown (copy page), 复制选中内容为 Markdown (copy selection), 导出链接的知乎页面为 Markdown (export linked Zhihu page) |
 
 <img src="docs/screenshots/popup.png" width="300" alt="Toolbar popup">
 

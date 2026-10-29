@@ -12,6 +12,14 @@ const CJK = /[\u2E80-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF\u3000-\u303F]/u;
 // 两种语言条目完全一致
 assert.deepEqual(Object.keys(zh).sort(), Object.keys(en).sort(), 'zh_CN 和 en 的 key 必须一致');
 
+// 审查 P3-1：同一 key 在 zh_CN 和 en 里占位符的集合和出现顺序都一致，且每个占位符映射到同一个 $n。
+// 目前没有因语序需要调换顺序的条目；以后真要调换，改成只比对集合，并在这里写明是哪个 key、为什么。
+const phOrder = (m) => [...m.message.matchAll(/\$(\w+)\$/g)].map(([, n]) => `${n.toLowerCase()}=${(m.placeholders || {})[n.toLowerCase()]?.content}`);
+for (const k of Object.keys(zh)) {
+  assert.deepEqual(phOrder(en[k]), phOrder(zh[k]), `${k} 的占位符顺序/编号 zh_CN 与 en 不一致`);
+  assert.deepEqual(Object.keys(en[k].placeholders || {}).sort(), Object.keys(zh[k].placeholders || {}).sort(), `${k} 的占位符集合不一致`);
+}
+
 // 按 chrome.i18n 规则（命名占位符 → $n）渲染
 function getMessageFrom(msgs) {
   return (key, subs = []) => {
@@ -43,6 +51,10 @@ assert.equal(t('ballAriaIdle'), '导出 Markdown（点击下载，右键复制�
 globalThis.chrome = { i18n: { getMessage: getMessageFrom(en) }, storage: {}, runtime: {} };
 assert.equal(t('ballTooltipIdle'), 'Click to export · Right-click to copy');
 assert.equal(t('ballAriaIdle'), 'Export Markdown (click to download, right-click to copy)');
+// 审查 P3-1：带占位符的条目断言完整英文（编号错位时会渲染出错误数字）
+assert.equal(t('ballPartial', 3, 10, 7), 'Partial export: 3/10 items exported, 7 couldn\'t load');
+assert.equal(t('ballExportedImagesFailed', 2), 'Exported. 2 images couldn\'t be downloaded; online links kept');
+assert.equal(t('ballAriaError', 'X'), 'Export failed: X. Press Enter to retry');
 for (const k of Object.keys(ZH_FALLBACK)) assert.ok(!CJK.test(t(k, 1, 2, 3)), `en 下 ${k} 含中文：${t(k, 1, 2, 3)}`);
 
 const { window, document } = parseHTML('<!doctype html><html><body></body></html>');

@@ -150,7 +150,7 @@ export function createTurndownService(downloadImages = false) {
               node.classList.contains('RichText-LinkCardContainer'));
     },
     replacement: function(content, node) {
-      const link = node.querySelector('a');
+      const link = node.nodeName === 'A' ? node : node.querySelector('a');
       if (!link) return '';
       
       const href = link.getAttribute('href') || '';
@@ -158,9 +158,10 @@ export function createTurndownService(downloadImages = false) {
       const title = turndownService.escape(linkCardTitle(node, link));
       
       const cleanHref = normalizeZhihuHref(href);
-      if (!cleanHref) return title;
+      // batch8 ZB7-02：卡片是块级内容，前后各留空行，相邻两张卡片不会粘成一行
+      if (!cleanHref) return `\n\n${title}\n\n`;
 
-      return `[${title}](${cleanHref})`;
+      return `\n\n[${title}](${cleanHref})\n\n`;
     }
   });
 
@@ -310,7 +311,8 @@ export function createTurndownService(downloadImages = false) {
 
   // 普通链接：解开 link.zhihu.com 跳转，补全协议相对 / 站内相对地址
   turndownService.addRule('zhihuLink', {
-    filter: (node) => node.nodeName === 'A' && node.getAttribute('href'),
+    // LinkCard 本身就是 <a class="LinkCard">，交给 zhihuLinkCard（后加的规则优先，这里要显式让出）
+    filter: (node) => node.nodeName === 'A' && node.getAttribute('href') && !node.classList?.contains('LinkCard'),
     replacement: (content, node) => {
       const href = normalizeZhihuHref(node.getAttribute('href'));
       if (!content.trim()) return '';

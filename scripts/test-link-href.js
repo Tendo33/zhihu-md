@@ -53,3 +53,13 @@ if (loaded) {
   console.log(`link href: markdown-it ${loaded.version} render check passed`);
 }
 console.log('link href tests passed');
+
+// --- ZB7-02 相邻 LinkCard 各占一段 ---
+{
+  const two = md(card('https://example.com/a', '甲') + card('https://example.com/b', '乙'));
+  assert.equal(two, '[甲](https://example.com/a)\n\n[乙](https://example.com/b)');
+  const mixed = md('<p>前文</p>' + card('https://example.com/a', '甲') + card('javascript:alert(1)', '乙') + '<p>后文</p>');
+  assert.equal(mixed, '前文\n\n[甲](https://example.com/a)\n\n乙\n\n后文');
+  assert.ok(!/\n{3,}/.test(mixed), '不应出现多余空行');
+  console.log('ZB7-02 adjacent LinkCards: ok');
+}

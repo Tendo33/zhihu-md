@@ -2,7 +2,9 @@
 
 ![图片](https://pic1.zhimg.com/v2-7fadbbbb27d12f4c4b61f995dd16c4d9.jpg)
 
-[10W字《R ggplot2可视化教程1.0》来了!](https://mp.weixin.qq.com/s/Uu6xpOO5G597NuKGMSBKFg)[10W字《Python可视化教程1.0》来了！](https://mp.weixin.qq.com/s/QaSmucuVsS_DR-klfpE3-Q)
+[10W字《R ggplot2可视化教程1.0》来了!](https://mp.weixin.qq.com/s/Uu6xpOO5G597NuKGMSBKFg)
+
+[10W字《Python可视化教程1.0》来了！](https://mp.weixin.qq.com/s/QaSmucuVsS_DR-klfpE3-Q)
 
 ## 目录
 

@@ -4,7 +4,7 @@
 
 Zhihu-md ("we", "us", or "our") is a browser extension for exporting Zhihu content into Markdown files. This policy explains what the extension can access, how data is processed, and what is stored locally.
 
-## 1. What We Collect
+## 1. What the extension accesses
 
 We do **not** operate a backend service for this extension. The extension reads Zhihu page content, processes it only locally in your browser, and does not upload it to the developer or any third party.
 

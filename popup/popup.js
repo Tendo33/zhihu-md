@@ -100,6 +100,7 @@ function showNotReady(tab, text, showRefresh) {
   $('info-text').textContent = text;
   refreshBtn.classList.toggle('hidden', !showRefresh);
   actionInfo.classList.remove('hidden');
+  setRecentRows(2);
   // 设计复验 S2：原因已在上方提示框里显示（#info-text），按钮的描述不再重复同一句
   setExportActionsEnabled(false, '暂不可导出，原因见上方提示');
 }
@@ -114,6 +115,7 @@ function showActionFeedback(feedback) {
     delete actionFeedback.dataset.reason;
     $('feedback-title').textContent = '';
     $('feedback-hint').textContent = '';
+    setRecentRows(3);
     return;
   }
   const [title, ...rest] = feedback.text.split(/[：:]/);
@@ -121,6 +123,7 @@ function showActionFeedback(feedback) {
   $('feedback-hint').textContent = POPUP_HINT[feedback.reason] || rest.join('：');
   actionFeedback.dataset.reason = feedback.reason;
   actionFeedback.classList.remove('hidden');
+  setRecentRows(2);
 }
 
 function setExportActionsEnabled(enabled, reason = '') {
@@ -151,10 +154,18 @@ function setRetry(on) {
   exportLabel.textContent = on ? '重试' : PRIMARY;
 }
 
+/** 发版审计 N4：出错或未就绪时提示框更高，最近导出收到 2 行，320/360 宽不出内滚动 */
+let recentRows = 3;
+function setRecentRows(n) {
+  if (recentRows === n) return;
+  recentRows = n;
+  renderRecent().catch(() => {});
+}
+
 async function renderRecent() {
   if (!chrome.storage || !chrome.storage.local) return;
   const got = await chrome.storage.local.get({ [RECENT_KEY]: [] });
-  const items = (got[RECENT_KEY] || []).slice(0, 3);
+  const items = (got[RECENT_KEY] || []).slice(0, recentRows);
   const box = $('recent');
   const list = $('recent-list');
   list.textContent = '';

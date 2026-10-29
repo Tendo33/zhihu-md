@@ -252,7 +252,17 @@ h1 {
   font-size: 12px;
   line-height: 1.4;
   color: var(--warning);
-  margin-top: 6px;
+}
+
+/* 设计复核 M2：提示放在输入行下方，上方留 6px（整行换行，右对齐到输入框下） */
+.option-item--field {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.option-item--field .field-note {
+  flex: 0 0 100%;
+  text-align: right;
 }
 
 .field-note:empty {
@@ -289,6 +299,13 @@ h1 {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+
+  /* 竖排时 gap 是 10，提示和输入行之间收到 6 */
+  .option-item--field .field-note {
+    flex-basis: auto;
+    margin-top: -4px;
+    text-align: left;
   }
 }
 

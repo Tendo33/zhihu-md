@@ -168,3 +168,17 @@ console.log('options redesign tests passed');
   assert.ok(!log.includes('嵌入对话框'), '不再提嵌入对话框');
   console.log('changelog merge passed');
 }
+
+// 设计复核 M2：数字框提示在输入行下方，上方 6px，aria-describedby 不变
+{
+  const html = read('options/options.html');
+  const item = html.slice(html.indexOf('<div class="option-item option-item--field">'), html.indexOf('<div class="option-item">', html.indexOf('option-item--field')));
+  const content = item.slice(item.indexOf('<div class="option-content">'), item.indexOf('<div class="num">'));
+  assert.ok(!content.includes('note-maxAnswerCount"'), '复核 M2：提示不在说明和数字框之间');
+  assert.ok(item.indexOf('id="note-maxAnswerCount"') > item.indexOf('<div class="num">'), '复核 M2：提示在输入行之后');
+  assert.match(html, /aria-describedby="desc-maxAnswerCount note-maxAnswerCount"/);
+  assert.match(css, /\.option-item--field \{\s*flex-wrap: wrap;\s*row-gap: 6px;/, '宽屏：换行，行距 6');
+  assert.match(css, /\.option-item--field \.field-note \{\s*flex: 0 0 100%;/);
+  assert.match(css, /\.option-item--field \.field-note \{\s*flex-basis: auto;\s*margin-top: -4px;/, '竖排：10 - 4 = 6');
+  console.log('design recheck M2 passed');
+}

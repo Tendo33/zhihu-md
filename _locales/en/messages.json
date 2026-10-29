@@ -167,7 +167,7 @@
     }
   },
   "ballImagesKeptReason": {
-    "message": "these images' format or source can't be saved locally",
+    "message": "the image format isn't supported",
     "description": "Screen reader extra: why images were kept as online links."
   },
   "ballSep": {

@@ -73,6 +73,12 @@ assert.equal(t('ballAriaIdle'), 'Export Markdown (click to download, right-click
   assert.equal(bt.ballKeptSrExtra(2, 1), '1 more kept as an online link');
   assert.equal(bt.ballKeptSrExtra(2, 3), '3 more kept as online links');
   assert.equal(bt.ballImageSrExtra(2, 1), '2 images couldn\'t be downloaded; online links kept, 1 more kept as an online link');
+  // 设计复核 e2fa5da：保留原因不分单复数，接在单数、复数后都读得通；中文不变
+  assert.equal(bt.ballKeptSrExtra(0, 1), '1 image kept as an online link, the image format isn\'t supported');
+  assert.equal(bt.ballKeptSrExtra(0, 3), '3 images kept as online links, the image format isn\'t supported');
+  assert.equal(bt.ballImageSrExtra(0, 1), '1 image kept as an online link, the image format isn\'t supported');
+  assert.ok(!/these|images'/.test(en.ballImagesKeptReason.message));
+  assert.equal(zh.ballImagesKeptReason.message, '这些图片的格式或来源不支持保存到本地');
   assert.equal(bt.ballImageSrExtra(1, 3), '1 image couldn\'t be downloaded; online link kept, 3 more kept as online links');
   for (const k of Object.keys(en)) assert.ok(!/again.*again/i.test(en[k].message), `${k} 英文文案：${en[k].message}`);
   for (const k of ['ballExportedImagesFailed', 'ballImagesFailed', 'ballImagesKept']) assert.equal(zhGet(`${k}One`, ['1']), zhGet(k, ['1']));

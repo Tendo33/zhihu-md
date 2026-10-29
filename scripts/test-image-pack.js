@@ -177,6 +177,9 @@ console.log('image pack tests passed');
   assert.equal(extFromMagic(box(0, 'mif1', '\0\0\0\0', 'avif')), 'avif', 'size=0 表示到末尾');
   assert.equal(extFromMagic(box(1, 'mif1', '\0\0\0\0', 'avif')), null, 'size=1（64 位长度）不扫 compatible');
   assert.equal(extFromMagic(box(16, 'mif1', '\0\0\0\0')), null, '没有 compatible brands');
+  // 复审 32569cb P3：avif 写在 minor_version 位置不算；没按 4 字节对齐的 avif 不算
+  assert.equal(extFromMagic(box(20, 'mif1', 'avif', 'mif1')), null, 'avif 在 minor_version 位置 → null');
+  assert.equal(extFromMagic(box(28, 'mif1', '\0\0\0\0', 'mi', 'avif', 'f1', 'miaf')), null, 'avif 跨 4 字节对齐 → null');
   assert.equal(extFromMagic(box(12, 'mif1').slice(0, 10)), null, '短缓冲区');
 }
 console.log('image pack avif/bmp magic tests passed');

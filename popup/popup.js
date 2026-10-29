@@ -390,8 +390,8 @@ async function handleExport() {
         } else {
           setImageLine('feedback-img', imagePartialLine(f, k), f === 0 && k > 0);
         }
-        // 设计复核 after-5（方案①）+ 复审 da941ab：部分导出只要有图片失败句（不论有没有保留），提示框多一行，最近导出缩为 1 行；不按宽度切换
-        setRecentRows(f > 0 ? 1 : 2);
+        // 设计复核 32569cb：部分导出一律缩为 1 行（不再按 f/k 分情况，也不按宽度切换），320 宽不出内滚动
+        setRecentRows(1);
       }
       exportLabel.textContent = PRIMARY;
       setExportActionsEnabled(true);

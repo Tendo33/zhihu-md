@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { chooseLayout, EDGE, HOVER_LIFT } from '../content/modules/tooltip-layout.js';
 
-// 用实测字宽模拟排版（Chromium 12px system-ui，见 dev-log v8 矩阵）：两个不换行短语 + 空格
+// 两个不换行短语 + 空格的字宽。enReal/zhReal 是 v8 Playwright 矩阵在 Chromium 里实测的 nwWidths
+// （空格由单行总宽反推：en 218.1、zh 127.5）；en/zh 是放宽约 13% 的版本，模拟字体更宽的系统
 const PHRASES = {
-  en: [100.4, 113.9, 3.8], // "Click to export ·"、"Right-click to copy"、空格
+  enReal: [88.9, 104.1, 3.1], // "Click to export ·"、"Right-click to copy"、空格
+  zhReal: [54.4, 48.0, 3.1],
+  en: [100.4, 113.9, 3.8],
   zh: [57.1, 48.0, 3.4],
 };
 const PAD = 20 + 2; // padding 6px 10px + 边框 1px
@@ -21,7 +24,7 @@ function measureFor([a, b, sp]) {
 
 const BALL = 44;
 const rows = [];
-for (const lang of ['en', 'zh']) {
+for (const lang of Object.keys(PHRASES)) {
   for (const vw of [320, 375, 1280]) {
     for (const vh of [568, 800]) {
       const positions = {
@@ -63,6 +66,15 @@ for (const r of rows.filter((x) => x.vw === 1280 && /^x\d+$/.test(x.pos))) {
 }
 // 320 宽默认位置英文要折行（一行 240px 放不下 228px 的可用宽度）
 assert.equal(rows.find((x) => x.lang === 'en' && x.vw === 320 && x.pos === 'default').lines, 2);
+// 与实测一致：320 宽页面有 15px 滚动条（clientWidth 305，球 left 237、top 715，视口高 791）。
+// en 折两行、宽度收到较长短语 104.1 + 22 ≈ 126（实测 127）；zh 一行
+{
+  const ball = { left: 237, top: 715, width: BALL, height: BALL };
+  const en = chooseLayout({ ball, vw: 305, vh: 791, measure: measureFor(PHRASES.enReal) });
+  assert.equal(en.lines, 2); assert.ok(Math.abs(en.tw - 126.1) < 0.5, `enReal 宽 ${en.tw}`); assert.equal(en.placement, 'left');
+  assert.equal(chooseLayout({ ball, vw: 305, vh: 791, measure: measureFor(PHRASES.zhReal) }).lines, 1);
+}
+assert.equal(rows.find((x) => x.lang === 'zhReal' && x.vw === 320 && x.pos === 'default').lines, 1);
 
 // CSS：去掉整行 nowrap，行高 18，左对齐，.nw 不换行，transform 走变量
 const css = fs.readFileSync(new URL('../content/content.css', import.meta.url), 'utf8');

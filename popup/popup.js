@@ -76,7 +76,7 @@ function hideAlerts() {
   setImageLine('ok-kept', '');
   $('info-kept').textContent = '';
   $('info-kept').classList.add('hidden');
-  actionInfo.removeAttribute('title');
+  $('info-text').removeAttribute('title');
   setImageLine('feedback-img', '');
 }
 
@@ -412,8 +412,9 @@ async function handleExport() {
       const infoKept = $('info-kept');
       infoKept.textContent = keptImages > 0 ? imageKeptMoreText(keptImages) : '';
       infoKept.classList.toggle('hidden', !(keptImages > 0));
-      if (keptImages > 0) actionInfo.title = imagePartialLine(res.failedImages, keptImages);
-      else actionInfo.removeAttribute('title');
+      // 设计复核 4193502：title 放在可见文字 span 上，role=status 容器不带 title（避免名称和内容各念一遍）
+      if (keptImages > 0) $('info-text').title = imagePartialLine(res.failedImages, keptImages);
+      else $('info-text').removeAttribute('title');
       $('refresh-btn').classList.add('hidden');
       actionInfo.classList.remove('hidden');
       setRecentRows(2); // 设计建议 1：多一条提示时最近导出缩为 2 行，320 宽不出内滚动

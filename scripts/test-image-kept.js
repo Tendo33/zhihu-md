@@ -65,7 +65,8 @@ const shown = (el) => !el.classList.contains('hidden');
   assert.ok(shown($('action-info')));
   assert.equal($('info-text').textContent, '3 张图片下载失败，已保留在线链接');
   assert.ok(!shown($('info-kept')) && !shown($('ok-kept')), '只有失败：没有保留行');
-  assert.equal($('action-info').getAttribute('title'), null, '只有失败：不加 title');
+  assert.equal($('info-text').getAttribute('title'), null, '只有失败：不加 title');
+  assert.equal($('action-info').getAttribute('title'), null);
 }
 {
   const $ = await runPopup({ failedImages: 1, keptImages: 2 });
@@ -76,7 +77,8 @@ const shown = (el) => !el.classList.contains('hidden');
   assert.ok(k.classList.contains('sr-only') && !k.classList.contains('img-sub'), '是视觉隐藏，不上屏');
   assert.ok(shown(k), '不是 display:none（没有 .hidden）');
   assert.ok($('action-info').contains(k) && $('action-info').getAttribute('role') === 'status', '在 #action-info 里');
-  assert.equal($('action-info').getAttribute('title'), '1 张图片下载失败，另有 2 张保留为在线链接', 'title 全句');
+  assert.equal($('info-text').getAttribute('title'), '1 张图片下载失败，另有 2 张保留为在线链接', 'title 全句，在可见文字 span 上');
+  assert.equal($('action-info').getAttribute('title'), null, 'role=status 容器不带 title');
   const css = fs.readFileSync(new URL('../lib/ui-v2.css', import.meta.url), 'utf8').match(/\.sr-only\{[^}]*\}/)[0];
   assert.ok(!/display\s*:\s*none/.test(css) && /clip/.test(css), '.sr-only 是标准视觉隐藏写法');
   assert.ok(!shown($('ok-kept')), '绿色提示里不重复');

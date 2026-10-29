@@ -26,4 +26,10 @@ assert.equal(relativeTime(now + 9999, now), '刚刚', '时钟回拨不出负数'
 
 assert.equal(titleFromFilename('zhihu/如何评价X-张三.md'), '如何评价X-张三');
 assert.equal(titleFromFilename('a_with_images.zip'), 'a');
+// 发版审计：同标题去重，保留最新一条（含成功/失败状态）
+let d = addRecent([], { title: 'A', ok: true }, 1);
+d = addRecent(d, { title: 'B', ok: true }, 2);
+d = addRecent(d, { title: 'A', ok: false }, 3);
+d = addRecent(d, { title: 'A', ok: true }, 4);
+assert.deepEqual(d.map((e) => [e.title, e.ok, e.ts]), [['A', true, 4], ['B', true, 2]]);
 console.log('recent-exports tests passed');

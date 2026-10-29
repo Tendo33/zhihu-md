@@ -288,7 +288,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
 /* R13 / B2：球底色和提示框的深色取值。知乎夜间模式（data-theme=dark）和系统深色
    （prefers-color-scheme，知乎未显式设 data-theme=light 时）两处用同一组值。
    球底 #1a6ae0 为设计裁定（白字 5.02:1，对 #191b1f 3.43、#121212 3.73）；
-   悬停/按下沿用亮色“加深”方向，仍保持对两种深色背景 ≥3:1。
+   深色下悬停 #2a73e0 / 按下 #1f6fe5 都比静止更亮（与亮色的加深方向相反，设计裁定），对两种深色背景均 ≥3.4。
    提示框沿用上面夜间模式已有的 #1b1d22 / #e6e8eb / #33373e。 */
 html[data-theme="dark"] #zhihu-md-floating-ball {
   --ball-bg: #1a6ae0;

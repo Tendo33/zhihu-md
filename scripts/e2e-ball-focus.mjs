@@ -29,7 +29,8 @@ if (shots) fs.mkdirSync(shots, { recursive: true });
 const THEMES = { light: { attr: 'light', bg: '#ffffff', ring: 'rgb(10, 95, 209)' }, dark: { attr: 'dark', bg: '#121212', ring: 'rgb(147, 197, 253)' } };
 // R12：收边左/右在「有滚动条」和「无滚动条（overflow hidden）」两种页面上都要四边环完整可见
 // ZF-01：真实知乎有 `:focus{outline:none !important}`；zhihu / star 两格注入这条（及 `*:focus{outline:0!important}` 变体），用键盘 Tab 聚焦后按像素断言环在
-const STATES = ['idle', 'docked-left', 'docked-right', 'docked-left noscroll', 'docked-right noscroll', 'idle zhihu', 'idle star', 'docked-right zhihu'];
+const STATES = ['idle', 'docked-left', 'docked-right', 'docked-left noscroll', 'docked-right noscroll', 'idle zhihu', 'idle star', 'docked-right zhihu', 'snap-right zhihu'];
+// snap-right：真的用鼠标拖到右边（有滚动条），走 JS 的 clamp/handleSnapAndDock，吸边后的 left 必须是 clientWidth - w，再等 800ms 收边
 // 可选 E2E_STATES=逗号分隔，只跑部分格（例如回滚检查只跑 ZF-01 的格）
 if (process.env.E2E_STATES) { const keep = process.env.E2E_STATES.split(','); STATES.splice(0, STATES.length, ...STATES.filter((x) => keep.includes(x))); }
 const RESETS = { zhihu: ':focus{outline:none !important}', star: '*:focus{outline:0!important}' };
@@ -61,12 +62,21 @@ try {
       if (noscroll) await page.evaluate(() => { document.documentElement.style.overflow = 'hidden'; });
       await page.evaluate((st) => {
         const b = document.getElementById('zhihu-md-floating-ball'); b.classList.remove('docked-left', 'docked-right');
-        if (st !== 'idle') b.classList.add(st);
+        if (st !== 'idle' && st !== 'snap-right') b.classList.add(st);
         // 球放在视口中部，环四边都在屏内，可以取像素
         b.style.setProperty('top', '300px', 'important'); if (st === 'idle') { b.style.setProperty('left', '600px', 'important'); b.style.setProperty('right', 'auto', 'important'); }
         document.activeElement?.blur();
       }, st0);
       await page.mouse.move(640, 5);
+      if (st0 === 'snap-right') {
+        await page.evaluate(() => { const b = document.getElementById('zhihu-md-floating-ball'); b.style.left = '600px'; b.style.top = '300px'; b.style.right = 'auto'; b.style.bottom = 'auto'; });
+        const r0 = await page.evaluate(() => { const r = document.getElementById('zhihu-md-floating-ball').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+        await page.mouse.move(r0[0], r0[1]); await page.mouse.down(); await page.mouse.move(r0[0] + 300, r0[1], { steps: 5 }); await page.mouse.move(1279, r0[1], { steps: 5 }); await page.mouse.up();
+        const [snapL, cw, bw0] = await page.evaluate(() => { const b = document.getElementById('zhihu-md-floating-ball'); return [parseFloat(b.style.left), document.documentElement.clientWidth, b.offsetWidth]; });
+        if (snapL !== cw - bw0) fail(cell, `吸右后 left ${snapL} ≠ clientWidth ${cw} - ${bw0}（压在滚动条下）`);
+        await page.mouse.move(640, 5); await page.waitForTimeout(1000);
+        if (!(await page.evaluate(() => document.getElementById('zhihu-md-floating-ball').classList.contains('docked-right')))) fail(cell, '拖到右边后没有收边');
+      }
       const read = () => page.evaluate(() => { const b = document.getElementById('zhihu-md-floating-ball'); const s = getComputedStyle(b); const r = b.getBoundingClientRect(); return { boxShadow: s.boxShadow, outlineStyle: s.outlineStyle, outlineWidth: s.outlineWidth, outlineOffset: s.outlineOffset, outlineColor: s.outlineColor, w: b.offsetWidth, h: b.offsetHeight, rect: [r.left, r.top, r.width, r.height], fv: b.matches(':focus-visible'), bg: s.backgroundColor }; });
       const before = await read();
       const [vw, vh, sbw] = await page.evaluate(() => [document.documentElement.clientWidth, document.documentElement.clientHeight, window.innerWidth - document.documentElement.clientWidth]);
@@ -74,7 +84,7 @@ try {
       // 常态位置不动：收边仍是贴 clientWidth 边、露出 60%
       const [bl, , bw] = before.rect;
       if (st0 === 'docked-left' && Math.abs(bl - -0.4 * bw) > 0.5) fail(cell, `常态位置变了 left ${bl}`);
-      if (st0 === 'docked-right' && Math.abs(bl - (vw - 0.6 * bw)) > 0.5) fail(cell, `常态位置变了 left ${bl}（clientWidth ${vw}）`);
+      if ((st0 === 'docked-right' || st0 === 'snap-right') && Math.abs(bl - (vw - 0.6 * bw)) > 0.5) fail(cell, `常态位置变了 left ${bl}（clientWidth ${vw}）`);
       if (reset) {
         // 键盘 Tab：正文已 visibility:hidden，不可聚焦；最多按 40 次直到焦点落到球上
         for (let i = 0; i < 40 && !(await page.evaluate(() => document.activeElement?.id === 'zhihu-md-floating-ball')); i++) await page.keyboard.press('Tab');

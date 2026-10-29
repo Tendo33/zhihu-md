@@ -167,8 +167,12 @@
     }
   },
   "ballImagesKeptReason": {
-    "message": "the image format isn't supported",
+    "message": "The image format isn't supported",
     "description": "Screen reader extra: why images were kept as online links."
+  },
+  "ballReasonSep": {
+    "message": ". ",
+    "description": "Screen reader: ends the kept-images sentence before the reason, so the reason is its own sentence (period; keep the trailing space in English)."
   },
   "ballSep": {
     "message": ", ",

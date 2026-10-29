@@ -10,7 +10,7 @@ import { describeFailure, ExportFailure } from '../lib/failure-text.js';
 import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 import { partialHint, partialText } from '../lib/partial-export.js';
-import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
+import { IMAGE_KEPT_REASON, IMAGE_KEPT_REASON_SEP, imageFailText, imageKeptMoreShortText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
 import { svgIcon } from '../lib/safe-dom.js';
 import { splitFilename } from '../lib/filename-split.js';
 
@@ -108,7 +108,7 @@ function setImageLine(id, text, withReason = false) {
     el.title = `${text}：${IMAGE_KEPT_REASON}`;
     const sr = document.createElement('span');
     sr.className = 'sr-only';
-    sr.textContent = `，${IMAGE_KEPT_REASON}`;
+    sr.textContent = `${IMAGE_KEPT_REASON_SEP}${IMAGE_KEPT_REASON}`;
     el.append(sr);
   }
 }

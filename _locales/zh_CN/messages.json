@@ -167,8 +167,12 @@
     }
   },
   "ballImagesKeptReason": {
-    "message": "这些图片的格式或来源不支持保存到本地",
+    "message": "图片格式或来源不支持保存到本地",
     "description": "Screen reader extra: why images were kept as online links."
+  },
+  "ballReasonSep": {
+    "message": "。",
+    "description": "Screen reader: ends the kept-images sentence before the reason, so the reason is its own sentence (period; keep the trailing space in English)."
   },
   "ballSep": {
     "message": "，",

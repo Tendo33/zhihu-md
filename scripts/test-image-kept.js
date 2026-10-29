@@ -110,7 +110,10 @@ const shown = (el) => !el.classList.contains('hidden');
   assert.ok(src.includes('const srExtra = ballKeptSrExtra(failedN, keptN);'));
   const { ballKeptSrExtra, ballImageSrExtra } = await import('../content/modules/ball-text.js');
   const ip = await import('../lib/image-pack.js');
-  assert.equal(ballKeptSrExtra(0, 2), `${ip.imageKeptText(2)}，${ip.IMAGE_KEPT_REASON}`);
+  assert.equal(ballKeptSrExtra(0, 2), `${ip.imageKeptText(2)}。${ip.IMAGE_KEPT_REASON}`);
+  // QA e2fa5da P4：1 张时也读得通，原因单独成句
+  assert.equal(ballKeptSrExtra(0, 1), '1 张图片保留为在线链接。图片格式或来源不支持保存到本地');
+  assert.equal(ip.imagePartialSrExtra(0, 1), '1 张图片保留为在线链接。图片格式或来源不支持保存到本地');
   assert.equal(ballKeptSrExtra(1, 2), ip.imageKeptMoreShortText(2));
   assert.equal(ballKeptSrExtra(1, 0), '');
   for (const [f, k] of [[3, 0], [3, 2], [0, 5], [0, 0]]) assert.equal(ballImageSrExtra(f, k), ip.imagePartialSrExtra(f, k), `读屏补充 ${f}/${k} 与弹窗一致`);

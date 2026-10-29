@@ -16,14 +16,14 @@ const FAIL_KEY = {
 export function ballImageSrExtra(failed, kept) {
   if (failed > 0 && kept > 0) return tn('ballImagesFailed', failed) + t('ballSep') + tn('ballImagesKeptMore', kept);
   if (failed > 0) return tn('ballImagesFailed', failed);
-  if (kept > 0) return tn('ballImagesKept', kept) + t('ballSep') + t('ballImagesKeptReason');
+  if (kept > 0) return tn('ballImagesKept', kept) + t('ballReasonSep') + t('ballImagesKeptReason');
   return '';
 }
 
 /** 成功态读屏补充：只算保留的图片（失败数已在 tooltip 里） */
 export function ballKeptSrExtra(failed, kept) {
   if (!(kept > 0)) return '';
-  return failed > 0 ? tn('ballImagesKeptMore', kept) : tn('ballImagesKept', kept) + t('ballSep') + t('ballImagesKeptReason');
+  return failed > 0 ? tn('ballImagesKeptMore', kept) : tn('ballImagesKept', kept) + t('ballReasonSep') + t('ballImagesKeptReason');
 }
 
 /** 失败原因：沿用 describeFailure 的判定，文字按界面语言取 */

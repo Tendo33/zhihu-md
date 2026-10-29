@@ -3,6 +3,20 @@ import { capAnswerCount, normalizeAnswerCount } from '../lib/answer-limit.js';
 
 const Logger = createLogger('[Zhihu-MD Options]');
 
+/**
+ * 设计复核 S6：同一条提示连续出现时读屏也要再播报。
+ * 先清空，下一帧再写入，live region 才会认为内容变了。
+ */
+export function announceNote(note, text) {
+  note.textContent = '';
+  clearTimeout(announceNote.timer);
+  if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(announceNote.frame);
+  if (!text) return;
+  const write = () => { note.textContent = text; };
+  if (typeof requestAnimationFrame === 'function') announceNote.frame = requestAnimationFrame(write);
+  else announceNote.timer = setTimeout(write, 16);
+}
+
 function saveOptions() {
   const showFloatingBall = document.getElementById('showFloatingBall').checked;
   const { value: validCount, note: countNote } = normalizeAnswerCount(document.getElementById('maxAnswerCount').value);
@@ -18,7 +32,7 @@ function saveOptions() {
     Logger.info('设置已保存:', { showFloatingBall, maxAnswerCount: validCount, downloadImages });
     // 设计 M3：页脚左侧「✓ 已保存」，2.5 秒后淡出；被上限或下限改值时在数字框下方留一行警示，保留到下次修改
     const note = document.getElementById('note-maxAnswerCount');
-    if (note) note.textContent = countNote;
+    if (note) announceNote(note, countNote);
     const status = document.getElementById('status');
     status.textContent = '✓ 已保存';
     status.classList.add('show');

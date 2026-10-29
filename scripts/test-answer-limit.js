@@ -33,11 +33,17 @@ globalThis.chrome = { storage: { sync: {
   get: (defaults, done) => done({ ...defaults, ...stored }),
   set: (obj, done) => { saved.push(obj.maxAnswerCount); stored = { ...stored, ...obj }; done && done(); },
 } } };
+// 设计复核 S6：手动驱动下一帧
+let frames = [];
+globalThis.requestAnimationFrame = (cb) => { frames.push(cb); return frames.length; };
+globalThis.cancelAnimationFrame = (id) => { if (id) frames[id - 1] = null; };
+const flush = () => { const f = frames; frames = []; f.forEach((cb) => cb && cb()); };
 await import('../options/options.js');
 const input = document.getElementById('maxAnswerCount');
 document.dispatchEvent(new window.Event('DOMContentLoaded'));
 assert.strictEqual(String(input.value), '1000', '旧的大值显示时截到 1000');
-const save = (raw) => { input.value = raw; input.dispatchEvent(new window.Event('change')); return saved.at(-1); };
+const change = (raw) => { input.value = raw; input.dispatchEvent(new window.Event('change')); };
+const save = (raw) => { change(raw); flush(); return saved.at(-1); };
 const status = document.getElementById('status');
 const note = document.getElementById('note-maxAnswerCount');
 assert.strictEqual(save('999'), 999);
@@ -65,6 +71,21 @@ assert.strictEqual(note.textContent, '', '0 不出提示');
 assert.strictEqual(save('abc'), 20);
 assert.strictEqual(save('12.7'), 12);
 assert.strictEqual(save('1000.5'), 1000);
+
+// 设计复核 S6：同一个非法值连续保存两次，第二次也先清空、下一帧再写入
+{
+  save('5000');
+  assert.strictEqual(note.textContent, '超过上限，已保存为 1000');
+  change('5000');
+  assert.strictEqual(note.textContent, '', '写入前先清空');
+  flush();
+  assert.strictEqual(note.textContent, '超过上限，已保存为 1000', '下一帧再写入');
+  change('-1');
+  change('20');
+  flush();
+  assert.strictEqual(note.textContent, '', '合法值取消还没写入的提示');
+  console.log('note re-announce passed');
+}
 
 // 使用路径：问题页。第 1 页接口失败 → partial.total 就是实际目标条数
 const { QuestionExporter } = await import('../content/modules/exporters/question.js');
@@ -194,3 +215,4 @@ console.log('answer limit tests passed');
   assert.ok(!/parseInt/.test(js), '不再用 parseInt 截断');
   console.log('answer count min passed');
 }
+

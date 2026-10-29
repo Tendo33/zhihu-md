@@ -54,3 +54,6 @@ body { min-width: 320px; }
 /* 设计 R05：所有提示放到按钮行下方的状态区，出现/消失不改变按钮位置 */
 .status-zone{display:flex;flex-direction:column;gap:8px}
 .status-zone:not(:has(> :not(.hidden))){display:none}
+
+/* 设计 R05 / R09：状态文案里的词组和“数字+量词”不从中间折行 */
+.alert .nw{white-space:nowrap}

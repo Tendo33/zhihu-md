@@ -95,6 +95,30 @@ function setSavedFilename(name) {
   el.title = full;
 }
 
+/**
+ * 设计 R05 / R09：中文状态文案里不能从中间断开的词组和“数字+量词”。
+ * 320 宽时「条未能加/载」被拆到两行；这些片段包进 .nw（white-space:nowrap），textContent 不变。
+ */
+const NOWRAP_RE = /第 \d+ 页|\d+(?:\/\d+)? (?:张图片|条|张)|未能加载|未能下载|加载失败|未加载完|在线链接|重新导出|刷新页面|知乎页面|几分钟后|剪贴板/g;
+function noWrapNodes(text) {
+  const out = [];
+  const s = String(text ?? '');
+  let last = 0;
+  for (const m of s.matchAll(NOWRAP_RE)) {
+    if (m.index > last) out.push(s.slice(last, m.index));
+    const span = document.createElement('span');
+    span.className = 'nw';
+    span.textContent = m[0];
+    out.push(span);
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) out.push(s.slice(last));
+  return out;
+}
+function setStatusText(el, text) {
+  el.replaceChildren(...noWrapNodes(text));
+}
+
 /** 第三轮 B：次级说明行；kept 时 title 和读屏文字补上原因 */
 function setImageLine(id, text, withReason = false) {
   const el = $(id);
@@ -103,7 +127,7 @@ function setImageLine(id, text, withReason = false) {
   el.classList.toggle('hidden', !text);
   el.removeAttribute('title');
   if (!text) return;
-  el.append(text);
+  el.append(...noWrapNodes(text));
   if (withReason) {
     el.title = `${text}：${IMAGE_KEPT_REASON}`;
     const sr = document.createElement('span');
@@ -141,7 +165,7 @@ function showNotReady(tab, text, showRefresh) {
   articleTitle.textContent = (tab && tab.title) || '知乎页面';
   articleTitle.setAttribute('title', articleTitle.textContent); // 单行省略：title 写完整标题
   updateStatus('idle', '不可用');
-  $('info-text').textContent = text;
+  setStatusText($('info-text'), text);
   refreshBtn.classList.toggle('hidden', !showRefresh);
   actionInfo.classList.remove('hidden');
   setRecentRows(2);
@@ -175,8 +199,8 @@ function showActionFeedback(feedback) {
     return;
   }
   const [title, ...rest] = feedback.text.split(/[：:]/);
-  $('feedback-title').textContent = rest.length ? title : feedback.text;
-  $('feedback-hint').textContent = POPUP_HINT[feedback.reason] || rest.join('：');
+  setStatusText($('feedback-title'), rest.length ? title : feedback.text);
+  setStatusText($('feedback-hint'), POPUP_HINT[feedback.reason] || rest.join('：'));
   actionFeedback.dataset.reason = feedback.reason;
   actionFeedback.classList.remove('hidden');
   setRecentRows(2);
@@ -374,8 +398,8 @@ async function handleExport() {
       updateStatus('warn', '部分导出');
       showActionFeedback({ text: partialText(response.data.partial), reason: 'partial' });
       setFeedbackTone('warn');
-      $('feedback-title').textContent = partialText(response.data.partial);
-      $('feedback-hint').textContent = partialHint(response.data.partial);
+      setStatusText($('feedback-title'), partialText(response.data.partial));
+      setStatusText($('feedback-hint'), partialHint(response.data.partial));
       // 设计复核 935b5b5：不再显示绿色「已保存」框，「打开」挪进琥珀提示
       feedbackOpen.classList.toggle('hidden', lastDownloadId == null);
       {
@@ -413,7 +437,7 @@ async function handleExport() {
     }
     if (res && res.failedImages > 0) {
       // 发版 QA ZR-09：部分图片没打进 zip，正文里已保留在线链接（N 只算真正的失败）
-      $('info-text').textContent = imageFailText(res.failedImages);
+      setStatusText($('info-text'), imageFailText(res.failedImages));
       // 第三轮设计定稿 B：保留数不上屏，放进 .sr-only 让 role=status 一起念；title 写全句
       const infoKept = $('info-kept');
       infoKept.textContent = keptImages > 0 ? imageKeptMoreText(keptImages) : '';

@@ -1,5 +1,6 @@
-// batch8 ZB7-01：link.zhihu.com 跳转目标解码后重新编码成合法 URL；只接受 http/https，其余安全退回。
-// batch8 ZB7-02：相邻 LinkCard 各占一段。
+// batch8 ZB7-01（f206396）：link.zhihu.com 跳转目标解码后重新编码成合法 URL；只接受 http/https，其余安全退回。
+// 审查 P2（990aa02）：( ) 编码成 %28 / %29。审查 P3①：mailto 保留为链接，#锚点只留文字。
+// batch8 ZB7-02 的相邻 LinkCard 用例在 81d9300 才加入（文件末尾）；f206396 里这行说明是提前写的。
 import assert from 'node:assert/strict';
 import { parseHTML } from 'linkedom';
 import { loadMarkdownIt } from './lib/rendered-check.js';

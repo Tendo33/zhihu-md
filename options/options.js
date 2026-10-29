@@ -1,5 +1,5 @@
 import { createLogger } from '../lib/logger.js';
-import { capAnswerCount } from '../lib/answer-limit.js';
+import { capAnswerCount, MAX_ANSWER_LIMIT } from '../lib/answer-limit.js';
 
 const Logger = createLogger('[Zhihu-MD Options]');
 
@@ -10,6 +10,7 @@ function saveOptions() {
 
   // Validate: 0 means unlimited, otherwise must be >= 1
   const validCount = capAnswerCount(Math.max(0, isNaN(maxAnswerCount) ? 20 : maxAnswerCount));
+  const capped = maxAnswerCount > MAX_ANSWER_LIMIT;
   document.getElementById('maxAnswerCount').value = validCount;
 
   chrome.storage.sync.set({
@@ -19,6 +20,7 @@ function saveOptions() {
   }, () => {
     Logger.info('设置已保存:', { showFloatingBall, maxAnswerCount: validCount, downloadImages });
     const status = document.getElementById('status');
+    status.textContent = capped ? `已按上限保存为 ${MAX_ANSWER_LIMIT}` : '设置已保存';
     status.classList.add('show');
     clearTimeout(saveOptions.hideTimer);
     saveOptions.hideTimer = setTimeout(() => {

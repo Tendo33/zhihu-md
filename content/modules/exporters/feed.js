@@ -3,7 +3,7 @@
  * Handles export for home page and follow page feeds
  */
 
-import { capAnswerCount } from '../../../lib/answer-limit.js';
+import { capAnswerCount, MAX_ANSWER_LIMIT } from '../../../lib/answer-limit.js';
 import { failureResult } from '../../../lib/failure-reason.js';
 import { CONSTANTS, normalizeUrl, scrollToLoadItems } from '../constants.js';
 import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
@@ -104,8 +104,8 @@ export const FeedExporter = {
         // Use default
       }
 
-      const unlimited = maxItemCount === 0;
-      const targetCount = unlimited ? Number.POSITIVE_INFINITY : maxItemCount;
+      // 批量上限 1000（Simon 定）：0 表示「上限内不限」，信息流按 1000 条滚动加载
+      const targetCount = maxItemCount === 0 ? MAX_ANSWER_LIMIT : maxItemCount;
       await this.scrollToLoadFeedItems(targetCount);
 
       let feedItems = document.querySelectorAll('.TopstoryItem');
@@ -133,7 +133,7 @@ export const FeedExporter = {
         uniqueItems.push(item);
       }
 
-      const itemsToProcess = unlimited ? uniqueItems : uniqueItems.slice(0, maxItemCount);
+      const itemsToProcess = uniqueItems.slice(0, targetCount);
 
       if (itemsToProcess.length === 0) {
         return failureResult();

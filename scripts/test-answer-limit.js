@@ -5,7 +5,7 @@ import { parseHTML } from 'linkedom';
 import { capAnswerCount, MAX_ANSWER_LIMIT } from '../lib/answer-limit.js';
 
 assert.strictEqual(MAX_ANSWER_LIMIT, 1000);
-for (const [v, want] of [[999, 999], [1000, 1000], [1001, 1000], [1e9, 1000], [0, 0], [20, 20], ['5000', 1000], [-3, -3]]) {
+for (const [v, want] of [[NaN, NaN], [null, null], [undefined, undefined], ['', ''], ['abc', 'abc'], [999, 999], [1000, 1000], [1001, 1000], [1e9, 1000], [0, 0], [20, 20], ['5000', 1000], [-3, -3]]) {
   assert.strictEqual(capAnswerCount(v), want, `cap(${v})`);
 }
 
@@ -30,12 +30,18 @@ const input = document.getElementById('maxAnswerCount');
 document.dispatchEvent(new window.Event('DOMContentLoaded'));
 assert.strictEqual(String(input.value), '1000', '旧的大值显示时截到 1000');
 const save = (raw) => { input.value = raw; input.dispatchEvent(new window.Event('change')); return saved.at(-1); };
+const status = document.getElementById('status');
 assert.strictEqual(save('999'), 999);
+assert.strictEqual(status.textContent, '设置已保存');
 assert.strictEqual(save('1000'), 1000);
 assert.strictEqual(save('1001'), 1000);
 assert.strictEqual(String(input.value), '1000', '截断后回填输入框');
+assert.strictEqual(status.textContent, '已按上限保存为 1000', '超过上限时提示');
 assert.strictEqual(save('99999999999'), 1000);
 assert.strictEqual(save('0'), 0, '0 仍表示尽量全部');
+assert.strictEqual(status.textContent, '设置已保存', '未截断时恢复原提示');
+assert.strictEqual(save(''), 20, '空串 → 20');
+assert.strictEqual(save('NaN'), 20);
 // 原有处理不变：负数 → 0，非数字 → 20，小数取整
 assert.strictEqual(save('-5'), 0);
 assert.strictEqual(save('abc'), 20);
@@ -82,6 +88,8 @@ assert.strictEqual(await feedTarget(1000), 1000);
 assert.strictEqual(await feedTarget(1001), 1000);
 assert.strictEqual(await feedTarget(5000), 1000, 'storage 里的旧大值');
 assert.strictEqual(await feedTarget(1e9), 1000);
-assert.strictEqual(await feedTarget(0), Number.POSITIVE_INFINITY, '0 的原有语义不变');
+assert.strictEqual(await feedTarget(0), 1000, '0：上限内不限，信息流按 1000');
+assert.strictEqual(await feedTarget(null), null, 'null 原样（原逻辑）');
+assert.strictEqual(await feedTarget('abc'), 'abc', '非数字原样（原逻辑）');
 
 console.log('answer limit tests passed');

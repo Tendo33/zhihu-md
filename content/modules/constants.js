@@ -84,9 +84,10 @@ function normalizeUrl(href) {
  * or until no new elements appear 3 times in a row, or until timeout.
  * @param {function(): number} getCount - Returns current count of target elements
  * @param {number} targetCount
- * @returns {Promise<number>} Final count of elements found
+ * @returns {Promise<{count: number, reason: 'limit'|'idle'|'timeout'}>}
+ *   reason：limit = 达到目标数；idle = 连续 3 轮没有新元素；timeout = 超过 SCROLL_TIMEOUT
  */
-async function scrollToLoadItems(getCount, targetCount) {
+async function scrollToLoadItemsWithReason(getCount, targetCount) {
   const startTime = Date.now();
   let lastCount = 0;
   let noChangeCount = 0;
@@ -95,13 +96,13 @@ async function scrollToLoadItems(getCount, targetCount) {
     const currentCount = getCount();
 
     if (currentCount >= targetCount) {
-      return currentCount;
+      return { count: currentCount, reason: 'limit' };
     }
 
     if (currentCount === lastCount) {
       noChangeCount++;
       if (noChangeCount >= 3) {
-        return currentCount;
+        return { count: currentCount, reason: 'idle' };
       }
     } else {
       noChangeCount = 0;
@@ -112,7 +113,12 @@ async function scrollToLoadItems(getCount, targetCount) {
     await new Promise(resolve => setTimeout(resolve, CONSTANTS.DEFAULTS.SCROLL_INTERVAL));
   }
 
-  return getCount();
+  return { count: getCount(), reason: 'timeout' };
+}
+
+/** 兼容旧调用：只返回最终数量 */
+async function scrollToLoadItems(getCount, targetCount) {
+  return (await scrollToLoadItemsWithReason(getCount, targetCount)).count;
 }
 
 export {
@@ -121,4 +127,5 @@ export {
   cleanFilename,
   normalizeUrl,
   scrollToLoadItems,
+  scrollToLoadItemsWithReason,
 };

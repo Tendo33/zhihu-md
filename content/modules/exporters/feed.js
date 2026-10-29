@@ -5,7 +5,7 @@
 
 import { capAnswerCount, MAX_ANSWER_LIMIT } from '../../../lib/answer-limit.js';
 import { failureResult } from '../../../lib/failure-reason.js';
-import { CONSTANTS, normalizeUrl, scrollToLoadItems } from '../constants.js';
+import { CONSTANTS, normalizeUrl, scrollToLoadItemsWithReason } from '../constants.js';
 import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
   cleanText,
@@ -24,10 +24,10 @@ export const FeedExporter = {
   /**
    * Scroll to load more feed items
    * @param {number} targetCount 
-   * @returns {Promise<number>}
+   * @returns {Promise<{count: number, reason: 'limit'|'idle'|'timeout'}>}
    */
   async scrollToLoadFeedItems(targetCount) {
-    return scrollToLoadItems(() => {
+    return scrollToLoadItemsWithReason(() => {
       const items = document.querySelectorAll('.TopstoryItem');
       if (items.length > 0) return items.length;
       return document.querySelectorAll('.Feed > .ContentItem, .ContentItem').length;
@@ -106,7 +106,8 @@ export const FeedExporter = {
 
       // 批量上限 1000（Simon 定）：0 表示「上限内不限」，信息流按 1000 条滚动加载
       const targetCount = maxItemCount === 0 ? MAX_ANSWER_LIMIT : maxItemCount;
-      await this.scrollToLoadFeedItems(targetCount);
+      const scroll = await this.scrollToLoadFeedItems(targetCount);
+      const stopReason = scroll && typeof scroll === 'object' ? scroll.reason : undefined;
 
       let feedItems = document.querySelectorAll('.TopstoryItem');
       if (feedItems.length === 0) {
@@ -134,8 +135,11 @@ export const FeedExporter = {
       }
 
       const itemsToProcess = uniqueItems.slice(0, targetCount);
-      // 和问题页一致：还有没导出的卡片（被上限截掉）时，文首写 truncated: true
-      const truncated = uniqueItems.length > itemsToProcess.length;
+      // 和问题页一致，没下完时文首写 truncated: true：
+      // 停在上限且导出满额、或滚动超时 → 视为没下完；连续 3 轮没有新卡片（idle）时按卡片是否被上限截掉判断
+      const truncated = (stopReason === 'limit' && itemsToProcess.length === targetCount)
+        || stopReason === 'timeout'
+        || uniqueItems.length > itemsToProcess.length;
 
       if (itemsToProcess.length === 0) {
         return failureResult();

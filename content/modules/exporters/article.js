@@ -4,6 +4,7 @@
  */
 
 import { failureResult } from '../../../lib/failure-reason.js';
+import { parseHtmlInert } from '../../../lib/safe-dom.js';
 import { CONSTANTS, cleanFilename, querySelectorAny } from '../constants.js';
 import { PageDetector } from '../detector.js';
 import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
@@ -225,8 +226,7 @@ date: ${date}`;
       const answerId = window.location.pathname.match(/\/answer\/(\d+)/)?.[1] || '';
       const record = await fetchAnswerRecord(answerId);
       if (record?.content) {
-        container = document.createElement('div');
-        container.innerHTML = record.content;
+        container = parseHtmlInert(record.content);
         author = record.author?.name || author;
         createdTime = formatUnixTime(record.created_time);
         editedTime = record.updated_time && record.updated_time !== record.created_time

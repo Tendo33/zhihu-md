@@ -7,16 +7,9 @@ globalThis.window = window; globalThis.document = document;
 globalThis.Node = window.Node; globalThis.NodeFilter = window.NodeFilter;
 const { QuestionExporter } = await import('../content/modules/exporters/question.js');
 let parses = 0;
-const orig = document.createElement.bind(document);
-document.createElement = (tag) => {
-  const el = orig(tag);
-  if (tag === 'div') {
-    const d = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Object.getPrototypeOf(el)), 'innerHTML')
-      || Object.getOwnPropertyDescriptor(window.Element.prototype, 'innerHTML');
-    Object.defineProperty(el, 'innerHTML', { get() { return d.get.call(this); }, set(v) { parses++; d.set.call(this, v); } });
-  }
-  return el;
-};
+const proto = window.DOMParser.prototype;
+const realParse = proto.parseFromString;
+proto.parseFromString = function (...a) { parses++; return realParse.apply(this, a); };
 const td = { turndown: (n) => n.textContent.trim() };
 const rec = await QuestionExporter.recordFromFeed(
   { id: 1, content: '<p>你好，世界</p>', author: { name: 'a' }, created_time: 1700000000 }, '9', td, new Map());

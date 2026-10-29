@@ -15,15 +15,16 @@ import { selectionToMarkdown } from './selection-md.js';
 import { floatingBallDrag } from './floating-ball-drag.js';
 import { applyBallA11y, IDLE_LABEL } from './ball-a11y.js';
 import { describeFailure } from '../../lib/failure-text.js';
+import { span, svgIcon } from '../../lib/safe-dom.js';
 
 const idleLabel = '点击下载 · 右键复制';
 
-const GLYPH = '<span class="glyph" aria-hidden="true">M↓</span>';
+// Z3-2：导出中保留 M↓ 字形，靠外圈进度环表示；成功/失败换成勾/叹号
 export const BALL_FACE = {
-  idle: GLYPH,
-  loading: GLYPH,
-  success: '<svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
-  error: '<svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>',
+  idle: () => span('glyph', 'M↓', { 'aria-hidden': 'true' }),
+  loading: () => span('glyph', 'M↓', { 'aria-hidden': 'true' }),
+  success: () => svgIcon('check', 'icon'),
+  error: () => svgIcon('alert', 'icon'),
 };
 
 export const FloatingBall = {
@@ -46,7 +47,12 @@ export const FloatingBall = {
     ball.id = 'zhihu-md-floating-ball';
     ball.type = 'button';
     ball.setAttribute('aria-label', IDLE_LABEL);
-    ball.innerHTML = `<span class="ring" aria-hidden="true"></span><span class="face">${BALL_FACE.idle}</span><span class="tooltip" aria-hidden="true">${idleLabel}</span>`;
+    ball.append(
+      span('ring', null, { 'aria-hidden': 'true' }),
+      span('face'),
+      span('tooltip', idleLabel, { 'aria-hidden': 'true' }),
+    );
+    ball.querySelector('.face').append(BALL_FACE.idle());
 
     document.body.appendChild(ball);
     return ball;
@@ -62,8 +68,7 @@ export const FloatingBall = {
 
     if (state === 'loading' || state === 'success' || state === 'error') ball.classList.add(state);
     const face = ball.querySelector('.face');
-    // Z3-2：导出中保留 M↓ 字形，靠外圈进度环表示；成功/失败换成勾/叹号
-    if (face) face.innerHTML = BALL_FACE[state] || BALL_FACE.idle;
+    if (face) face.replaceChildren((BALL_FACE[state] || BALL_FACE.idle)());
   },
 
   /**

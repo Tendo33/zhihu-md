@@ -11,6 +11,7 @@ import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 import { partialHint, partialText } from '../lib/partial-export.js';
 import { imageFailText } from '../lib/image-pack.js';
+import { svgIcon } from '../lib/safe-dom.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
 
@@ -180,9 +181,7 @@ async function renderRecent() {
     b.className = `badge ${it.ok ? 'ok' : 'err'}`;
     b.setAttribute('aria-label', it.ok ? '成功' : '失败');
     b.setAttribute('role', 'img');
-    b.innerHTML = it.ok
-      ? '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>'
-      : '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>';
+    b.append(svgIcon(it.ok ? 'check' : 'alert'));
     const n = document.createElement('span');
     n.className = 'n';
     n.textContent = it.title;

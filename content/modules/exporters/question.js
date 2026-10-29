@@ -5,6 +5,7 @@
 
 import { failureResult } from '../../../lib/failure-reason.js';
 import { partialHint, partialText } from '../../../lib/partial-export.js';
+import { parseHtmlInert } from '../../../lib/safe-dom.js';
 import { ArticleExporter } from './article.js';
 import { CONSTANTS, cleanFilename } from '../constants.js';
 import { PageDetector } from '../detector.js';
@@ -262,8 +263,7 @@ ${answer.content}
     // perf：API 正文只解析一次；只有页面上也有这条回答时才需要比较两边的可见文本长度
     let holder = null;
     if (source.content) {
-      holder = document.createElement('div');
-      holder.innerHTML = source.content;
+      holder = parseHtmlInert(source.content);
     }
     const domTextLen = dom ? cleanText(dom.contentEl).length : 0;
     // Visible text, not innerHTML: lazy-image attributes make a short answer look complete.

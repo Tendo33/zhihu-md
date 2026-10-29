@@ -24,6 +24,18 @@ assert.equal(withExt('img_001_v2-abc.jpg', 'png'), 'img_001_v2-abc.png');
 assert.equal(withExt('img_002_noext', 'webp'), 'img_002_noext.webp');
 assert.equal(withExt('img_003_a.jpg', null), 'img_003_a.jpg');
 
+// 审查 P3-4：去掉 Content-Type 识别或 webp 的 WEBP 标记检查时必须失败
+const UNKNOWN = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+const RIFF_WAVE = Uint8Array.from([0x52, 0x49, 0x46, 0x46, 1, 2, 3, 4, 0x57, 0x41, 0x56, 0x45]);
+assert.equal(extFromMagic(RIFF_WAVE), null, 'RIFF 但不是 WEBP 不能当 webp');
+{
+  const one = [{ url: 'https://pic1.zhimg.com/v2-q.jpg', filename: 'img_009_q.jpg' }];
+  const ct = applyImageResults('![](images/img_009_q.jpg)', one, [{ ok: true, data: UNKNOWN, contentType: 'image/gif' }]);
+  assert.deepEqual(ct.files.map((f) => f.filename), ['img_009_q.gif'], '魔数认不出时按 Content-Type 命名');
+  const wave = applyImageResults('![](images/img_009_q.jpg)', one, [{ ok: true, data: RIFF_WAVE, contentType: 'application/octet-stream' }]);
+  assert.ok(!wave.files.some((f) => f.filename.endsWith('.webp')), 'RIFF/WAVE 不应存成 .webp');
+}
+
 // 文案
 assert.equal(imageFailText(2), '2 张图片下载失败，已保留在线链接');
 

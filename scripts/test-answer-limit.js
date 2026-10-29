@@ -1,4 +1,4 @@
-// 「最大下载回答数」上限 1000：保存路径（options）和使用路径（问题页 / 动态页导出）都截到 1000
+// 「最大下载条数」上限 1000：保存路径（options）和使用路径（问题页 / 动态页导出）都截到 1000
 import assert from 'assert';
 import fs from 'fs';
 import { parseHTML } from 'linkedom';

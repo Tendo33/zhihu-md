@@ -6,6 +6,10 @@
 
 - Chrome / Edge 包的 manifest 不再带 `background.scripts`，Chrome 扩展页不再提示「'background.scripts' requires manifest version of 2 or lower」。Firefox 包另用 `npm run build:firefox` 构建到 `dist-firefox/`，保留 `background.scripts`。
 
+### 改进
+
+- 设置页按设计稿重做：开关只显示一个圆钮，标题改为「最大下载条数」并加单位「条」，三项说明换成新文案；保存后在页脚显示「✓ 已保存」，输入超过上限时在输入框下方提示「超过上限，已保存为 1000」；在扩展管理页的嵌入对话框里去掉外框、收紧间距；标签可点击，开关对读屏软件报为「开关」。
+
 ## [1.1.8] - 2026-10-29
 
 ### 新增

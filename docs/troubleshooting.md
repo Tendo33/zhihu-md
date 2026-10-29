@@ -33,14 +33,14 @@
 
 常见原因：
 
-- `最大下载回答数` 小于这个问题下的回答数。文首 `truncated: true` 表示没有下完
+- `最大下载条数` 小于这个问题下的回答数。文首 `truncated: true` 表示没有下完
 - 设为 0 时最多取 1000 条
 - 回答接口失败，只能保留页面上已经出现的回答
 - 知乎页面结构变了，部分 `.AnswerItem` 未被识别
 
 先检查：
 
-- 设置页中的 `最大下载回答数`
+- 设置页中的 `最大下载条数`
 - `content/modules/exporters/question.js`
 - `content/modules/zhihu-dom.js`
 

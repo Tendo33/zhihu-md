@@ -58,6 +58,9 @@ const shown = (el) => !el.classList.contains('hidden');
   assert.ok($('ok-kept').textContent.startsWith('2 张图片保留为在线链接'));
   assert.ok($('ok-kept').textContent.includes(IMAGE_KEPT_REASON), '读屏文字带原因');
   assert.equal($('ok-kept').getAttribute('title'), `2 张图片保留为在线链接：${IMAGE_KEPT_REASON}`);
+  // 审查 a833a13 P3-3：读屏补充以句号「。」单独成句（popup.js 的 IMAGE_KEPT_REASON_SEP），不是逗号拼接
+  assert.equal($('ok-kept').querySelector('.sr-only').textContent, `。${IMAGE_KEPT_REASON}`);
+  assert.equal($('ok-kept').textContent, `2 张图片保留为在线链接。${IMAGE_KEPT_REASON}`);
   assert.ok($('ok-kept').closest('[role=status]') === $('action-ok'), '和「已保存」在同一个 status 区域');
 }
 {

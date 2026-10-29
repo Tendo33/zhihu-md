@@ -36,8 +36,8 @@ const matchPattern = (pattern, url) => {
 const pageHit = (u) => PAGE_PATTERNS.some((p) => matchPattern(p, u));
 const linkHit = (u) => LINK_PATTERNS.some((p) => matchPattern(p, u));
 const SHOW = ['https://zhuanlan.zhihu.com/p/123', 'https://www.zhihu.com/question/1', 'https://www.zhihu.com/question/1/answer/2',
-  'https://www.zhihu.com/question/1?sort=created', 'https://www.zhihu.com/hot', 'https://www.zhihu.com/follow'];
-const HIDE = ['https://www.zhihu.com/', 'https://www.zhihu.com/search?q=x', 'https://www.zhihu.com/people/abc',
+  'https://www.zhihu.com/question/1?sort=created', 'https://www.zhihu.com/hot', 'https://www.zhihu.com/follow', 'https://www.zhihu.com/'];
+const HIDE = ['https://www.zhihu.com/search?q=x', 'https://www.zhihu.com/people/abc',
   'https://www.zhihu.com/topic/1', 'https://example.com/question/1', 'https://www.zhihu.com/hotlist'];
 for (const u of SHOW) { assert.ok(pageHit(u), '页面菜单应显示: ' + u); assert.notEqual(detectPageTypeFromPathname(new URL(u).pathname), null, '应是可导出页面: ' + u); }
 for (const u of HIDE) assert.ok(!pageHit(u), '页面菜单不应显示: ' + u);

@@ -1,15 +1,13 @@
 import { createLogger } from '../lib/logger.js';
-import { capAnswerCount, MAX_ANSWER_LIMIT } from '../lib/answer-limit.js';
+import { capAnswerCount, normalizeAnswerCount } from '../lib/answer-limit.js';
 
 const Logger = createLogger('[Zhihu-MD Options]');
 
 function saveOptions() {
   const showFloatingBall = document.getElementById('showFloatingBall').checked;
-  const maxAnswerCount = parseInt(document.getElementById('maxAnswerCount').value, 10);
+  const { value: validCount, note: countNote } = normalizeAnswerCount(document.getElementById('maxAnswerCount').value);
   const downloadImages = document.getElementById('downloadImages').checked;
 
-  const validCount = capAnswerCount(Math.max(0, isNaN(maxAnswerCount) ? 20 : maxAnswerCount));
-  const capped = maxAnswerCount > MAX_ANSWER_LIMIT;
   document.getElementById('maxAnswerCount').value = validCount;
 
   chrome.storage.sync.set({
@@ -18,9 +16,9 @@ function saveOptions() {
     downloadImages: downloadImages
   }, () => {
     Logger.info('设置已保存:', { showFloatingBall, maxAnswerCount: validCount, downloadImages });
-    // 设计 M3：页脚左侧「✓ 已保存」，2.5 秒后淡出；被上限改值时在数字框下方留一行警示，保留到下次修改
+    // 设计 M3：页脚左侧「✓ 已保存」，2.5 秒后淡出；被上限或下限改值时在数字框下方留一行警示，保留到下次修改
     const note = document.getElementById('note-maxAnswerCount');
-    if (note) note.textContent = capped ? `超过上限，已保存为 ${MAX_ANSWER_LIMIT}` : '';
+    if (note) note.textContent = countNote;
     const status = document.getElementById('status');
     status.textContent = '✓ 已保存';
     status.classList.add('show');

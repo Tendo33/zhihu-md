@@ -54,8 +54,14 @@ assert.strictEqual(save('0'), 0, '0 仍表示尽量全部');
 assert.strictEqual(note.textContent, '', '下次未截断的修改清掉警示行');
 assert.strictEqual(save(''), 20, '空串 → 20');
 assert.strictEqual(save('NaN'), 20);
-// 原有处理不变：负数 → 0，非数字 → 20，小数取整
-assert.strictEqual(save('-5'), 0);
+// 审查第 5 条：负数 → 1 并在数字框下方提示；非数字 → 20，小数向下取整
+assert.strictEqual(save('-5'), 1);
+assert.strictEqual(String(input.value), '1', '回填 1');
+assert.strictEqual(note.textContent, '至少 1 条，已保存为 1', '小于 1 时数字框下方提示');
+assert.strictEqual(save('0.5'), 1);
+assert.strictEqual(note.textContent, '至少 1 条，已保存为 1');
+assert.strictEqual(save('0'), 0, '0 仍表示尽量全部（待决策）');
+assert.strictEqual(note.textContent, '', '0 不出提示');
 assert.strictEqual(save('abc'), 20);
 assert.strictEqual(save('12.7'), 12);
 assert.strictEqual(save('1000.5'), 1000);
@@ -167,3 +173,24 @@ assert.match((await feedRun(20, 25, 'non-object')).md, /^item_count: 20\ntruncat
 }
 
 console.log('answer limit tests passed');
+
+// 审查第 5 条：小于 1 的处理（0 仍是「尽量全部」，见待决策）
+{
+  const { normalizeAnswerCount, MIN_ANSWER_NOTE } = await import('../lib/answer-limit.js');
+  const eq = (raw, value, note) => assert.deepEqual(normalizeAnswerCount(raw), { value, note }, `输入 ${JSON.stringify(raw)}`);
+  assert.equal(MIN_ANSWER_NOTE, '至少 1 条，已保存为 1');
+  eq('0', 0, '');
+  eq('-5', 1, MIN_ANSWER_NOTE);
+  eq('-0.5', 1, MIN_ANSWER_NOTE);
+  eq('0.5', 1, MIN_ANSWER_NOTE);
+  eq('2.7', 2, '');
+  eq('1', 1, '');
+  eq('', 20, '');
+  eq('abc', 20, '');
+  eq('1000', 1000, '');
+  eq('1001', 1000, '超过上限，已保存为 1000');
+  const js = fs.readFileSync(new URL('../options/options.js', import.meta.url), 'utf8');
+  assert.match(js, /normalizeAnswerCount\(document\.getElementById\('maxAnswerCount'\)\.value\)/, '设置页用 normalizeAnswerCount');
+  assert.ok(!/parseInt/.test(js), '不再用 parseInt 截断');
+  console.log('answer count min passed');
+}

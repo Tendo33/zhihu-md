@@ -67,7 +67,10 @@ QuestionExporter.exportMultipleAnswers = async () => ({
 const successCases = [
   [{ success: true, failedImages: 3, keptImages: 0 }, '已导出，3 张图片未能下载，已保留在线链接', '已导出，3 张图片未能下载，已保留在线链接'],
   [{ success: true, failedImages: 3, keptImages: 2 }, '已导出，3 张图片未能下载，已保留在线链接', '已导出，3 张图片未能下载，已保留在线链接，另有 2 张保留为在线链接'],
-  [{ success: true, failedImages: 0, keptImages: 5 }, '已导出', `已导出，5 张图片保留为在线链接。${IMAGE_KEPT_REASON}`],
+  // QA e2fa5da P4（Z85-02）：只有保留时 tooltip 也带张数（1 张、多张），读屏原因单独成句
+  [{ success: true, failedImages: 0, keptImages: 5 }, '已导出，5 张图片保留为在线链接', `已导出，5 张图片保留为在线链接。${IMAGE_KEPT_REASON}`],
+  [{ success: true, failedImages: 0, keptImages: 1 }, '已导出，1 张图片保留为在线链接', `已导出，1 张图片保留为在线链接。${IMAGE_KEPT_REASON}`],
+  [{ success: true, failedImages: 0, keptImages: 0 }, '已导出', '已导出'],
 ];
 for (const [res, tip, spoken] of successCases) {
   const r = await run(res);

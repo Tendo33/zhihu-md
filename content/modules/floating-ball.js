@@ -223,11 +223,14 @@ export const FloatingBall = {
           this.finishBall(ball, generation, 'warning', t('ballPartial', exported, total, total - exported), srExtra, t('ballPartialSep'));
         } else {
           // 发版 QA ZR-09：部分图片没打进 zip 时，成功提示里带上数量
-          // 第三轮 B：只有 kept 按普通成功处理，tooltip 不变，读屏末尾补一句；数字只算失败
+          // 第三轮 B：只有 kept 按普通成功处理，读屏末尾补原因
+          // QA e2fa5da P4（Z85-02）：只有 kept 时 tooltip 也带上张数，不再只显示「已导出」
           const failedN = (dl && dl.failedImages) || 0;
           const keptN = (dl && dl.keptImages) || 0;
-          const srExtra = ballKeptSrExtra(failedN, keptN);
-          this.finishBall(ball, generation, 'success', failedN > 0 ? tn('ballExportedImagesFailed', failedN) : t('ballExported'), srExtra);
+          const keptOnly = failedN === 0 && keptN > 0;
+          const message = failedN > 0 ? tn('ballExportedImagesFailed', failedN) : keptOnly ? tn('ballExportedImagesKept', keptN) : t('ballExported');
+          const srExtra = keptOnly ? t('ballImagesKeptReason') : ballKeptSrExtra(failedN, keptN);
+          this.finishBall(ball, generation, 'success', message, srExtra, keptOnly ? t('ballReasonSep') : undefined);
         }
       } else if (result.reason) {
         // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办

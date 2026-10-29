@@ -85,6 +85,24 @@
       }
     }
   },
+  "ballExportedImagesKept": {
+    "message": "Exported. $ARG1$ images kept as online links",
+    "description": "Tooltip after export when some images were kept as online links and none failed. $1 = number of images (2 or more).",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballExportedImagesKeptOne": {
+    "message": "Exported. $ARG1$ image kept as an online link",
+    "description": "Singular form of ballExportedImagesKept, used when the count is 1. $1 = 1.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
   "ballCopied": {
     "message": "Copied",
     "description": "Floating ball: page copied."

@@ -85,6 +85,24 @@
       }
     }
   },
+  "ballExportedImagesKept": {
+    "message": "已导出，$ARG1$ 张图片保留为在线链接",
+    "description": "Tooltip after export when some images were kept as online links and none failed. $1 = number of images (2 or more).",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ballExportedImagesKeptOne": {
+    "message": "已导出，$ARG1$ 张图片保留为在线链接",
+    "description": "Singular form of ballExportedImagesKept, used when the count is 1. $1 = 1.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
   "ballCopied": {
     "message": "已复制",
     "description": "Floating ball: page copied."

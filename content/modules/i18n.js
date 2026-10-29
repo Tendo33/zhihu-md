@@ -14,6 +14,8 @@ export const ZH_FALLBACK = {
   ballExported: "已导出",
   ballExportedImagesFailed: "已导出，$1 张图片未能下载，已保留在线链接",
   ballExportedImagesFailedOne: "已导出，$1 张图片未能下载，已保留在线链接",
+  ballExportedImagesKept: "已导出，$1 张图片保留为在线链接",
+  ballExportedImagesKeptOne: "已导出，$1 张图片保留为在线链接",
   ballCopied: "已复制",
   ballCopiedSelection: "已复制选中内容",
   ballNoSelection: "没有选中内容，先选中一段文字再复制",

@@ -141,7 +141,7 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
 
 // 悬浮球：成功提示里带数量
 const ball = fs.readFileSync(new URL('../content/modules/floating-ball.js', import.meta.url), 'utf8');
-assert.match(ball, /failedN > 0 \? tn?\('ballExportedImagesFailed', failedN\) : t\('ballExported'\)/);
+assert.match(ball, /failedN > 0 \? tn?\('ballExportedImagesFailed', failedN\) : keptOnly \? tn\('ballExportedImagesKept', keptN\) : t\('ballExported'\)/);
 { const { t } = await import('../content/modules/i18n.js'); assert.equal(t('ballExportedImagesFailed', 2), `已导出，${imageFailText(2)}`); }
 console.log('image pack tests passed');
 

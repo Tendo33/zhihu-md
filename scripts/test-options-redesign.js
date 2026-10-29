@@ -155,3 +155,12 @@ console.log('options redesign tests passed');
   assert.ok(!/desc-|option-desc|innerHTML/.test(read('options/options.js')), 'options.js 不重写说明');
   console.log('options redesign B1 passed');
 }
+
+// 设计验收 S2：数字框聚焦只保留一道 2px 外圈（和开关一致），边框保持 --text-2
+{
+  const fv = rule('.number-input:focus-visible');
+  assert.match(fv, /border-color: var\(--text-2\);/, 'S2：聚焦时边框不变蓝');
+  assert.match(fv, /outline: 2px solid var\(--focus\);/, 'S2：保留 2px 焦点外圈');
+  assert.match(fv, /outline-offset: 2px;/);
+  console.log('options redesign S2 passed');
+}

@@ -204,6 +204,7 @@ h1 {
 }
 
 .number-input:focus-visible {
+  border-color: var(--text-2); /* 设计验收 S2：焦点只靠 2px 外圈表示，边框不再变蓝，避免两道蓝圈 */
   outline: 2px solid var(--focus);
   outline-offset: 2px;
   box-shadow: none;

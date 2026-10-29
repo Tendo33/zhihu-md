@@ -134,3 +134,18 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
 const ball = fs.readFileSync(new URL('../content/modules/floating-ball.js', import.meta.url), 'utf8');
 assert.match(ball, /dl && dl\.failedImages > 0 \? `已导出，\$\{imageFailText\(dl\.failedImages\)\}` : '已导出'/);
 console.log('image pack tests passed');
+
+// 审查 P3（release-polish-2 ③）：Content-Type 为 octet-stream 时，avif / bmp 只能靠文件头识别
+{
+  const AVIF = Uint8Array.from([0, 0, 0, 0x1c, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66, 0, 0, 0, 0]);
+  const AVIS = Uint8Array.from([0, 0, 0, 0x1c, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x73, 0, 0, 0, 0]);
+  const HEIC = Uint8Array.from([0, 0, 0, 0x1c, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63, 0, 0, 0, 0]);
+  const BMP = Uint8Array.from([0x42, 0x4d, 0x36, 0, 0, 0, 0, 0, 0, 0, 0x36, 0]);
+  const one = [{ url: 'https://pic1.zhimg.com/v2-m.jpg', filename: 'img_010_m.jpg' }];
+  const name = (data) => applyImageResults('![](images/img_010_m.jpg)', one, [{ ok: true, data, contentType: 'application/octet-stream' }]).files.map((f) => f.filename);
+  assert.deepEqual(name(AVIF), ['img_010_m.avif'], 'ftyp avif + octet-stream → .avif');
+  assert.deepEqual(name(AVIS), ['img_010_m.avif'], 'ftyp avis + octet-stream → .avif');
+  assert.deepEqual(name(BMP), ['img_010_m.bmp'], 'BM + octet-stream → .bmp');
+  assert.deepEqual(name(HEIC), [], 'ftyp heic 不是 avif，按无法识别处理');
+}
+console.log('image pack avif/bmp magic tests passed');

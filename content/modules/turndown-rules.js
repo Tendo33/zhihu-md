@@ -29,11 +29,13 @@ function toHttpUrl(value) {
 }
 
 // 审查 P3①（lead 决定）：mailto: 保留为链接；#锚点在导出文件里没有意义，有意只留文字（走下面的 '' 分支）。
-// 只放行原链接本身是 mailto:；link.zhihu.com 的跳转目标仍然只接受 http(s)。
-function toMailtoUrl(value) {
+// ZB8-01（lead 决定）：tel: 和 mailto: 一样保留为链接。
+// 只放行原链接本身是 mailto: / tel:；link.zhihu.com 的跳转目标仍然只接受 http(s)。
+const OPAQUE_LINK_PROTOCOLS = new Set(['mailto:', 'tel:']);
+function toOpaqueUrl(value) {
   try {
     const url = new URL(value);
-    if (url.protocol !== 'mailto:' || !url.pathname) return '';
+    if (!OPAQUE_LINK_PROTOCOLS.has(url.protocol) || !url.pathname) return '';
     // 不透明路径里空格、<、>、括号等不会被自动编码，这里补上，保证 Markdown 链接不被截断、不变成 raw HTML
     return url.href.replace(/[\s()<>"]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'));
   } catch {
@@ -43,7 +45,7 @@ function toMailtoUrl(value) {
 
 export function normalizeZhihuHref(href = '') {
   let value = String(href).trim();
-  if (/^mailto:/i.test(value)) return toMailtoUrl(value);
+  if (/^(mailto|tel):/i.test(value)) return toOpaqueUrl(value);
   if (value.startsWith('//')) value = 'https:' + value;
   else if (value.startsWith('/')) value = 'https://www.zhihu.com' + value;
   const original = toHttpUrl(value);

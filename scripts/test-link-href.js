@@ -101,3 +101,22 @@ console.log('link href tests passed');
   assert.ok(!/\n{3,}/.test(mixed), '不应出现多余空行');
   console.log('ZB7-02 adjacent LinkCards: ok');
 }
+
+// --- ZB8-01（lead 决定）：tel: 和 mailto 一样保留为链接；跳转目标仍只接受 http(s) ---
+{
+  assert.equal(normalizeZhihuHref('tel:+8610123'), 'tel:+8610123');
+  assert.equal(normalizeZhihuHref('TEL:+86 10 123'), 'tel:+86%2010%20123');
+  assert.equal(normalizeZhihuHref('tel:'), '');
+  assert.equal(normalizeZhihuHref(redirect('tel:+8610123')), new URL(redirect('tel:+8610123')).href, 'tel: 跳转目标退回 link.zhihu.com');
+  for (const bad of ['javascript:alert(1)', 'data:,x', 'vbscript:x', 'sms:+8610123', 'file:///etc/passwd']) {
+    assert.equal(normalizeZhihuHref(bad), '', bad);
+  }
+  assert.equal(md('<p>电话 <a href="tel:+8610123">T-tel</a></p>'), '电话 [T-tel](tel:+8610123)');
+  assert.equal(md('<p><a href="#ref1">A-anchor</a></p>'), 'A-anchor');
+  assert.equal(normalizeZhihuHref('mailto:a@b.c'), 'mailto:a@b.c');
+  if (loaded) {
+    const toks = new loaded.MarkdownIt({ html: true }).parseInline(md('<p><a href="tel:+86 (10) 123">电</a></p>'), {})[0].children;
+    assert.equal(toks.find((t) => t.type === 'link_open').attrGet('href'), 'tel:+86%20%2810%29%20123');
+  }
+  console.log('ZB8-01 tel kept / redirect-to-tel falls back: ok');
+}

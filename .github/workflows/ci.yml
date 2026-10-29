@@ -27,11 +27,9 @@ jobs:
 
   # 可选：用真实 markdown-it（html:true）渲染检查 raw HTML 泄漏（test-html-like-text + test-fixtures 全部样本）。
   # markdown-it 只临时装（--no-save --ignore-scripts，精确版本），不进 package.json / package-lock。
-  # continue-on-error 暂时保留：首次真实运行通过后由主管移除。
   rendered-check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    continue-on-error: true
     env:
       MARKDOWN_IT_VERSION: 14.3.3
     steps:

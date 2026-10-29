@@ -23,8 +23,8 @@ assert.ok(!/position: fixed/.test(css), '设置页不再有 fixed 浮层');
 
 // 保存路径：真的加载 options.js，改输入框触发 change
 const { window, document } = parseHTML(`<!doctype html><html><body>
-<input type="checkbox" id="showFloatingBall" checked><input type="number" id="maxAnswerCount" value="20">
-<input type="checkbox" id="downloadImages"><div id="note-maxAnswerCount"></div><div id="status"></div><span id="app-version"></span></body></html>`);
+<input type="checkbox" id="showFloatingBall" checked><div class="field-col"><div class="num"><input type="number" id="maxAnswerCount" value="20"></div><div class="field-note" id="note-maxAnswerCount"></div></div>
+<input type="checkbox" id="downloadImages"><div id="status"></div><span id="app-version"></span></body></html>`);
 globalThis.window = window;
 globalThis.document = document;
 let stored = { showFloatingBall: true, maxAnswerCount: 5000, downloadImages: false };
@@ -46,6 +46,9 @@ const change = (raw) => { input.value = raw; input.dispatchEvent(new window.Even
 const save = (raw) => { change(raw); flush(); return saved.at(-1); };
 const status = document.getElementById('status');
 const note = document.getElementById('note-maxAnswerCount');
+// 复核 M2：提示和数字框在同一个 .field-col 里，options.js 仍按 id 找到它并播报
+assert.ok(note.parentElement.classList.contains('field-col'), '提示在 .field-col 里');
+assert.strictEqual(note.parentElement, input.closest('.num').parentElement, '提示和 .num 同列');
 assert.strictEqual(save('999'), 999);
 assert.strictEqual(status.textContent, '✓ 已保存');
 assert.strictEqual(note.textContent, '');

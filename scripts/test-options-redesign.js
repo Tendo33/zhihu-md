@@ -177,8 +177,14 @@ console.log('options redesign tests passed');
   assert.ok(!content.includes('note-maxAnswerCount"'), '复核 M2：提示不在说明和数字框之间');
   assert.ok(item.indexOf('id="note-maxAnswerCount"') > item.indexOf('<div class="num">'), '复核 M2：提示在输入行之后');
   assert.match(html, /aria-describedby="desc-maxAnswerCount note-maxAnswerCount"/);
-  assert.match(css, /\.option-item--field \{\s*flex-wrap: wrap;\s*row-gap: 6px;/, '宽屏：换行，行距 6');
-  assert.match(css, /\.option-item--field \.field-note \{\s*flex: 0 0 100%;/);
-  assert.match(css, /\.option-item--field \.field-note \{\s*flex-basis: auto;\s*margin-top: -4px;/, '竖排：10 - 4 = 6');
+  // 复核 2f4a629：.num 和提示包在同一个 .field-col 里，所有宽度间距都由 gap: 6px 决定
+  assert.match(item, /<div class="field-col">\s*<div class="num">[\s\S]*?<\/div>\s*<div class="field-note" id="note-maxAnswerCount" role="status" aria-live="polite"><\/div>\s*<\/div>\s*<\/div>/, '复核 M2：.field-col 只包 .num 和提示');
+  assert.ok(!/\.option-item--field \{[^}]*(flex-wrap|row-gap)/.test(css), '复核 M2：去掉整行换行和 row-gap');
+  assert.ok(!/flex: 0 0 100%|margin-top: -4px/.test(css), '复核 M2：去掉 flex: 0 0 100% 和 margin-top: -4px');
+  assert.match(css, /\n\.field-col \{\s*display: flex;\s*flex-direction: column;\s*align-items: flex-end;\s*align-self: flex-start;\s*gap: 6px;\s*flex: none;\s*\}/);
+  assert.match(css, /\n\.field-col \.field-note \{\s*text-align: right;\s*\}/);
+  const narrow = css.slice(css.indexOf('@media (max-width: 480px)'));
+  assert.match(narrow, /\.field-col \{\s*align-items: flex-start;\s*\}/, '≤480：左对齐');
+  assert.match(narrow, /\.field-col \.field-note \{\s*text-align: left;\s*\}/);
   console.log('design recheck M2 passed');
 }

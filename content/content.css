@@ -15,6 +15,11 @@
   --bg-secondary: #FFFFFF;
   --border-subtle: #dde1e6;
   --text-primary: #1b1d22;
+  /* 球本体底色/字色单独成变量：深色下改为设计裁定的 #1a6ae0 + 白字（R13） */
+  --ball-bg: var(--accent);
+  --ball-bg-hover: var(--accent-hover);
+  --ball-bg-active: var(--accent-active);
+  --ball-fg: var(--accent-inverse);
 
   -webkit-appearance: none;
   appearance: none;
@@ -28,13 +33,13 @@
   
   /* Zhihu Blue Theme */
   /* Zhihu Blue Theme */
-  background: var(--accent);
+  background: var(--ball-bg);
   /* Removed border to eliminate 'light blue ring' effect */
   border: none;
   
   /* Neutral shadow for cleaner look */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); /* Z3-2：mockup .fab 阴影 */
-  color: var(--accent-inverse);
+  color: var(--ball-fg);
   font: 700 14px/1 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif; /* 设计验收 R3：M↓ 700/14 统一字体栈 */
   letter-spacing: 0;
   cursor: pointer;
@@ -63,7 +68,7 @@
 /* Hover State - Normal */
 #zhihu-md-floating-ball:hover {
   transform: translateY(-2px);
-  background: var(--accent-hover);
+  background: var(--ball-bg-hover);
   box-shadow: 
     0 12px 32px rgba(0, 0, 0, 0.2), 
     0 4px 12px rgba(0, 0, 0, 0.1);
@@ -72,7 +77,7 @@
 /* Active/Click State */
 #zhihu-md-floating-ball:active {
   transform: translateY(0);
-  background: var(--accent-active);
+  background: var(--ball-bg-active);
   box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 30%, transparent);
   transition-duration: 0.1s;
 }
@@ -81,7 +86,7 @@
 #zhihu-md-floating-ball.dragging {
   transition: none; /* Disable transition during drag for responsiveness */
   cursor: move;
-  background: var(--accent);
+  background: var(--ball-bg);
   box-shadow: 0 16px 32px color-mix(in oklab, var(--accent) 40%, transparent);
   opacity: 0.95;
 }
@@ -132,7 +137,7 @@
 #zhihu-md-floating-ball .icon {
   width: 16px;
   height: 16px;
-  color: var(--accent-inverse);
+  color: var(--ball-fg);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
@@ -167,6 +172,7 @@
 /* Success State */
 #zhihu-md-floating-ball.success {
   background: var(--success);
+  color: var(--accent-inverse);
 }
 
 #zhihu-md-floating-ball.success .icon {
@@ -176,6 +182,7 @@
 /* Error State */
 #zhihu-md-floating-ball.error {
   background: var(--error);
+  color: var(--accent-inverse);
 }
 
 #zhihu-md-floating-ball.error .icon {
@@ -258,8 +265,8 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
   left: 60px;
 }
 
-/* 深色：跟随知乎自己的夜间模式（html[data-theme="dark"]），不看系统设置——
-   知乎页面在系统深色下默认仍是白底，见 dev-log 偏离说明 */
+/* 深色：其余 token 跟随知乎自己的夜间模式（html[data-theme="dark"]）——
+   知乎页面在系统深色下默认仍是白底；球底色和提示框另见下方 R13/B2 块（两种判定一致） */
 html[data-theme="dark"] #zhihu-md-floating-ball {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   --accent: #60a5fa;
@@ -276,6 +283,30 @@ html[data-theme="dark"] #zhihu-md-floating-ball {
   --border-subtle: #33373e;
   --border-strong: #4a4f57;
   --text-primary: #e6e8eb;
+}
+
+/* R13 / B2：球底色和提示框的深色取值。知乎夜间模式（data-theme=dark）和系统深色
+   （prefers-color-scheme，知乎未显式设 data-theme=light 时）两处用同一组值。
+   球底 #1a6ae0 为设计裁定（白字 5.02:1，对 #191b1f 3.43、#121212 3.73）；
+   悬停/按下沿用亮色“加深”方向，仍保持对两种深色背景 ≥3:1。
+   提示框沿用上面夜间模式已有的 #1b1d22 / #e6e8eb / #33373e。 */
+html[data-theme="dark"] #zhihu-md-floating-ball {
+  --ball-bg: #1a6ae0;
+  --ball-bg-hover: #1864d6;
+  --ball-bg-active: #1862d2;
+  --ball-fg: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) #zhihu-md-floating-ball {
+    --ball-bg: #1a6ae0;
+    --ball-bg-hover: #1864d6;
+    --ball-bg-active: #1862d2;
+    --ball-fg: #FFFFFF;
+    --bg-secondary: #1b1d22;
+    --border-subtle: #33373e;
+    --text-primary: #e6e8eb;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

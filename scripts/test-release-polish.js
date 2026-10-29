@@ -27,4 +27,10 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
   const rule = css.match(/\.number-input \{([^}]*)\}/)[1];
   assert.match(rule, /border: 1px solid var\(--text-tertiary\);/);
 }
+// N2：悬浮球提示与球本体同一中文字体栈
+{
+  const css = read('content/content.css');
+  const tip = css.match(/#zhihu-md-floating-ball \.tooltip \{([^}]*)\}/)[1];
+  assert.match(tip, /font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif;/);
+}
 console.log('release-polish tests passed');

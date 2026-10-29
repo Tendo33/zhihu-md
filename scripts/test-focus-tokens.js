@@ -41,9 +41,8 @@ console.log('ball focus token tests passed');
 // R12（设计师 21:03）：收边球聚焦时离视口边留 offset 2px + 线宽 2px，环四边完整可见；常态收边位置不变
 {
   const css = fs.readFileSync(new URL('../content/content.css', import.meta.url), 'utf8');
-  assert.match(css, /#zhihu-md-floating-ball\.docked-left:focus-visible,\s*#zhihu-md-floating-ball\.docked-right:focus-visible\s*\{[^}]*transform:\s*translateX\(var\(--ball-edge-gap\)\)/, '聚焦时用 --ball-edge-gap 离边');
-  assert.match(css, /#zhihu-md-floating-ball\.docked-left\s*\{\s*--ball-edge-gap:\s*4px/);
-  assert.match(css, /#zhihu-md-floating-ball\.docked-right\s*\{\s*--ball-edge-gap:\s*-4px/);
+  assert.match(css, /#zhihu-md-floating-ball\.docked-left:focus-visible \{ transform: translateX\(4px\); \}/, '左停靠聚焦右移 4px');
+  assert.match(css, /#zhihu-md-floating-ball\.docked-right:focus-visible \{ transform: translateX\(-4px\); \}/, '右停靠聚焦左移 4px');
   assert.match(css, /\.docked-left \{\n {2}transform: translateX\(-40%\);/, '常态收边左位置不变');
   assert.match(css, /\.docked-right \{\n {2}transform: translateX\(40%\);[\s\S]*?right: 0 !important;/, '常态收边右位置不变（right:0 即 clientWidth 边）');
 }

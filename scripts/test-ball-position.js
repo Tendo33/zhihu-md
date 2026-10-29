@@ -13,15 +13,15 @@ globalThis.chrome = {
 Object.assign(window, { innerWidth: 1280, innerHeight: 800 });
 
 const { clampBallPosition } = await import('../content/modules/floating-ball-drag.js');
-assert.deepEqual(clampBallPosition(-12, -12, 44, 44, 1280, 800), { x: 0, y: 0 });
-assert.deepEqual(clampBallPosition(5000, 5000, 44, 44, 1280, 800), { x: 1236, y: 756 });
-assert.deepEqual(clampBallPosition(NaN, undefined, 44, 44, 1280, 800), { x: 0, y: 0 });
+assert.deepEqual(clampBallPosition(-12, -12, 44, 44, 1280, 800), { x: 4, y: 4 }, '离边 4px');
+assert.deepEqual(clampBallPosition(5000, 5000, 44, 44, 1280, 800), { x: 1232, y: 752 });
+assert.deepEqual(clampBallPosition(NaN, undefined, 44, 44, 1280, 800), { x: 4, y: 4 });
 assert.deepEqual(clampBallPosition(100, 100, 44, 44, 30, 30), { x: 0, y: 0 }, '窗口比球小时贴在 0，不出现负数');
 assert.deepEqual(clampBallPosition(300, 200, 44, 44, 1280, 800), { x: 300, y: 200 });
 
 const { FloatingBall } = await import('../content/modules/floating-ball.js');
 const live = () => document.getElementById('zhihu-md-floating-ball');
-for (const [pos, want] of [[{ x: -12, y: -12 }, ['0px', '0px']], [{ x: 9999, y: 9999 }, ['1236px', '756px']], [{ x: 400, y: 300 }, ['400px', '300px']]]) {
+for (const [pos, want] of [[{ x: -12, y: -12 }, ['4px', '4px']], [{ x: 9999, y: 9999 }, ['1232px', '752px']], [{ x: 400, y: 300 }, ['400px', '300px']]]) {
   stored = pos;
   FloatingBall.setupBallElement();
   assert.equal(live(), FloatingBall.ball);
@@ -45,7 +45,7 @@ stored = { x: 1200, y: 700 };
 FloatingBall.setupBallElement();
 Object.assign(window, { innerWidth: 600, innerHeight: 400 });
 window.dispatchEvent(new window.Event('resize'));
-assert.deepEqual([live().style.left, live().style.top], ['556px', '356px']);
+assert.deepEqual([live().style.left, live().style.top], ['552px', '352px']);
 FloatingBall.remove();
 // 审查 a9bbc6e P4：只认十进制数字字符串
 {
@@ -67,19 +67,28 @@ FloatingBall.remove();
   assert.deepEqual(viewportSize(), { vw: 1265, vh: 785 });
   stored = { x: 9999, y: 9999 };
   FloatingBall.setupBallElement();
-  assert.deepEqual([live().style.left, live().style.top], ['1221px', '741px'], 'restorePosition 夹到 clientWidth/clientHeight');
+  assert.deepEqual([live().style.left, live().style.top], ['1217px', '737px'], 'restorePosition 夹到 clientWidth/clientHeight');
   live().style.left = '1250px'; live().style.top = '790px';
   floatingBallDrag.clampToViewport(live());
-  assert.deepEqual([live().style.left, live().style.top], ['1221px', '741px'], 'clampToViewport 用 clientWidth');
+  assert.deepEqual([live().style.left, live().style.top], ['1217px', '737px'], 'clampToViewport 用 clientWidth');
   const saved = [];
   const fake = { style: {}, classList: { add() {} } };
   fake.getBoundingClientRect = () => ({ left: 1200, right: 1244, top: 100, width: 44 });
   const orig = floatingBallDrag.savePosition; floatingBallDrag.savePosition = (x, y) => saved.push([x, y]);
   floatingBallDrag.handleSnapAndDock(fake);
   floatingBallDrag.savePosition = orig;
-  assert.equal(fake.style.left, '1221px', 'handleSnapAndDock 吸右到 clientWidth - w，不压在滚动条下');
-  assert.deepEqual(saved.at(-1), [1221, 100]);
+  assert.equal(fake.style.left, '1217px', 'handleSnapAndDock 吸右到 clientWidth - w，不压在滚动条下');
+  assert.deepEqual(saved.at(-1), [1217, 100]);
   FloatingBall.remove();
   delete de.clientWidth; delete de.clientHeight;
+}
+// 设计验收必改 1：留 4px 后窗口太小仍不出现负数；吸左也是 4px
+assert.deepEqual(clampBallPosition(100, 100, 44, 44, 50, 50), { x: 6, y: 6 });
+{
+  const { floatingBallDrag } = await import('../content/modules/floating-ball-drag.js');
+  const fake = { style: {}, classList: { add() {} }, getBoundingClientRect: () => ({ left: 10, right: 54, top: 100, width: 44 }) };
+  const orig = floatingBallDrag.savePosition; const saved = []; floatingBallDrag.savePosition = (x, y) => saved.push([x, y]);
+  floatingBallDrag.handleSnapAndDock(fake); floatingBallDrag.savePosition = orig;
+  assert.equal(fake.style.left, '4px', '吸左离边 4px'); assert.deepEqual(saved.at(-1), [4, 100]);
 }
 console.log('ball position tests passed');

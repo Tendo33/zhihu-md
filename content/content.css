@@ -112,17 +112,16 @@ html body #zhihu-md-floating-ball#zhihu-md-floating-ball:focus-visible {
   box-shadow: 0 4px 16px color-mix(in oklab, var(--accent) 40%, transparent);
 }
 
-/* L-07：收边时键盘聚焦只把球展开，不换投影（保持收边时的投影，尺寸不变） */
+/* L-07：收边时键盘聚焦只把球展开，不换投影（保持收边时的投影，尺寸不变）
+   设计验收 2026-10-29 必改 1：聚焦时离视口边正好 4px（offset 2px + 线宽 2px），环四边完整可见；
+   right:0 已按 clientWidth（不含滚动条）；只在 :focus-visible 生效，平时位置不动 */
 #zhihu-md-floating-ball.docked-left:focus-visible,
 #zhihu-md-floating-ball.docked-right:focus-visible {
-  transform: translateX(var(--ball-edge-gap));
   opacity: 1;
   border-radius: 50%;
 }
-
-/* R12：聚焦时离视口边（right:0 已按 clientWidth，不含滚动条）留出 offset 2px + 线宽 2px，环四边完整可见；只在 :focus-visible 生效，平时位置不动 */
-#zhihu-md-floating-ball.docked-left { --ball-edge-gap: 4px; }
-#zhihu-md-floating-ball.docked-right { --ball-edge-gap: -4px; }
+#zhihu-md-floating-ball.docked-left:focus-visible { transform: translateX(4px); }
+#zhihu-md-floating-ball.docked-right:focus-visible { transform: translateX(-4px); }
 
 /* Docked Right - Preview visible */
 #zhihu-md-floating-ball.docked-right {

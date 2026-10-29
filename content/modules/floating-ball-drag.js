@@ -2,11 +2,16 @@
  * QA e2fa5da P4：恢复位置时夹到视口内（QA 在 1280 左上角看到 -12,-12）。
  * 存储里的值可能是负数、超出当前窗口或不是数字；窗口比球还小时贴在 0。
  */
+/** 设计验收 2026-10-29 必改 1：球离可见视口四边至少留 4px（焦点环 offset 2px + 线宽 2px），环不被裁 */
+export const BALL_EDGE_GAP = 4;
 export function clampBallPosition(x, y, w, h, vw, vh) {
   const fix = (v, max) => {
     const n = Number(v);
-    if (!Number.isFinite(n)) return 0;
-    return Math.max(0, Math.min(n, max));
+    // 窗口连 球+两边 4px 都放不下时退回 [0, max]，不出现负数
+    const lo = max - BALL_EDGE_GAP >= BALL_EDGE_GAP ? BALL_EDGE_GAP : 0;
+    const hi = lo ? max - BALL_EDGE_GAP : Math.max(0, max);
+    if (!Number.isFinite(n)) return lo;
+    return Math.max(lo, Math.min(n, hi));
   };
   return { x: fix(x, vw - w), y: fix(y, vh - h) };
 }
@@ -111,11 +116,7 @@ export const floatingBallDrag = {
       let newTop = initialTop + dy;
 
       const { vw, vh } = viewportSize();
-      const maxLeft = vw - ballWidth;
-      const maxTop = vh - ballHeight;
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
+      ({ x: newLeft, y: newTop } = clampBallPosition(newLeft, newTop, ballWidth, ballHeight, vw, vh));
 
       scheduleMove(newLeft, newTop);
     };
@@ -180,11 +181,7 @@ export const floatingBallDrag = {
       let newTop = initialTop + dy;
 
       const { vw, vh } = viewportSize();
-      const maxLeft = vw - ballWidth;
-      const maxTop = vh - ballHeight;
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
+      ({ x: newLeft, y: newTop } = clampBallPosition(newLeft, newTop, ballWidth, ballHeight, vw, vh));
 
       scheduleMove(newLeft, newTop);
     };
@@ -241,12 +238,13 @@ export const floatingBallDrag = {
     let dockedSide = null;
 
     if (rect.left < docThreshold) {
-      ball.style.left = '0px';
-      this.savePosition(0, rect.top);
+      // 吸边也离边 4px（收边后 CSS left:0/right:0 + translate 接管，静止收边位置不变）
+      ball.style.left = `${BALL_EDGE_GAP}px`;
+      this.savePosition(BALL_EDGE_GAP, rect.top);
       dockedSide = 'left';
     } else if (winWidth - rect.right < docThreshold) {
-      ball.style.left = `${winWidth - rect.width}px`;
-      this.savePosition(winWidth - rect.width, rect.top);
+      ball.style.left = `${winWidth - rect.width - BALL_EDGE_GAP}px`;
+      this.savePosition(winWidth - rect.width - BALL_EDGE_GAP, rect.top);
       dockedSide = 'right';
     }
 

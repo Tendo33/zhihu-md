@@ -2,10 +2,31 @@
 
 ## [Unreleased]
 
-### Changed
+## [1.1.7] - 2026-10-29
 
-- Default export shortcut is now `Alt+Shift+K` on all platforms (was `Alt+Shift+Z`). On Windows and Linux, Chrome reserves Alt+Shift+Z for tab groups (focus previous tab group), so the old shortcut was never registered. 默认快捷键改为 Alt+Shift+K：Windows/Linux 上 Chrome 已把 Alt+Shift+Z 用于标签组，导致快捷键注册不上。Applies to new installs only: existing users keep the shortcut they already have (e.g. Alt+Shift+Z on macOS); the popup footer shows the one in effect. 仅对新安装生效，已安装用户保留原有快捷键，以弹窗显示为准。
-- The popup footer shows「快捷键未设置 · 去设置」when no shortcut is registered; the button opens the browser shortcuts page (Chrome/Brave/Opera `chrome://extensions/shortcuts`, Edge `edge://extensions/shortcuts`; Firefox shows a text hint).
+### 新增
+
+- 右键菜单：在专栏文章、问题 / 回答、热榜、关注页和首页右键可「导出本页为 Markdown」「复制本页 Markdown」，选中文字可「复制选中内容为 Markdown」；在任意网站右键指向知乎问题、回答或专栏文章的链接，可「打开并导出这个知乎链接」。
+- 快捷键导出当前页。新安装默认 `Alt+Shift+K`（macOS 为 `Option+Shift+K`）；Windows / Linux 上 Chrome 把 `Alt+Shift+Z` 留给了标签组，旧快捷键注册不上。已安装用户保留原有快捷键，以弹窗底栏显示为准。
+- 没有分配快捷键时，弹窗底栏显示「快捷键未设置 · 去设置」，点击打开浏览器的快捷键设置页（Firefox 显示文字提示）。
+- 弹窗显示最近 3 条导出记录。
+
+### 改进
+
+- 弹窗改版：当前页卡片、导出 / 复制按钮、出错时直接显示原因并可重试。
+- 导出失败时说明具体原因：页面还没加载完、需要登录、需要安全验证或被知乎限流。
+- 悬浮导出球改为 M↓ 图标加进度环，导出中、成功、失败一眼可分；支持键盘操作和读屏。
+- 导出过程统一显示「正在导出…」；设置项更名为「悬浮导出球」并写明出现位置；设置页数字输入框加了可见边框；支持深色模式。
+- 批量导出问题回答时，如果中途有一页加载失败，会提示「已导出 N/M 条，部分失败」，文件末尾也会注明内容不完整，不再显示成「已导出」。
+- 最近导出里同一标题只保留最新一条；出错提示显示时最近导出缩为 2 条。
+
+### 修复
+
+- 知乎跳转链接（link.zhihu.com）还原成真实地址；带括号的链接、mailto: 和 tel: 链接导出后可以正常点击。
+- 链接卡片各占一段，卡片标题里的 `<`、`*`、`[` 等字符原样保留。
+- 正文里像 `<标签>` 这样的文字在 Markdown 预览里不再被吞掉；标题开头的「1.」不再被多余转义。
+- 回答页和专栏页对尖括号文字的处理一致；空段落、代码块空行、协议相对链接等格式问题已修正，支持参考文献脚注。
+- 热榜导出的 front matter `url` 与其他导出器一样加了引号。
 
 ## [1.1.6] - 2026-10-10
 

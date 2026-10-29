@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Zhihu to Markdown",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "minimum_chrome_version": "111",
   "description": "把知乎专栏、回答、问题页和热榜转换为 Markdown，保留公式、代码和图片，一键下载或复制。",
   "permissions": [

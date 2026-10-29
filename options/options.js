@@ -8,7 +8,6 @@ function saveOptions() {
   const maxAnswerCount = parseInt(document.getElementById('maxAnswerCount').value, 10);
   const downloadImages = document.getElementById('downloadImages').checked;
 
-  // Validate: 0 means unlimited, otherwise must be >= 1
   const validCount = capAnswerCount(Math.max(0, isNaN(maxAnswerCount) ? 20 : maxAnswerCount));
   const capped = maxAnswerCount > MAX_ANSWER_LIMIT;
   document.getElementById('maxAnswerCount').value = validCount;

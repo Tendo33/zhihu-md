@@ -92,9 +92,15 @@ h1 {
 
 .option-desc {
   font-size: 13px;
-  color: var(--text-primary);
-  opacity: .82;
+  color: var(--text-2);
+  opacity: 1;
   line-height: 1.5;
+  text-wrap: pretty; /* 设计 M6 */
+}
+
+/* 设计 M6：数字和单位不断行（「1000 条」） */
+.nw {
+  white-space: nowrap;
 }
 
 /* Controls */

@@ -84,3 +84,15 @@ console.log('options redesign tests passed');
   assert.ok(!/\.number-input \{[^}]*width: 100%/.test(css), 'M5：窄屏不拉满');
   console.log('options redesign M5 passed');
 }
+
+// M6：三项说明新文案（逐字照设计规格）、text-wrap: pretty、「1000 条」不断行
+{
+  const html = read('options/options.html');
+  assert.ok(html.includes('id="desc-showFloatingBall">在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。</div>'));
+  assert.ok(html.includes('id="desc-maxAnswerCount">问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 <span class="nw">1000 条</span>；被上限截断的导出会标为 truncated。</div>'));
+  assert.ok(html.includes('id="desc-downloadImages">把文章里的图片一起保存，导出为含 .md 和 images 文件夹的 ZIP 包；关闭时图片保留在线链接。</div>'));
+  assert.match(rule('.option-desc'), /text-wrap: pretty;/);
+  assert.match(rule('.option-desc'), /color: var\(--text-2\);/);
+  assert.match(rule('.nw'), /white-space: nowrap;/);
+  console.log('options redesign M6 passed');
+}

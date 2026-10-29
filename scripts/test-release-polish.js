@@ -18,7 +18,7 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
 {
   const html = read('options/options.html');
   assert.match(html, /id="label-showFloatingBall">悬浮导出球</);
-  assert.match(html, /id="desc-showFloatingBall">在知乎首页、关注、热榜、问题、回答和专栏文章页显示导出悬浮球（点击下载，右键复制）。</);
+  assert.match(html, /id="desc-showFloatingBall">在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。</);
   assert.ok(!html.includes('悬浮导出按钮') && !html.includes('知乎文章页面'));
 }
 // B3：数字输入框边框用 --text-2（即 --text-tertiary，非文本对比度 ≥3:1；设置页重做 M5 直接写 v2 token）

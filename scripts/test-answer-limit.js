@@ -13,7 +13,7 @@ for (const [v, want] of [[NaN, NaN], [null, null], [undefined, undefined], ['', 
 const html = fs.readFileSync(new URL('../options/options.html', import.meta.url), 'utf8');
 assert.match(html, /<input type="number" id="maxAnswerCount" name="maxAnswerCount" min="0" max="1000" value="20"/);
 
-assert.ok(html.includes('问题页回答和信息流（首页、关注）的下载上限。填 0 时尽量全部下载，最多 1000 条；没下完时文件会标 truncated。'), '说明文案');
+assert.ok(html.includes('问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 <span class="nw">1000 条</span>；被上限截断的导出会标为 truncated。'), '说明文案');
 const css = fs.readFileSync(new URL('../options/options.css', import.meta.url), 'utf8');
 // 设置页重做 M3：保存提示在卡片页脚里，不再是 fixed 浮层
 const rule = css.match(/\.status-msg \{([^}]*)\}/)[1];

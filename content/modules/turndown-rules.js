@@ -19,7 +19,10 @@ import TurndownService from '../../lib/turndown.min.js';
 function toHttpUrl(value) {
   try {
     const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+    // 审查 P2：WHATWG 序列化不编码 ( )，不成对的括号会截断 Markdown 链接 `[t](https://a.com/b)c)`；
+    // 拼进 Markdown 前统一编码成 %28 / %29（等价 URL，浏览器照常打开）
+    return url.href.replace(/[()]/g, (c) => (c === '(' ? '%28' : '%29'));
   } catch {
     return '';
   }

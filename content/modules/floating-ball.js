@@ -8,7 +8,7 @@ import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
 import { PARTIAL_PREFIX, partialText } from '../../lib/partial-export.js';
-import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptText } from '../../lib/image-pack.js';
+import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreShortText, imageKeptText, imagePartialSrExtra } from '../../lib/image-pack.js';
 import { PageDetector } from './detector.js';
 import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
@@ -183,7 +183,9 @@ export const FloatingBall = {
 
         if (result.data.partial) {
           // 发版 QA ZR-02 / 设计 M1：文件已保存但不完整 → 警告态（琥珀色三角，持续显示，polite 播报）
-          this.finishBall(ball, generation, 'warning', `${PARTIAL_PREFIX}${partialText(result.data.partial)}`);
+          // QA P2Z-02：tooltip 不变，读屏末尾补上图片失败数和保留数（与弹窗琥珀提示的图片行一致）
+          const srExtra = imagePartialSrExtra((dl && dl.failedImages) || 0, (dl && dl.keptImages) || 0);
+          this.finishBall(ball, generation, 'warning', `${PARTIAL_PREFIX}${partialText(result.data.partial)}`, srExtra);
         } else {
           // 发版 QA ZR-09：部分图片没打进 zip 时，成功提示里带上数量
           // 第三轮 B：只有 kept 按普通成功处理，tooltip 不变，读屏末尾补一句；数字只算失败

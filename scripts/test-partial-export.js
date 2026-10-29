@@ -40,7 +40,7 @@ assert.ok(badge && badge.classList.contains('warn') && !badge.classList.contains
 
 // 悬浮球：warning 态 + 「部分导出：」前缀；读屏不出现「失败」
 const ball = fs.readFileSync(new URL('../content/modules/floating-ball.js', import.meta.url), 'utf8');
-assert.match(ball, /this\.finishBall\(ball, generation, 'warning', `\$\{PARTIAL_PREFIX\}\$\{partialText\(result\.data\.partial\)\}`\)/);
+assert.match(ball, /this\.finishBall\(ball, generation, 'warning', `\$\{PARTIAL_PREFIX\}\$\{partialText\(result\.data\.partial\)\}`, srExtra\)/);
 assert.match(ball, /warning: \(\) => svgIcon\('warn', 'icon'\)/);
 const { ballA11y } = await import('../content/modules/ball-a11y.js');
 const a = ballA11y('warning', '部分导出：已导出 12/20 条，8 条未能加载');

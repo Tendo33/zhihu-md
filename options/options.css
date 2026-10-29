@@ -154,7 +154,7 @@ input:checked + .slider:before {
   width: clamp(80px, 22vw, 120px);
   padding: 8px 12px;
   background: var(--bg-hover);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--text-tertiary); /* 发版审计 B3：WCAG 1.4.11 边界 ≥3:1 */
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 14px;

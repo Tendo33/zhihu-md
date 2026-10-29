@@ -21,4 +21,10 @@ const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
   assert.match(html, /id="desc-showFloatingBall">在知乎回答、问题和专栏页面右下角显示导出悬浮球（点击下载，右键复制）。</);
   assert.ok(!html.includes('悬浮导出按钮') && !html.includes('知乎文章页面'));
 }
+// B3：数字输入框边框用 --text-tertiary（非文本对比度 ≥3:1）
+{
+  const css = read('options/options.css');
+  const rule = css.match(/\.number-input \{([^}]*)\}/)[1];
+  assert.match(rule, /border: 1px solid var\(--text-tertiary\);/);
+}
 console.log('release-polish tests passed');

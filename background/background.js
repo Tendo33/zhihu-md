@@ -121,7 +121,7 @@ async function handleDownloadWithImages(filename, content, images) {
           filename: zipFilename,
           saveAs: true
         });
-        resolve({ downloadId, filename: zipFilename, failedImages: packed.failed });
+        resolve({ downloadId, filename: zipFilename, failedImages: packed.failed, keptImages: packed.kept });
       } catch (error) {
         reject(error);
       }
@@ -142,7 +142,7 @@ async function downloadImages(images) {
     images.map(async (img) => {
       Logger.debug(`下载图片: ${img.url.substring(0, 50)}...`);
       const safeUrl = normalizeImageUrl(img.url);
-      if (!safeUrl) throw new Error('只下载 *.zhimg.com 的图片');
+      if (!safeUrl) return { ok: false, kept: true }; // 不在白名单：不下载，保留在线链接，不算失败
       // 审查 P3（release-polish-2 ①）：不跟随重定向，避免 zhimg 30x 跳到白名单外的主机
       const response = await fetch(safeUrl, { redirect: 'error' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);

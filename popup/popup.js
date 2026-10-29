@@ -10,7 +10,7 @@ import { describeFailure, ExportFailure } from '../lib/failure-text.js';
 import { shortcutGuide } from '../lib/shortcut-guide.js';
 import { RECENT_KEY, recordRecent, relativeTime } from '../lib/recent-exports.js';
 import { partialHint, partialText } from '../lib/partial-export.js';
-import { imageFailText } from '../lib/image-pack.js';
+import { IMAGE_KEPT_REASON, imageFailText, imageKeptMoreText, imageKeptText, imagePartialLine } from '../lib/image-pack.js';
 import { svgIcon } from '../lib/safe-dom.js';
 
 const Logger = createLogger('[Zhihu-MD Popup]');
@@ -71,6 +71,27 @@ function updateStatus(type, text) {
 
 function hideAlerts() {
   for (const el of [actionFeedback, actionOk, actionInfo]) el.classList.add('hidden');
+  setImageLine('ok-kept', '');
+  setImageLine('info-kept', '');
+  setImageLine('feedback-img', '');
+}
+
+/** 第三轮 B：次级说明行；kept 时 title 和读屏文字补上原因 */
+function setImageLine(id, text, withReason = false) {
+  const el = $(id);
+  if (!el) return;
+  el.replaceChildren();
+  el.classList.toggle('hidden', !text);
+  el.removeAttribute('title');
+  if (!text) return;
+  el.append(text);
+  if (withReason) {
+    el.title = `${text}：${IMAGE_KEPT_REASON}`;
+    const sr = document.createElement('span');
+    sr.className = 'sr-only';
+    sr.textContent = `，${IMAGE_KEPT_REASON}`;
+    el.append(sr);
+  }
 }
 
 function showArticleInfo(info) {
@@ -334,6 +355,11 @@ async function handleExport() {
       $('ok-file').textContent = (res && res.filename) || response.data.filename;
       openBtn.classList.toggle('hidden', lastDownloadId == null);
       actionOk.classList.remove('hidden');
+      {
+        const f = (res && res.failedImages) || 0;
+        const k = (res && res.keptImages) || 0;
+        setImageLine('feedback-img', imagePartialLine(f, k), f === 0 && k > 0);
+      }
       exportLabel.textContent = PRIMARY;
       setExportActionsEnabled(true);
       renderRecent().catch(() => {});
@@ -343,9 +369,15 @@ async function handleExport() {
     $('ok-file').textContent = (res && res.filename) || response.data.filename;
     openBtn.classList.toggle('hidden', lastDownloadId == null);
     actionOk.classList.remove('hidden');
+    const keptImages = (res && res.keptImages) || 0;
+    if (!(res && res.failedImages > 0) && keptImages > 0) {
+      // 第三轮 B：只有按规则保留的图片 → 仍是成功，「已保存」下加一行次级说明
+      setImageLine('ok-kept', imageKeptText(keptImages), true);
+    }
     if (res && res.failedImages > 0) {
-      // 发版 QA ZR-09：部分图片没打进 zip，正文里已保留在线链接
+      // 发版 QA ZR-09：部分图片没打进 zip，正文里已保留在线链接（N 只算真正的失败）
       $('info-text').textContent = imageFailText(res.failedImages);
+      setImageLine('info-kept', keptImages > 0 ? imageKeptMoreText(keptImages) : '', keptImages > 0);
       $('refresh-btn').classList.add('hidden');
       actionInfo.classList.remove('hidden');
       setRecentRows(2); // 设计建议 1：多一条提示时最近导出缩为 2 行，320 宽不出内滚动

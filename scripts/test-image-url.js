@@ -42,7 +42,8 @@ const images = [
 const md = images.map((im) => `![](images/${im.filename})`).join('\n');
 const res = await new Promise((done) => L.msg({ action: 'download', filename: 'a.md', content: md, images, downloadImages: true, title: 'a' }, {}, done));
 assert.deepEqual(fetched, ['https://pic1.zhimg.com/v2-a.png', 'https://pic2.zhimg.com/v2-b.png', 'https://pic3.zhimg.com/v2-d.png', 'https://pic4.zhimg.com/v2-e.png'], '只 fetch 白名单内的图片，http 和 // 升级为 https');
-assert.equal(res.failedImages, 2);
+assert.equal(res.failedImages, 0, '白名单外的图片不算下载失败（第三轮 B）');
+assert.equal(res.keptImages, 2, '白名单外的图片计入保留在线链接');
 const zip = Buffer.from(dlUrl.split(',')[1], 'base64').toString('latin1');
 assert.ok(zip.includes('](https://evil.example/c.png)') && zip.includes('](http://evil.example/f.png)') && zip.includes('images/img_002_b.png') && zip.includes('images/img_004_d.png'));
 console.log('image url allowlist tests passed');

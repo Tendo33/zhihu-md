@@ -8,7 +8,7 @@ import { FeedExporter } from './exporters/feed.js';
 import { HotExporter } from './exporters/hot.js';
 import { QuestionExporter } from './exporters/question.js';
 import { PARTIAL_PREFIX, partialText } from '../../lib/partial-export.js';
-import { imageFailText } from '../../lib/image-pack.js';
+import { imageFailText, imageKeptMoreShortText, imageKeptText } from '../../lib/image-pack.js';
 import { PageDetector } from './detector.js';
 import { copyText, copyTextLater } from '../../lib/clipboard.js';
 import { selectionToMarkdown } from './selection-md.js';
@@ -108,23 +108,24 @@ export const FloatingBall = {
   },
 
   /** 提示文字、读屏播报和 aria-label 一起更新 */
-  setMessage(ball, message, state) {
+  setMessage(ball, message, state, srExtra = '') {
     ball.querySelector('.tooltip').textContent = message;
+    const spoken = srExtra ? `${message}，${srExtra}` : message;
     const live = this.getLiveRegion();
     if (live) {
       live.setAttribute('role', state === 'error' ? 'alert' : 'status');
       live.setAttribute('aria-live', state === 'error' ? 'assertive' : 'polite');
-      live.textContent = state === 'normal' ? '' : message;
+      live.textContent = state === 'normal' ? '' : spoken;
     }
     const current = state || (ball.classList.contains('loading') ? 'loading' : 'normal');
-    applyBallA11y(ball, current, message);
+    applyBallA11y(ball, current, spoken);
   },
 
-  finishBall(ball, generation, state, message) {
+  finishBall(ball, generation, state, message, srExtra = '') {
     if (generation !== this.operation) return;
     this.busy = false;
     this.updateBallState(ball, state);
-    this.setMessage(ball, message, state);
+    this.setMessage(ball, message, state, srExtra);
     // 成功提示短暂停留；失败原因一直显示，直到下一次操作（Round 2：错误持续可见）
     if (state === 'success') {
       setTimeout(() => this.finishBall(ball, generation, 'normal', idleLabel), 4000);
@@ -185,7 +186,11 @@ export const FloatingBall = {
           this.finishBall(ball, generation, 'warning', `${PARTIAL_PREFIX}${partialText(result.data.partial)}`);
         } else {
           // 发版 QA ZR-09：部分图片没打进 zip 时，成功提示里带上数量
-          this.finishBall(ball, generation, 'success', dl && dl.failedImages > 0 ? `已导出，${imageFailText(dl.failedImages)}` : '已导出');
+          // 第三轮 B：只有 kept 按普通成功处理，tooltip 不变，读屏末尾补一句；数字只算失败
+          const failedN = (dl && dl.failedImages) || 0;
+          const keptN = (dl && dl.keptImages) || 0;
+          const srExtra = keptN > 0 ? (failedN > 0 ? imageKeptMoreShortText(keptN) : imageKeptText(keptN)) : '';
+          this.finishBall(ball, generation, 'success', failedN > 0 ? `已导出，${imageFailText(failedN)}` : '已导出', srExtra);
         }
       } else if (result.reason) {
         // 页面未加载完 / 需要登录 / 安全验证：直接告诉用户怎么办

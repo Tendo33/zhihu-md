@@ -45,7 +45,8 @@ assert.equal(extFromMagic(RIFF_WAVE), null, 'RIFF 但不是 WEBP 不能当 webp'
   const SVG = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>');
   for (const [data, ct] of [[SVG, 'image/svg+xml'], [UNKNOWN, 'application/octet-stream'], [UNKNOWN, ''], [RIFF_WAVE, 'audio/wav']]) {
     const x = applyImageResults(md1, one, [{ ok: true, data, contentType: ct }]);
-    assert.equal(x.failed, 1, `${ct || '无类型'} 计为失败`);
+    assert.equal(x.failed, 0, `${ct || '无类型'} 不算下载失败`);
+    assert.equal(x.kept, 1, `${ct || '无类型'} 计为保留在线链接（第三轮 B）`);
     assert.equal(x.files.length, 0);
     assert.equal(x.content, '![](https://pic1.zhimg.com/v2-m.png)');
   }
@@ -132,7 +133,7 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
 
 // 悬浮球：成功提示里带数量
 const ball = fs.readFileSync(new URL('../content/modules/floating-ball.js', import.meta.url), 'utf8');
-assert.match(ball, /dl && dl\.failedImages > 0 \? `已导出，\$\{imageFailText\(dl\.failedImages\)\}` : '已导出'/);
+assert.match(ball, /failedN > 0 \? `已导出，\$\{imageFailText\(failedN\)\}` : '已导出'/);
 console.log('image pack tests passed');
 
 // 审查 P3（release-polish-2 ③）：Content-Type 为 octet-stream 时，avif / bmp 只能靠文件头识别

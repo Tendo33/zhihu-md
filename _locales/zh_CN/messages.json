@@ -4,7 +4,7 @@
     "description": "扩展名称，显示在 Chrome 应用商店和 chrome://extensions 中。两种语言保持一致，不要翻译。"
   },
   "extDescription": {
-    "message": "把知乎专栏、回答、问题页和热榜转换为 Markdown，保留公式、代码和图片，一键下载或复制。",
+    "message": "把知乎文章、回答、问题和热榜存为 Markdown，保留公式、代码和图片，一键下载或复制。",
     "description": "扩展简介，显示在 Chrome 应用商店和 chrome://extensions 中。不超过 132 个字符。"
   },
   "cmdExportPage": {
@@ -24,7 +24,7 @@
     "description": "右键菜单：把选中的内容复制为 Markdown。"
   },
   "menuLinkExport": {
-    "message": "导出链接的知乎页面为 Markdown",
+    "message": "导出链接指向的知乎页面为 Markdown",
     "description": "右键菜单：在知乎问题、回答或专栏链接上，打开并导出该页。"
   },
   "ballTooltipIdlePart1": {
@@ -276,7 +276,7 @@
     "description": "Floating ball failure reason: page not fully loaded."
   },
   "failClipboard": {
-    "message": "无法写入剪贴板：请保持弹窗打开后重试，或改用“导出 Markdown”",
+    "message": "无法写入剪贴板：请保持弹窗打开后重试，或改用「导出 Markdown」",
     "description": "Floating ball failure reason: clipboard write failed (same text as the popup)."
   },
   "failExportUnknown": {

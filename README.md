@@ -4,7 +4,7 @@
 
 # Zhihu to Markdown
 
-**将知乎专栏/问答页面内容转换为 Markdown 格式并下载**
+**把知乎文章、回答、问题和热榜一键存为 Markdown**
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh?style=flat-square&label=Chrome%20Web%20Store&color=0a5fd1)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black?style=flat-square)](./LICENSE)
@@ -77,8 +77,8 @@ npm run build
 | --- | --- |
 | 工具栏弹窗 | 显示页面类型、标题、作者；「导出 Markdown」「复制 Markdown」；最近导出 |
 | 悬浮球 | 左键下载，右键复制；问题页、信息流、热榜优先用它 |
-| 快捷键 | 导出本页。1.1.7 起新安装默认 `Alt+Shift+K`（macOS 为 `Option+Shift+K`）。从旧版本升级时，已经分配过的快捷键（如 `Alt+Shift+Z`）保持不变，不会被自动改成 K；以前没有分配到快捷键的用户，升级后 Chrome 可能补上 K。实际生效的快捷键以弹窗底栏显示为准。如需修改，或快捷键被其他扩展占用、被浏览器保留，请到 `chrome://extensions/shortcuts` 设置 |
-| 右键菜单 | 「导出本页为 Markdown」「复制本页为 Markdown」；选中文字时「复制选中内容为 Markdown」；知乎链接上「导出链接的知乎页面为 Markdown」 |
+| 快捷键 | 导出本页。默认 `Alt+Shift+K`（macOS 为 `Option+Shift+K`），以弹窗底栏显示的为准；可在 `chrome://extensions/shortcuts` 修改 |
+| 右键菜单 | 「导出本页为 Markdown」「复制本页为 Markdown」；选中文字时「复制选中内容为 Markdown」；知乎链接上「导出链接指向的知乎页面为 Markdown」 |
 
 <img src="docs/screenshots/popup.png" width="300" alt="工具栏弹窗">
 
@@ -90,8 +90,8 @@ npm run build
 
 | 设置项 | 说明 | 默认 |
 | --- | --- | --- |
-| 悬浮导出球 | 是否显示页面右下角悬浮球 | 开启 |
-| 最大下载条数 | 问题页和信息流的条数上限。最多 1000，填更大的数按 1000 算。0 表示上限内不限：问题页按页面显示的回答总数取，信息流滚到没有新卡片为止，都最多 1000 条；没下完时文首写 `truncated: true` | 20 |
+| 悬浮球 | 是否显示页面右下角悬浮球 | 开启 |
+| 最多导出条数 | 问题页和信息流的条数上限。最多 1000，填更大的数按 1000 算。0 表示上限内不限：问题页按页面显示的回答总数取，信息流滚到没有新卡片为止，都最多 1000 条；没下完时文首写 `truncated: true` | 20 |
 | 下载图片到本地 | 专栏、回答、问题页的下载导出打包为 ZIP；复制、信息流和热榜仍用远程图片 | 关闭 |
 
 设置保存在 `chrome.storage.sync`（开启浏览器同步时会随你的浏览器账号同步），悬浮球位置和最近导出记录保存在 `chrome.storage.local`。
@@ -112,9 +112,8 @@ npm run build
 
 ## 隐私
 
-- 扩展没有自己的服务器，会读取知乎页面内容，仅在本地处理，不上传给开发者或第三方；除了向知乎及其图床发出的正常请求，不发出其他网络请求，没有统计或埋点。
-- 设置存在 `chrome.storage.sync`，开启浏览器同步时会随你的浏览器账号同步。这是浏览器自己的同步，只有设置，不含页面内容。
-- 只访问知乎及其图片 CDN（`zhimg.com`，仅在打包图片时），所有转换都在你的浏览器里完成。
+- 扩展没有自己的服务器，没有统计或埋点。页面内容只在你的浏览器里转换，不上传给开发者或第三方；只访问知乎及其图片 CDN（`zhimg.com`，仅在打包图片时）。
+- 设置存在 `chrome.storage.sync`，开启浏览器同步时会随你的浏览器账号同步，只有设置，不含页面内容。
 - 详见 [PRIVACY.md](./PRIVACY.md)。
 
 ## 常见问题
@@ -123,7 +122,7 @@ npm run build
 取决于当前页面是否已显示。扩展不绕过任何限制。
 
 **问题页为什么没有全部回答？**
-受「最大下载条数」限制（默认 20）。设为 0 时最多 1000 条，填大于 1000 的数也按 1000 条算；接口失败时只保留页面上已出现的回答。
+受设置里「最多导出条数」限制（默认 20）。设为 0 时最多 1000 条；接口失败时只保留页面上已出现的回答。
 
 **快捷键不起作用？**
 到 `chrome://extensions/shortcuts` 检查 Zhihu to Markdown 是否已分配快捷键。

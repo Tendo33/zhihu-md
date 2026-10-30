@@ -1,4 +1,4 @@
-// 「最大下载条数」上限 1000：保存路径（options）和使用路径（问题页 / 动态页导出）都截到 1000
+// 「最多导出条数」上限 1000：保存路径（options）和使用路径（问题页 / 动态页导出）都截到 1000
 import assert from 'assert';
 import fs from 'fs';
 import { parseHTML } from 'linkedom';
@@ -14,7 +14,7 @@ for (const [v, want] of [[NaN, NaN], [null, null], [undefined, undefined], ['', 
 const html = fs.readFileSync(new URL('../options/options.html', import.meta.url), 'utf8');
 assert.match(html, /<input type="number" id="maxAnswerCount" name="maxAnswerCount" min="0" max="1000" value="20"/);
 
-assert.equal(descText(html, 'maxAnswerCount'), '问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 1000 条；被上限截断的导出会标注为已截断。', '说明文案');
+assert.equal(descText(html, 'maxAnswerCount'), '问题页的回答，以及首页、关注信息流都按这个数量导出。填 0 表示尽量全部导出（最多 1000 条）；没导完时文件会标注已截断。', '说明文案');
 const css = fs.readFileSync(new URL('../options/options.css', import.meta.url), 'utf8');
 // 设置页重做 M3：保存提示在卡片页脚里，不再是 fixed 浮层
 const rule = css.match(/\.status-msg \{([^}]*)\}/)[1];

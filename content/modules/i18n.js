@@ -41,7 +41,7 @@ export const ZH_FALLBACK = {
   failSecurityCheck: "被知乎限流或需要验证：请在知乎页面完成验证，或稍等几分钟后刷新再导出",
   failLoginRequired: "需要登录知乎才能查看这部分内容，请登录后重新导出",
   failNotLoaded: "页面未加载完，请等几秒或刷新页面后再试",
-  failClipboard: "无法写入剪贴板：请保持弹窗打开后重试，或改用“导出 Markdown”",
+  failClipboard: "无法写入剪贴板：请保持弹窗打开后重试，或改用「导出 Markdown」",
   failExportUnknown: "导出失败，请刷新知乎页面后重试",
   failCopyUnknown: "复制失败，请刷新知乎页面后重试",
 };

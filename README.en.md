@@ -4,7 +4,7 @@
 
 # Zhihu to Markdown
 
-**Convert Zhihu columns and Q&A pages to Markdown and download them.**
+**Save Zhihu articles, answers, questions and the hot list as Markdown in one click.**
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh?style=flat-square&label=Chrome%20Web%20Store&color=0a5fd1)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black?style=flat-square)](./LICENSE)
@@ -77,8 +77,8 @@ Open `chrome://extensions`, enable Developer mode, click "Load unpacked" and pic
 | --- | --- |
 | Toolbar popup | Page type, title, author; Export / Copy Markdown; recent exports |
 | Floating ball | Left-click downloads, right-click copies; preferred for question, feed and hot pages |
-| Shortcut | Exports the current page. From 1.1.7, fresh installs default to `Alt+Shift+K` (`Option+Shift+K` on macOS). On upgrade, a shortcut you already had (e.g. `Alt+Shift+Z`) is kept and is not switched to K; if you never had one assigned, Chrome may assign K after the upgrade. The popup footer shows the shortcut actually in effect. To change it, or if another extension or the browser itself has reserved it, go to `chrome://extensions/shortcuts` |
-| Context menu | 导出本页为 Markdown (export page), 复制本页为 Markdown (copy page), 复制选中内容为 Markdown (copy selection), 导出链接的知乎页面为 Markdown (export linked Zhihu page) |
+| Shortcut | Exports the current page. Defaults to `Alt+Shift+K` (`Option+Shift+K` on macOS); the popup footer shows the one in effect. Change it at `chrome://extensions/shortcuts` |
+| Context menu | "Export this page as Markdown", "Copy this page as Markdown"; on selected text, "Copy selection as Markdown"; on a Zhihu link, "Export linked Zhihu page as Markdown" |
 
 <img src="docs/screenshots/popup.png" width="300" alt="Toolbar popup">
 
@@ -90,8 +90,8 @@ Long exports started from the popup (such as a question page) need the popup to 
 
 | Setting | Description | Default |
 | --- | --- | --- |
-| 悬浮导出球 (floating button) | Show the floating ball | On |
-| 最大下载条数 (max items) | Limit for question pages and feeds. Max 1000; larger numbers count as 1000. 0 means no limit within the cap: as many answers as the question page lists, or scroll until no new cards on feeds, up to 1000 either way; files that stop early get `truncated: true` | 20 |
+| 悬浮球 (floating button) | Show the floating ball | On |
+| 最多导出条数 (max items) | Limit for question pages and feeds. Max 1000; larger numbers count as 1000. 0 means no limit within the cap: as many answers as the question page lists, or scroll until no new cards on feeds, up to 1000 either way; files that stop early get `truncated: true` | 20 |
 | 下载图片到本地 (download images) | Bundle images into a ZIP for column, answer and question downloads; copy, feed and hot exports keep remote images | Off |
 
 Settings live in `chrome.storage.sync` (synced with your browser account when browser sync is on); the ball position and recent exports in `chrome.storage.local`.
@@ -112,9 +112,8 @@ All permissions are granted once at install or update time; the extension never 
 
 ## Privacy
 
-- No backend and no analytics. The extension reads Zhihu page content and processes it only locally; nothing is uploaded to the developer or third parties. Apart from normal requests to Zhihu and its image CDN, it makes no network requests.
-- Settings are stored in `chrome.storage.sync` and sync with your browser account when browser sync is on. That is the browser's own sync, carries settings only and no page content.
-- Only talks to Zhihu and its image CDN (`zhimg.com`, only when bundling images); all conversion happens in your browser.
+- No backend and no analytics. Page content is converted in your browser and never uploaded to the developer or third parties. The extension only talks to Zhihu and its image CDN (`zhimg.com`, only when bundling images).
+- Settings are stored in `chrome.storage.sync` and sync with your browser account when browser sync is on. That covers settings only, never page content.
 - See [PRIVACY.md](./PRIVACY.md).
 
 ## FAQ

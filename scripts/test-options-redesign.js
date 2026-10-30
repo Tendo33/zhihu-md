@@ -56,10 +56,10 @@ console.log('options redesign tests passed');
   console.log('options redesign M3 passed');
 }
 
-// M4：标题改为「最大下载条数」
+// M4：标题改为「最多导出条数」
 {
   const html = read('options/options.html');
-  assert.match(html, /id="label-maxAnswerCount"[^>]*>最大下载条数</);
+  assert.match(html, /id="label-maxAnswerCount"[^>]*>最多导出条数</);
   assert.ok(!html.includes('最大下载回答数'), 'M4：旧标题不再出现');
   console.log('options redesign M4 passed');
 }
@@ -81,8 +81,8 @@ console.log('options redesign tests passed');
   const html = read('options/options.html');
   // B1 之后说明里按短语包了 .nw，文案按 textContent 比对（与规格逐字一致）
   assert.equal(descText(html, 'showFloatingBall'), '在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。');
-  assert.equal(descText(html, 'maxAnswerCount'), '问题页回答和首页、关注信息流通用。填 0 则尽量全部下载，最多 1000 条；被上限截断的导出会标注为已截断。');
-  assert.equal(descText(html, 'downloadImages'), '把文章里的图片一起保存，导出为含 .md 和 images 文件夹的 ZIP 包；关闭时图片保留在线链接。');
+  assert.equal(descText(html, 'maxAnswerCount'), '问题页的回答，以及首页、关注信息流都按这个数量导出。填 0 表示尽量全部导出（最多 1000 条）；没导完时文件会标注已截断。');
+  assert.equal(descText(html, 'downloadImages'), '把文中图片一起保存，导出为含 .md 和 images 文件夹的 ZIP 包；关闭时图片保留在线链接。');
   assert.match(rule('.option-desc'), /text-wrap: pretty;/);
   assert.match(rule('.option-desc'), /color: var\(--text-2\);/);
   assert.match(rule('.nw'), /white-space: nowrap;/);
@@ -193,8 +193,8 @@ console.log('options redesign tests passed');
 {
   const html = read('options/options.html');
   const desc = descText(html, 'maxAnswerCount');
-  assert.ok(desc.includes('填 0 则尽量全部下载') && desc.includes('最多 1000 条'), '说明写明 0 = 尽量全部（上限 1000）');
-  assert.match(html, /<span class="nw">填 0 则尽量全部下载，<\/span>/, '「填 0 则尽量全部下载」整句不断行');
+  assert.ok(desc.includes('填 0 表示尽量全部导出') && desc.includes('最多 1000 条'), '说明写明 0 = 尽量全部（上限 1000）');
+  assert.match(html, /<span class="nw">填 0 表示尽量全部导出<\/span>/, '「填 0 表示尽量全部导出」整句不断行');
   const { normalizeAnswerCount, MIN_ANSWER_NOTE } = await import('../lib/answer-limit.js');
   assert.deepEqual(normalizeAnswerCount('0'), { value: 0, note: '' }, '0 原样保存为哨兵值');
   for (const v of ['-1', '0.5']) assert.deepEqual(normalizeAnswerCount(v), { value: 1, note: MIN_ANSWER_NOTE }, `${v} 存成 1`);

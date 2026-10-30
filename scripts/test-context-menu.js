@@ -54,7 +54,7 @@ assert.equal(MENU_ITEMS.find((x) => x.id === 'zm-page-copy').title, '复制本�
   assert.deepEqual(got.map((c) => c.title), asked.map((k) => 'EN:' + k));
   assert.ok(got.every((c) => !('messageKey' in c)), 'messageKey 不能传给 contextMenus.create');
   const fb = []; createMenus({ removeAll: (cb) => cb(), create: (o) => fb.push(o) }, () => '');
-  assert.deepEqual(fb.map((c) => c.title), ['导出本页为 Markdown', '复制本页为 Markdown', '复制选中内容为 Markdown', '导出链接的知乎页面为 Markdown']);
+  assert.deepEqual(fb.map((c) => c.title), ['导出本页为 Markdown', '复制本页为 Markdown', '复制选中内容为 Markdown', '导出链接指向的知乎页面为 Markdown']);
   const loc = JSON.parse(fs.readFileSync(new URL('../_locales/zh_CN/messages.json', import.meta.url), 'utf8'));
   for (const it of MENU_ITEMS) assert.equal(loc[it.messageKey].message, it.title, it.id + ' 兜底与 zh_CN 一致');
 }
@@ -170,7 +170,7 @@ assert.equal(r.reason, 'unsupported');
 }
 
 const html = fs.readFileSync(new URL('../popup/popup.html', import.meta.url), 'utf8');
-assert.match(html, /· 右键也可导出/);
+assert.match(html, /· 右键菜单也能导出/);
 console.log('context menu tests passed');
 
 // 接线：background.js 把 notifyFailure 接到 chrome.action（showLinkFailure）

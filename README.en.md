@@ -105,8 +105,10 @@ Settings live in `chrome.storage.sync` (synced with your browser account when br
 | `contextMenus` | Right-click menu items |
 | `downloads` | Save Markdown or ZIP files |
 | `storage` | Settings, ball position and recent exports |
-| `*.zhihu.com` | Run on Zhihu pages; call Zhihu's answer API for question pages; fetch images when bundling |
-| (no permission) `zhimg.com` | Zhihu's image CDN; images are fetched with plain requests when bundling and are not covered by the declared host access |
+| `*.zhihu.com` | Run on Zhihu pages; call Zhihu's answer API for question pages |
+| `https://*.zhimg.com` | Zhihu's image CDN; download images when "download images" bundling is on |
+
+All permissions are granted once at install or update time; the extension never asks for confirmation or extra permissions while you use it.
 
 ## Privacy
 

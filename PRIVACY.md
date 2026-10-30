@@ -1,6 +1,6 @@
 # Privacy Policy for Zhihu-md
 
-**Last Updated: October 29, 2026**
+**Last Updated: October 30, 2026**
 
 Zhihu-md ("we", "us", or "our") is a browser extension for exporting Zhihu content into Markdown files. This policy explains what the extension can access, how data is processed, and what is stored locally.
 
@@ -43,9 +43,10 @@ The current extension manifest requests only these permissions:
 
 The extension also declares host access for:
 
-- `*://*.zhihu.com/*`
+- `*://*.zhihu.com/*`: run the content script on Zhihu pages and request Zhihu answer data
+- `https://*.zhimg.com/*`: download images from Zhihu's image CDN, only when local image packaging is enabled and you start a download export
 
-This limits content-script execution to Zhihu pages. When local image packaging is enabled, images are fetched from Zhihu's image CDN (`*.zhimg.com`), which is not part of the declared host access.
+All of these permissions are required and granted once when you install or update the extension. The extension declares no optional permissions and never asks for confirmation or additional permissions while you use it. It does not request access to any other site.
 
 ## 4. Local Storage
 

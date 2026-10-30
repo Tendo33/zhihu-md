@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const read = (p) => fs.readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const v = JSON.parse(read('package.json')).version;
 const lock = JSON.parse(read('package-lock.json'));
-assert.equal(v, '1.1.9');
+assert.equal(v, '1.1.10');
 assert.equal(lock.version, v);
 assert.equal(lock.packages[''].version, v);
 assert.equal(JSON.parse(read('manifest.src.json')).version, v);
@@ -15,6 +15,7 @@ assert.match(read('README.en.md'), /From 1\.1\.7, fresh installs/);
 {
   const cl = read('CHANGELOG.md');
   const section = (ver) => cl.slice(cl.indexOf(`## [${ver}]`), cl.indexOf('\n## [', cl.indexOf(`## [${ver}]`) + 1) >>> 0);
+  assert.match(section('1.1.10'), /https:\/\/\*\.zhimg\.com\/\*/, 'CHANGELOG 1.1.10 写明新增图床主机权限');
   assert.match(section('1.1.8'), /商店名称和简介支持中英文/, 'CHANGELOG 1.1.8 写明商店多语言');
   // 以下是 1.1.7 引入的改动，留在 1.1.7 段
   const sec = section('1.1.7');

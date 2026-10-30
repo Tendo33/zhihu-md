@@ -1,4 +1,4 @@
-// 审查 P3-3：图片下载只允许 https://*.zhimg.com（代码层，不改 manifest 权限）
+// 审查 P3-3：图片下载只允许 https://*.zhimg.com（代码层；1.1.10 起 manifest 也声明该主机权限）
 import assert from 'node:assert/strict';
 import { isAllowedImageUrl, normalizeImageUrl } from '../lib/image-pack.js';
 

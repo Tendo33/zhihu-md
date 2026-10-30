@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "minimum_chrome_version": "121",
   "description": "__MSG_extDescription__",
   "default_locale": "zh_CN",
@@ -13,7 +13,8 @@
     "storage"
   ],
   "host_permissions": [
-    "*://*.zhihu.com/*"
+    "*://*.zhihu.com/*",
+    "https://*.zhimg.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",

@@ -7,7 +7,7 @@ import { detectPageTypeFromPathname } from '../lib/page-detector.js';
 
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.src.json', import.meta.url), 'utf8'));
 assert.deepEqual(manifest.permissions, ['activeTab', 'clipboardWrite', 'contextMenus', 'downloads', 'storage'], '只新增 contextMenus');
-assert.deepEqual(manifest.host_permissions, ['*://*.zhihu.com/*']);
+assert.deepEqual(manifest.host_permissions, ['*://*.zhihu.com/*', 'https://*.zhimg.com/*'], '1.1.10：图床主机权限安装时一次授予');
 
 const created = [];
 createMenus({ removeAll: (cb) => cb(), create: (o) => created.push(o) });

@@ -6,11 +6,11 @@
   --fs-xs:12px;--fs-sm:13px;--fs-md:14px;--fs-lg:16px;--fs-xl:20px;--lh-tight:1.3;--lh-body:1.5;
   --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-8:32px;
   --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
-  --shadow-1:0 1px 2px rgb(0 0 0/.06),0 1px 3px rgb(0 0 0/.08);
-  --shadow-2:0 4px 12px rgb(0 0 0/.12);--shadow-3:0 12px 32px rgb(0 0 0/.18);
+  --shadow-1:0 1px 2px rgb(16 24 40/.05),0 1px 1px rgb(16 24 40/.03);
+  --shadow-2:0 6px 16px -4px rgb(16 24 40/.12),0 2px 4px -2px rgb(16 24 40/.06);--shadow-3:0 20px 44px -12px rgb(16 24 40/.24),0 6px 14px -6px rgb(16 24 40/.1);
   --dur-fast:120ms;--dur:200ms;--ease:cubic-bezier(.2,0,0,1);
   --hit-min:32px;--hit-touch:44px;
-  --bg:#f6f7f9;--surface:#fff;--surface-2:#f1f3f5;--border:#dde1e6;--border-strong:#c3c9d1;
+  --bg:#f4f5f7;--surface:#fff;--surface-2:#f1f3f5;--border:#dde1e6;--border-strong:#c3c9d1;
   --text:#1b1f24;--text-2:#5b6270;--text-disabled:#8b929c;
   --success:#0f7a3d;--success-bg:#e7f5ec;--warning:#8a5200;--warning-bg:#fff3e0;
   --danger:#b42318;--danger-bg:#fdecea;--info:#1f5fbf;--info-bg:#e8f0fc;
@@ -22,18 +22,18 @@
   --bg:#111317;--surface:#1b1d22;--surface-2:#24272d;--border:#33373e;--border-strong:#4a4f57;
   --text:#e8eaed;--text-2:#a1a7b3;--text-disabled:#6b717b;
   --success:#4ade80;--success-bg:#13301f;--warning:#fbbf24;--warning-bg:#33270c;--danger:#f87171;--danger-bg:#3a1717;--info:#7cb2ff;--info-bg:#152a47;
-  --brand:#f87171;--brand-hover:#fb9191;--brand-press:#f05252;--brand-on:#1b0606;--brand-soft:#3a1717;--brand-text:#f87171;
+  --brand:#d93636;--brand-hover:#cc2f2f;--brand-press:#b82a2a;--brand-on:#fff;--brand-soft:#3a1717;--brand-text:#f87171;
   --state-hover:rgb(255 255 255/.06);--state-press:rgb(255 255 255/.1);
-  --shadow-2:0 4px 12px rgb(0 0 0/.5);color-scheme:dark}
+  --shadow-1:0 1px 2px rgb(0 0 0/.3);--shadow-2:0 6px 16px -4px rgb(0 0 0/.55);color-scheme:dark}
 [data-theme=dark][data-brand=zhihu]{--brand:#60a5fa;--brand-hover:#82b8fb;--brand-press:#3b8ef5;--brand-on:#06142b;--brand-soft:#152a47;--brand-text:#7cb2ff;--focus:#93c5fd}
 @media (prefers-color-scheme:dark){
 :root:not([data-theme=light]){
   --bg:#111317;--surface:#1b1d22;--surface-2:#24272d;--border:#33373e;--border-strong:#4a4f57;
   --text:#e8eaed;--text-2:#a1a7b3;--text-disabled:#6b717b;
   --success:#4ade80;--success-bg:#13301f;--warning:#fbbf24;--warning-bg:#33270c;--danger:#f87171;--danger-bg:#3a1717;--info:#7cb2ff;--info-bg:#152a47;
-  --brand:#f87171;--brand-hover:#fb9191;--brand-press:#f05252;--brand-on:#1b0606;--brand-soft:#3a1717;--brand-text:#f87171;
+  --brand:#d93636;--brand-hover:#cc2f2f;--brand-press:#b82a2a;--brand-on:#fff;--brand-soft:#3a1717;--brand-text:#f87171;
   --state-hover:rgb(255 255 255/.06);--state-press:rgb(255 255 255/.1);
-  --shadow-2:0 4px 12px rgb(0 0 0/.5);color-scheme:dark}
+  --shadow-1:0 1px 2px rgb(0 0 0/.3);--shadow-2:0 6px 16px -4px rgb(0 0 0/.55);color-scheme:dark}
 :root[data-brand=zhihu]:not([data-theme=light]){--brand:#60a5fa;--brand-hover:#82b8fb;--brand-press:#3b8ef5;--brand-on:#06142b;--brand-soft:#152a47;--brand-text:#7cb2ff;--focus:#93c5fd}
 }
 /* 组件 */
@@ -104,3 +104,36 @@ kbd{font:600 11px/1 ui-monospace,monospace;padding:2px 6px;border:1px solid var(
 .hidden{display:none!important}
 .logo img{width:24px;height:24px;display:block;border-radius:6px}
 html,body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-md)/var(--lh-body) var(--font-sans)}
+
+/* ---------- v2.1 视觉精修（两仓库同源，追加在末尾）：只调表层——阴影、描边、渐变、过渡；不改任何尺寸和间距 ---------- */
+.btn{transition:background-color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease),box-shadow var(--dur) var(--ease),transform var(--dur-fast) var(--ease)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn-primary{background-image:linear-gradient(180deg,rgb(255 255 255/.12),rgb(255 255 255/0));box-shadow:inset 0 1px 0 rgb(255 255 255/.18),0 1px 2px rgb(16 24 40/.16),0 6px 14px -6px color-mix(in srgb,var(--brand) 60%,transparent)}
+.btn-primary:hover{box-shadow:inset 0 1px 0 rgb(255 255 255/.18),0 1px 2px rgb(16 24 40/.16),0 8px 20px -6px color-mix(in srgb,var(--brand) 70%,transparent)}
+.btn-secondary{border-color:var(--border);box-shadow:var(--shadow-1)}.btn-secondary:hover{border-color:var(--border-strong)}
+.btn:disabled,.btn[aria-disabled=true]{background-image:none;box-shadow:none;transform:none}
+.btn:focus-visible{box-shadow:none}
+.icon-btn{transition:background-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease)}
+.card{box-shadow:var(--shadow-1)}
+.ctx{background:linear-gradient(180deg,color-mix(in srgb,var(--brand) 5%,var(--surface)),var(--surface) 72%)}
+.ctx .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.ctx .badge.idle::before{opacity:.55}
+.hd{box-shadow:0 1px 0 var(--border);border-bottom-color:transparent}
+.hd h1{letter-spacing:-.01em}
+.logo,.logo img{box-shadow:0 0 0 1px rgb(16 24 40/.08),0 1px 2px rgb(16 24 40/.12)}
+.alert{box-shadow:inset 0 0 0 1px color-mix(in srgb,currentColor 16%,transparent)}
+.alert.info{box-shadow:inset 0 0 0 1px var(--border)}
+.sec-h{letter-spacing:.02em}
+.row{border-bottom-color:color-mix(in srgb,var(--border) 70%,transparent)}
+.ft{box-shadow:0 -1px 0 var(--border);border-top-color:transparent}
+kbd{border-color:var(--border);border-bottom-width:1px;background:var(--surface-2);box-shadow:inset 0 -1px 0 var(--border-strong);color:var(--text)}
+.empty .ic{background:color-mix(in srgb,var(--brand) 9%,var(--surface-2));color:var(--brand-text)}
+.switch span{box-shadow:inset 0 1px 2px rgb(16 24 40/.12)}.switch span::after{box-shadow:0 1px 3px rgb(16 24 40/.24)}
+.switch input:checked+span{box-shadow:none}
+.field{transition:border-color var(--dur-fast) var(--ease)}.field:hover{border-color:var(--text-2)}
+.fab{box-shadow:0 1px 2px rgb(16 24 40/.16),0 8px 20px -6px color-mix(in srgb,var(--brand) 60%,transparent)}
+.body{scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent}
+/* 深色：品牌色外发光在暗底上过亮，改为中性投影 */
+[data-theme=dark] .btn-primary,[data-theme=dark] .btn-primary:hover{box-shadow:inset 0 1px 0 rgb(255 255 255/.14),0 1px 2px rgb(0 0 0/.4)}
+[data-theme=dark] .fab{box-shadow:0 4px 12px rgb(0 0 0/.5)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .btn-primary,:root:not([data-theme=light]) .btn-primary:hover{box-shadow:inset 0 1px 0 rgb(255 255 255/.14),0 1px 2px rgb(0 0 0/.4)}:root:not([data-theme=light]) .fab{box-shadow:0 4px 12px rgb(0 0 0/.5)}}

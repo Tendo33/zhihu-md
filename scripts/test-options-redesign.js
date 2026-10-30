@@ -159,7 +159,7 @@ console.log('options redesign tests passed');
 // 审查第 3 条：1.1.8 未发布，条目并入 1.1.8 段，[Unreleased] 留空，不重复
 {
   const log = read('CHANGELOG.md');
-  const unrel = log.slice(log.indexOf('## [Unreleased]'), log.indexOf('## [1.1.8]'));
+  const unrel = log.slice(log.indexOf('## [Unreleased]'), log.indexOf('\n## [', log.indexOf('## [Unreleased]') + 1));
   assert.ok(log.includes('## [Unreleased]') && !/^- /m.test(unrel), '[Unreleased] 留空');
   const sec = log.slice(log.indexOf('## [1.1.8]'), log.indexOf('## [1.1.7]'));
   assert.match(sec, /### 改进[\s\S]*导出本页为 Markdown[\s\S]*设置页按设计稿重做/);

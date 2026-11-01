@@ -4,7 +4,7 @@
     "description": "Extension name shown in the Chrome Web Store and chrome://extensions. Same in every language; do not translate."
   },
   "extDescription": {
-    "message": "Convert Zhihu columns, answers, question pages and hot lists to Markdown, with math, code and images kept. Download or copy.",
+    "message": "Save Zhihu articles, answers, questions and the hot list as Markdown, with math, code and images intact. Download or copy.",
     "description": "Extension description shown in the Chrome Web Store and chrome://extensions. 132 characters max."
   },
   "cmdExportPage": {
@@ -149,7 +149,7 @@
     }
   },
   "ballImagesFailedKept": {
-    "message": "$ARG1$\u00a0images couldn't be downloaded, $ARG2$\u00a0can't be saved locally; online links kept",
+    "message": "$ARG1$ images couldn't be downloaded, $ARG2$ can't be saved locally; online links kept",
     "description": "Screen reader extra when some images failed to download AND others can't be saved locally (PM copy 2026-10-29). $1 = failed count (2 or more), $2 = kept count.",
     "placeholders": {
       "arg1": {
@@ -161,7 +161,7 @@
     }
   },
   "ballImagesFailedKeptOne": {
-    "message": "$ARG1$\u00a0image couldn't be downloaded, $ARG2$\u00a0can't be saved locally; online links kept",
+    "message": "$ARG1$ image couldn't be downloaded, $ARG2$ can't be saved locally; online links kept",
     "description": "Singular form of ballImagesFailedKept, used when the failed count is 1. $1 = 1, $2 = kept count.",
     "placeholders": {
       "arg1": {

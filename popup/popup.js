@@ -155,10 +155,10 @@ function showArticleInfo(info) {
 /** 非知乎页、不支持的知乎页：空状态卡，按钮置灰 */
 function showUnsupported(desc) {
   articleInfo.classList.add('hidden');
-  errorMessage.querySelector('.empty-desc').textContent = desc || '打开知乎问题、回答或专栏文章后可用';
+  errorMessage.querySelector('.empty-desc').textContent = desc || '请打开知乎的问题、回答、专栏文章、首页、关注或热榜页';
   errorMessage.classList.remove('hidden');
   updateStatus('idle', '不支持此页面');
-  setExportActionsEnabled(false, '当前页面不支持导出，所以按钮不可用');
+  setExportActionsEnabled(false, '这个页面不支持导出');
 }
 
 /** 内容脚本还没就绪：info alert，按钮置灰，可刷新 */
@@ -175,7 +175,7 @@ function showNotReady(tab, text, showRefresh) {
 }
 
 /** popup 里主按钮就是「重试」，下一步写短一点（与样稿一致） */
-const POPUP_HINT = { security_check: '在知乎页面完成验证后点“重试”' };
+const POPUP_HINT = { security_check: '在知乎页面完成验证后点「重试」' };
 
 /** Z3-3：失败用内联 alert（原因 + 下一步），主按钮变成「重试」 */
 function setFeedbackTone(tone) {
@@ -345,7 +345,7 @@ async function init() {
     else if (f.isHome) type = 'home';
     else if (f.isFollow) type = 'follow';
     else if (f.isHot) type = 'hot';
-    if (!type) { showUnsupported('请打开知乎文章、问题、回答、首页、关注或热榜页面'); return; }
+    if (!type) { showUnsupported('请打开知乎的问题、回答、专栏文章、首页、关注或热榜页'); return; }
 
     try {
       const response = await safeSendMessage(tab.id, { action: 'getArticleInfo' });
@@ -357,7 +357,7 @@ async function init() {
     } catch (msgError) {
       Logger.warn('getArticleInfo failed:', msgError);
       const fb = describeFailure(msgError, 'export');
-      if (fb.reason === 'not_loaded') showNotReady(tab, '页面仍在加载，正文就绪后可导出', true);
+      if (fb.reason === 'not_loaded') showNotReady(tab, '页面还在加载，加载完即可导出', true);
       else showNotReady(tab, fb.text, true);
     }
   } catch (error) {
@@ -461,7 +461,7 @@ function handleCopy() {
   hideAlerts();
   showActionFeedback(null);
   setExportActionsEnabled(false, '正在复制');
-  copyLabel.textContent = '复制中…';
+  copyLabel.textContent = '正在复制…';
   const pending = copyTextLater(async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const response = await safeSendMessage(tab.id, { action: 'exportMarkdown', downloadImages: false });

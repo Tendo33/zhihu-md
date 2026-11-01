@@ -17,15 +17,15 @@ const zh = read('_locales/zh_CN/messages.json');
 const en = read('_locales/en/messages.json');
 assert.equal(zh.extName.message, 'Zhihu to Markdown');
 assert.equal(en.extName.message, 'Zhihu to Markdown');
-assert.equal(zh.extDescription.message, '把知乎专栏、回答、问题页和热榜转换为 Markdown，保留公式、代码和图片，一键下载或复制。');
-assert.equal(en.extDescription.message, 'Convert Zhihu columns, answers, question pages and hot lists to Markdown, with math, code and images kept. Download or copy.');
+assert.equal(zh.extDescription.message, '把知乎文章、回答、问题和热榜存为 Markdown，保留公式、代码和图片，一键下载或复制。');
+assert.equal(en.extDescription.message, 'Save Zhihu articles, answers, questions and the hot list as Markdown, with math, code and images intact. Download or copy.');
 for (const msgs of [zh, en]) for (const v of Object.values(msgs)) assert.ok(v.description, '每条 message 都要有 description');
 assert.equal(zh.cmdExportPage.message, '导出本页为 Markdown', '中文统一为「导出本页」');
 assert.equal(en.cmdExportPage.message, 'Export this page as Markdown');
 // 设计验收 S1：英文动词与指代统一（主管已定以设计和审查意见为准）
 assert.deepEqual([en.menuPageExport, en.menuPageCopy, en.menuSelectionCopy, en.menuLinkExport].map((x) => x.message),
   ['Export this page as Markdown', 'Copy this page as Markdown', 'Copy selection as Markdown', 'Export linked Zhihu page as Markdown']);
-const MENU = { menuPageExport: '导出本页为 Markdown', menuPageCopy: '复制本页为 Markdown', menuSelectionCopy: '复制选中内容为 Markdown', menuLinkExport: '导出链接的知乎页面为 Markdown' };
+const MENU = { menuPageExport: '导出本页为 Markdown', menuPageCopy: '复制本页为 Markdown', menuSelectionCopy: '复制选中内容为 Markdown', menuLinkExport: '导出链接指向的知乎页面为 Markdown' };
 for (const [k, v] of Object.entries(MENU)) { assert.equal(zh[k].message, v, k + ' 中文不变'); assert.ok(en[k].message && en[k].message !== v, k + ' 有英文'); }
 assert.deepEqual(Object.keys(zh).sort(), Object.keys(en).sort(), '两种语言条目一致');
 assert.deepEqual(manifestMessageKeys(m).sort(), ['cmdExportPage', 'extDescription', 'extName']);

@@ -1,0 +1,93 @@
+/* series.css — 「to Markdown」系列共用层（arxiv-md / zhihu-md / journal-md 三仓库字节相同，改一处要同步三处）。
+ * 叠在 ui-v2.css（及品牌 tokens）之后：设置页外壳 .sp、页头版本号 .chip、页脚链接 .sp-links、同系列 .series、弹窗空状态。
+ * 只用 ui-v2 的 tokens，不引入新颜色（同系列圆点除外：三款产品的浅色品牌色）。 */
+
+/* ---------- 设置页外壳：页头（图标 40 + 产品名 + 「设置」+ 右侧版本号）→ 分组卡片 → 页脚 ---------- */
+body.sp-body{min-height:100vh;padding:clamp(20px,5vw,40px) 20px 32px;background:var(--bg);-webkit-font-smoothing:antialiased}
+.sp{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:var(--sp-4)}
+.sp-hd{display:flex;align-items:center;gap:var(--sp-3);padding:0 4px var(--sp-1)}
+.sp-hd>img{flex:none;width:40px;height:40px;border-radius:10px;box-shadow:0 0 0 1px rgb(16 24 40/.08),0 1px 2px rgb(16 24 40/.12)}
+.sp-ttl{flex:1;min-width:0}
+.sp-ttl h1{font:600 var(--fs-xl)/1.3 var(--font-sans);letter-spacing:-.01em;margin:0;overflow-wrap:anywhere}
+.sp-ttl p{color:var(--text-2);font-size:var(--fs-sm);line-height:1.4;margin:0}
+.sp-acts{flex:none;display:flex;align-items:center;gap:var(--sp-2)}
+.chip{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:var(--r-full);background:var(--surface-2);color:var(--text-2);box-shadow:inset 0 0 0 1px var(--border);font:600 var(--fs-xs)/1 var(--font-sans);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* 分组卡片：标题 16/600、说明 13 灰字、每行 12/20 内边距，行与行之间 1px 分隔（ui-v2 .grp / .it） */
+.sp .grp{box-shadow:var(--shadow-1);overflow:hidden}
+.sp .grp>h2{font:600 var(--fs-lg)/1.4 var(--font-sans);margin:0;padding:var(--sp-5) var(--sp-5) var(--sp-2);color:var(--text)}
+.sp .grp-desc{margin:0;padding:0 var(--sp-5) var(--sp-3);color:var(--text-2);font-size:var(--fs-sm);line-height:1.55}
+.sp .grp>h2+.it,.sp .grp-desc+.it{border-top:0}
+.sp .it{padding:var(--sp-3) var(--sp-5)}
+.sp .it:last-child{padding-bottom:var(--sp-5)}
+.sp .it .tx{min-width:0}
+.sp .it-col{flex-direction:column;align-items:stretch;gap:var(--sp-1)}
+.sp .lbl{display:block;font-weight:500;font-size:var(--fs-md);line-height:1.4;color:var(--text)}
+/* 说明文字 13px（ui-v2 的 .it .tx small 是 12，中文偏小；这里提高优先级盖过它） */
+.sp .help,.sp .it .tx small{display:block;color:var(--text-2);font-size:var(--fs-sm);line-height:1.5;overflow-wrap:anywhere}
+.sp .switch{flex:none}
+/* ui-v2 .switch 的轨道盖在透明 input 上会吃掉点击：让 input 在最上层；关闭态描边 --text-2，非文字对比度 ≥3:1 */
+.sp .switch input{z-index:1}
+.sp .switch span{box-shadow:inset 0 0 0 1px var(--text-2)}
+.sp .switch input:checked+span{box-shadow:none}
+
+/* 欢迎条（首次安装打开设置页时） */
+.sp .welcome{background:color-mix(in srgb,var(--brand) 6%,var(--surface));color:var(--text);border:1px solid color-mix(in srgb,var(--brand) 22%,var(--border));border-radius:var(--r-lg);padding:var(--sp-4) var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-1);box-shadow:var(--shadow-1)}
+.sp .welcome h2{font:600 var(--fs-lg)/1.4 var(--font-sans);color:var(--brand-text);margin:0}
+.sp .welcome p{font-size:var(--fs-sm);margin:0}
+
+/* 页脚：保存状态 / 隐私一句话 → 链接行 → 同系列 */
+.sp-ft{display:flex;flex-direction:column;gap:var(--sp-3);padding:var(--sp-2) 4px 0;font-size:var(--fs-sm);line-height:1.5;color:var(--text-2)}
+.sp-ft p{margin:0}
+.sp-links{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--sp-4)}
+.sp-links a{display:inline-flex;align-items:center;min-height:24px;color:var(--text-2);text-decoration:none}
+.sp-links a:hover{color:var(--brand-text);text-decoration:underline;text-underline-offset:2px}
+.series{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2);padding-top:var(--sp-3);border-top:1px solid var(--border)}
+.series>span{margin-right:var(--sp-1)}
+.series a{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:var(--r-full);border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:500;text-decoration:none;transition:border-color var(--dur-fast) var(--ease)}
+.series a:hover{border-color:var(--border-strong)}
+.series a::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--dot,var(--brand))}
+.series a[data-p=arxiv]{--dot:#b31b1b}.series a[data-p=zhihu]{--dot:#0a5fd1}.series a[data-p=journal]{--dot:#0f766e}
+/* 页脚链接、同系列：系列焦点环 2px --focus、偏移 2px（不用浏览器默认环，深色下对比度不够） */
+.sp-ft a:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+
+@media (max-width:480px){
+  body.sp-body{padding:16px 12px 24px}
+  .sp-hd>img{width:32px;height:32px;border-radius:8px}
+  .sp-ttl h1{font-size:var(--fs-lg)}
+}
+
+/* ---------- 系列视觉：选中色、纯色主按钮、轻量开关、分段选择、置灰按钮 ---------- */
+/* 选中色 --select：开关打开、分段选中、单选卡片。品牌色是红色时（arXiv，<html> 不带 data-brand）改用中性深色，
+   红色只留给主按钮和错误提示——一排红色开关读起来像报警。--select-on 是选中底上的文字，--knob 是开关旋钮 */
+:root{--select:var(--brand);--select-on:var(--brand-on);--knob:#fff}
+:root:not([data-brand]){--select:#2b3138;--select-on:#fff}
+[data-theme=dark]:not([data-brand]){--select:#e3e6ea;--select-on:#1b1d22;--knob:#1b1d22}
+@media (prefers-color-scheme:dark){:root:not([data-brand]):not([data-theme=light]){--select:#e3e6ea;--select-on:#1b1d22;--knob:#1b1d22}}
+
+/* 主按钮：纯色 + 很轻的投影，去掉 ui-v2 v2.1 的渐变高光和品牌色光晕 */
+.btn.btn-primary:not(:disabled):not([aria-disabled=true]){background-image:none;box-shadow:0 1px 2px rgb(16 24 40/.14)}
+.btn.btn-primary:not(:disabled):not([aria-disabled=true]):hover{box-shadow:0 2px 6px -1px rgb(16 24 40/.22)}
+.btn.btn-primary:not(:disabled):not([aria-disabled=true]):focus-visible{box-shadow:none}
+
+/* 开关：打开 = 选中色实心；关闭 = 表面色轨道 + 1.5px 描边 + 缩小的灰旋钮（比灰底加深色描边轻，非文字对比度仍 ≥3:1） */
+.switch input:checked+span{background:var(--select)}
+.switch input:checked+span::after{background:var(--knob)}
+.switch input:not(:checked)+span{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--text-2)}
+.switch input:not(:checked)+span::after{background:var(--text-2);box-shadow:none;transform:scale(.72)}
+
+/* 分段选择（语言、服务）：灰色轨道里选中项浮起（白底 + 细边），不再用品牌色实心块 */
+.segmented{display:inline-flex;flex-wrap:wrap;margin:0;padding:2px;gap:2px;border:1px solid var(--border-strong);border-radius:var(--r-md);width:max-content;max-width:100%;background:var(--surface-2)}
+.segmented label{position:relative;display:inline-flex}
+.segmented input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.segmented span{display:inline-flex;align-items:center;min-height:30px;padding:0 var(--sp-3);border-radius:6px;color:var(--text-2);font:600 var(--fs-sm)/1 var(--font-sans);transition:background-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease)}
+.segmented label:hover span{color:var(--text)}
+.segmented input:checked+span{background:var(--surface);color:var(--text);box-shadow:0 0 0 1px var(--border-strong),0 1px 2px rgb(16 24 40/.12)}
+.segmented input:focus-visible+span{outline:2px solid var(--focus);outline-offset:1px}
+
+/* 弹窗里的置灰按钮：透明底 + 细边，视觉重量低于提示本身 */
+.acts .btn:disabled{background:transparent;border-color:var(--border);color:var(--text-disabled);box-shadow:none}
+
+/* ---------- 弹窗：不支持的页面（图标 + 标题 + 去哪里），三款同一写法 ---------- */
+.empty .empty-title{display:block;color:var(--text);font-weight:600;font-size:var(--fs-md);margin-bottom:2px}
+.empty .empty-desc{display:block;line-height:1.5}

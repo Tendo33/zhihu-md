@@ -7,19 +7,22 @@
   <link rel="stylesheet" href="../lib/shared.css">
   <!-- 设计验收 R3：ui-v2 放在 shared 之后，同名 token（--surface/--border/--danger…）以 v2 为准 -->
   <link rel="stylesheet" href="../lib/ui-v2.css">
+  <link rel="stylesheet" href="../lib/series.css">
   <link rel="stylesheet" href="options.css">
 </head>
-<body>
-  <div class="container">
-    <header class="header">
-      <img class="brand-logo" src="../icons/icon128.png" alt="" width="32" height="32">
-      <div class="brand-text">
-        <h1>设置</h1>
-        <p class="brand-sub">Zhihu to Markdown</p>
+<body class="sp-body">
+  <div class="sp">
+    <header class="sp-hd header">
+      <img class="brand-logo" src="../icons/icon128.png" alt="" width="40" height="40">
+      <div class="sp-ttl brand-text">
+        <h1>Zhihu to Markdown</h1>
+        <p class="brand-sub">设置</p>
       </div>
+      <div class="sp-acts"><span id="app-version" class="chip"></span></div>
     </header>
-    
-    <main class="section">
+
+    <section class="grp container" aria-labelledby="sec-page">
+      <h2 id="sec-page">页面</h2>
       <div class="option-item">
         <div class="option-content">
           <label class="option-label" id="label-showFloatingBall" for="showFloatingBall">悬浮球</label>
@@ -30,7 +33,10 @@
           <span class="slider" aria-hidden="true"></span>
         </span>
       </div>
+    </section>
 
+    <section class="grp container" aria-labelledby="sec-export">
+      <h2 id="sec-export">导出</h2>
       <div class="option-item option-item--field">
         <div class="option-content">
           <label class="option-label" id="label-maxAnswerCount" for="maxAnswerCount">最多导出条数</label>
@@ -55,11 +61,23 @@
           <span class="slider" aria-hidden="true"></span>
         </span>
       </div>
-    </main>
-    
-    <footer class="footer">
+    </section>
+
+    <footer class="sp-ft footer">
       <span id="status" class="status-msg" role="status" aria-live="polite" aria-atomic="true"></span>
-      <span class="ver">Zhihu to Markdown <span id="app-version"></span></span>
+      <p>页面内容只在你的浏览器里转换，不上传给开发者或第三方。改动自动保存。</p>
+      <nav class="sp-links" aria-label="相关链接">
+        <a href="https://github.com/Tendo33/zhihu-md" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/Tendo33/zhihu-md/issues" target="_blank" rel="noopener noreferrer">反馈问题</a>
+        <a href="https://github.com/Tendo33/zhihu-md/blob/main/PRIVACY.md" target="_blank" rel="noopener noreferrer">隐私说明</a>
+        <a href="https://github.com/Tendo33/zhihu-md/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">更新日志</a>
+      </nav>
+      <div class="series">
+        <span>同系列</span>
+        <a data-p="arxiv" href="https://chromewebstore.google.com/detail/arxiv-to-markdown/pphdggfbjddgdljndgdablkhbdpbfnbd" target="_blank" rel="noopener noreferrer">arXiv to Markdown</a>
+        <a data-p="journal" href="https://github.com/Tendo33/journal-md" target="_blank" rel="noopener noreferrer">Journal to Markdown</a>
+      </div>
+      <p>© 2025–2026 SimonSun</p>
     </footer>
   </div>
 

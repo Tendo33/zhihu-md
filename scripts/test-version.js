@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const read = (p) => fs.readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const v = JSON.parse(read('package.json')).version;
 const lock = JSON.parse(read('package-lock.json'));
-assert.equal(v, '1.1.10');
+assert.equal(v, '1.2.0');
 assert.equal(lock.version, v);
 assert.equal(lock.packages[''].version, v);
 assert.equal(JSON.parse(read('manifest.src.json')).version, v);

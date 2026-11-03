@@ -39,7 +39,7 @@ Not a crawler: it only handles the Zhihu page you opened, plus answers not yet s
 
 | Floating ball | Exported Markdown |
 | --- | --- |
-| <img src="docs/screenshots/floating-ball.png" alt="Floating ball at the bottom right"> | <img src="docs/screenshots/markdown-output.png" alt="Exported Markdown file"> |
+| <img src="docs/screenshots/page-entry.png" alt="Floating ball at the bottom right"> | <img src="docs/screenshots/markdown-output.png" alt="Exported Markdown file"> |
 
 ### Supported pages
 
@@ -88,7 +88,7 @@ Long exports started from the popup (such as a question page) need the popup to 
 
 ## Settings
 
-<img src="docs/screenshots/options.png" width="720" alt="Options page">
+<img src="docs/screenshots/settings.png" width="720" alt="Settings page">
 
 | Setting | Description | Default |
 | --- | --- | --- |

@@ -39,7 +39,7 @@
 
 | 页面悬浮球 | 导出的 Markdown |
 | --- | --- |
-| <img src="docs/screenshots/floating-ball.png" alt="页面右下角的悬浮球"> | <img src="docs/screenshots/markdown-output.png" alt="导出的 Markdown 文件"> |
+| <img src="docs/screenshots/page-entry.png" alt="页面右下角的悬浮球"> | <img src="docs/screenshots/markdown-output.png" alt="导出的 Markdown 文件"> |
 
 ### 支持的页面
 
@@ -88,7 +88,7 @@ npm run build
 
 ## 设置
 
-<img src="docs/screenshots/options.png" width="720" alt="设置页">
+<img src="docs/screenshots/settings.png" width="720" alt="设置页">
 
 | 设置项 | 说明 | 默认 |
 | --- | --- | --- |

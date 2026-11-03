@@ -19,6 +19,8 @@
 
 </div>
 
+> **The "to Markdown" series**: [arXiv to Markdown](https://github.com/Tendo33/arxiv-md) · **Zhihu to Markdown** · [Journal to Markdown](https://github.com/Tendo33/journal-md). Three extensions with the same interface and export habits, for arXiv preprints, Zhihu and journal full text.
+
 > The UI is in Chinese only. The article in the screenshots is a demo page, not real Zhihu content.
 
 ## Features
@@ -137,10 +139,18 @@ npm install
 npm run build     # unpacked extension in dist/
 npm run lint
 npm test
-npm run package   # build/zhihu-to-markdown-v<version>.zip
+npm run package   # build/zhihu-md-v<version>.zip
 ```
 
 Developer docs (Chinese) start at [docs/README.md](./docs/README.md).
+
+## Also in the series
+
+| Extension | For | Get it |
+| --- | --- | --- |
+| [arXiv to Markdown](https://github.com/Tendo33/arxiv-md) | arXiv papers (abstract, PDF and HTML pages) | [Chrome Web Store](https://chromewebstore.google.com/detail/arxiv-to-markdown/pphdggfbjddgdljndgdablkhbdpbfnbd) |
+| **Zhihu to Markdown** | Zhihu articles, answers, questions, feeds, hot list | [Chrome Web Store](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) |
+| [Journal to Markdown](https://github.com/Tendo33/journal-md) | PMC, PubMed, Springer, Nature, Frontiers, MDPI, PLOS, eLife | [Releases](https://github.com/Tendo33/journal-md/releases) |
 
 ## Changelog
 

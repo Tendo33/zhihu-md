@@ -4,7 +4,7 @@
     "description": "扩展名称，显示在 Chrome 应用商店和 chrome://extensions 中。两种语言保持一致，不要翻译。"
   },
   "extDescription": {
-    "message": "把知乎文章、回答、问题和热榜存为 Markdown，保留公式、代码和图片，一键下载或复制。",
+    "message": "一键把知乎文章、回答、问题和热榜存为 Markdown：公式、代码、图片原样保留，可下载也可复制。",
     "description": "扩展简介，显示在 Chrome 应用商店和 chrome://extensions 中。不超过 132 个字符。"
   },
   "cmdExportPage": {

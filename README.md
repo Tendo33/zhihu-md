@@ -19,6 +19,8 @@
 
 </div>
 
+> **「to Markdown」系列**：[arXiv to Markdown](https://github.com/Tendo33/arxiv-md) · **Zhihu to Markdown** · [Journal to Markdown](https://github.com/Tendo33/journal-md)。三款插件同一套界面和导出习惯，分别覆盖 arXiv 预印本、知乎和期刊全文。
+
 > 截图中的文章是演示页，不是真实知乎内容。
 
 ## 功能
@@ -139,10 +141,18 @@ npm install
 npm run build     # 输出未打包扩展到 dist/
 npm run lint
 npm test
-npm run package   # 生成 build/zhihu-to-markdown-v<version>.zip
+npm run package   # 生成 build/zhihu-md-v<version>.zip
 ```
 
 文档入口：[docs/README.md](./docs/README.md)，包括 [架构](./docs/architecture.md)、[导出链路](./docs/request-lifecycle.md)、[开发维护](./docs/development.md)。
+
+## 同系列
+
+| 插件 | 适用 | 获取 |
+| --- | --- | --- |
+| [arXiv to Markdown](https://github.com/Tendo33/arxiv-md) | arXiv 论文（摘要页、PDF、HTML） | [Chrome 应用商店](https://chromewebstore.google.com/detail/arxiv-to-markdown/pphdggfbjddgdljndgdablkhbdpbfnbd) |
+| **Zhihu to Markdown** | 知乎文章、回答、问题、信息流、热榜 | [Chrome 应用商店](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) |
+| [Journal to Markdown](https://github.com/Tendo33/journal-md) | PMC、PubMed、Springer、Nature、Frontiers、MDPI、PLOS、eLife | [Releases](https://github.com/Tendo33/journal-md/releases) |
 
 ## 更新日志
 

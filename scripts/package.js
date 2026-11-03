@@ -10,7 +10,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(root, 'dist');
 const buildDir = path.join(root, 'build');
 const { version } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-const zipName = `zhihu-to-markdown-v${version}.zip`;
+const zipName = `zhihu-md-v${version}.zip`;
 const zipPath = path.join(buildDir, zipName);
 
 if (!fs.existsSync(path.join(distDir, 'manifest.json'))) {

@@ -34,13 +34,13 @@ jobs:
       - name: Verify artifact
         shell: bash
         run: |
-          test -f "build/zhihu-to-markdown-v${{ steps.pkg.outputs.version }}.zip"
+          test -f "build/zhihu-md-v${{ steps.pkg.outputs.version }}.zip"
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.ref_name }}" \
-            "build/zhihu-to-markdown-v${{ steps.pkg.outputs.version }}.zip" \
+            "build/zhihu-md-v${{ steps.pkg.outputs.version }}.zip" \
             --generate-notes \
             --title "Zhihu to Markdown ${{ github.ref_name }}"

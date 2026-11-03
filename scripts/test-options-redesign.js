@@ -41,11 +41,12 @@ console.log('options redesign tests passed');
   console.log('options redesign M2 passed');
 }
 
-// M3：保存提示在页脚（左），版本号在右；超限警示行在数字框下方并被 aria-describedby 关联
+// M3（系列外壳）：保存提示在页脚第一行，版本号在页头右侧；超限警示行在数字框下方并被 aria-describedby 关联
 {
   const html = read('options/options.html');
-  const footer = html.slice(html.indexOf('<footer class="footer">'), html.indexOf('</footer>'));
-  assert.match(footer, /<span id="status" class="status-msg" role="status" aria-live="polite" aria-atomic="true"><\/span>\s*<span class="ver">Zhihu to Markdown <span id="app-version"><\/span><\/span>/, 'M3：提示在页脚左、版本号在右');
+  const footer = html.slice(html.indexOf('<footer class="sp-ft footer">'), html.indexOf('</footer>'));
+  assert.match(footer, /^<footer class="sp-ft footer">\s*<span id="status" class="status-msg" role="status" aria-live="polite" aria-atomic="true"><\/span>/, 'M3：提示在页脚第一行');
+  assert.match(html.slice(html.indexOf('<header'), html.indexOf('</header>')), /<span id="app-version" class="chip"><\/span>/, 'M3：版本号在页头右侧');
   assert.ok(html.indexOf('id="status"') < html.indexOf('</footer>') && html.indexOf('id="status"') > html.indexOf('<footer'), 'status 在页脚内');
   assert.match(html, /<div class="field-note" id="note-maxAnswerCount" role="status" aria-live="polite"><\/div>/);
   assert.match(html, /aria-describedby="desc-maxAnswerCount note-maxAnswerCount"/);
@@ -93,12 +94,12 @@ console.log('options redesign tests passed');
 {
   const html = read('options/options.html');
   assert.match(css, /\nbody \{\s*background-color: var\(--bg\);/, 'M7：页面 --bg');
-  assert.match(rule('.container'), /background: var\(--surface\);/, 'M7：卡片 --surface');
-  assert.match(rule('.header'), /padding: 20px 24px;/);
-  assert.match(rule('.option-item'), /padding: 16px 24px;/);
-  assert.match(rule('.section'), /padding: 0;/);
+  // 系列外壳：卡片是 ui-v2 .grp（--surface），页头、分组标题在 series.css；行 12/20、标题 500 与另外两款一致
+  assert.match(html, /<section class="grp container" aria-labelledby="sec-page">/, 'M7：分组卡片用 .grp');
+  assert.match(html, /<header class="sp-hd header">/);
+  assert.match(rule('.option-item'), /padding: 12px 20px;/);
   assert.ok(!/padding-right: 20px/.test(rule('.option-content')));
-  assert.match(rule('.option-label'), /font-weight: 600;/);
+  assert.match(rule('.option-label'), /font-weight: 500;/);
   assert.match(rule('.option-item:hover'), /var\(--state-hover\)/);
   for (const k of ['showFloatingBall', 'maxAnswerCount', 'downloadImages']) {
     assert.match(html, new RegExp(`<label class="option-label" id="label-${k}" for="${k}">`), `${k} 用 <label for>`);
@@ -156,11 +157,11 @@ console.log('options redesign tests passed');
   console.log('options redesign S2 passed');
 }
 
-// 审查第 3 条：1.1.8 未发布，条目并入 1.1.8 段，[Unreleased] 留空，不重复
+// 审查第 3 条：1.1.8 的条目并入 1.1.8 段，不在 [Unreleased] 里重复（未发版的新改动可以记在 Unreleased）
 {
   const log = read('CHANGELOG.md');
   const unrel = log.slice(log.indexOf('## [Unreleased]'), log.indexOf('\n## [', log.indexOf('## [Unreleased]') + 1));
-  assert.ok(log.includes('## [Unreleased]') && !/^- /m.test(unrel), '[Unreleased] 留空');
+  assert.ok(log.includes('## [Unreleased]') && !/设置页按设计稿重做|超过上限，已保存为 1000/.test(unrel), '[Unreleased] 不重复 1.1.8 条目');
   const sec = log.slice(log.indexOf('## [1.1.8]'), log.indexOf('## [1.1.7]'));
   assert.match(sec, /### 改进[\s\S]*导出本页为 Markdown[\s\S]*设置页按设计稿重做/);
   assert.match(sec, /### 修复[\s\S]*background\.scripts[\s\S]*### 改进/, 'bg-scripts 条目并入 1.1.8 修复');

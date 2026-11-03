@@ -335,7 +335,7 @@ async function init() {
   renderRecent().catch(() => {});
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab || !tab.url) { showUnsupported('无法访问当前页面'); return; }
+    if (!tab || !tab.url) { showUnsupported(); return; }
     const f = checkUrlType(tab.url);
     if (!f || !f.isZhihu) { showUnsupported(); return; }
     let type = null;

@@ -1,7 +1,7 @@
 {
-  "name": "zhihu-to-markdown",
+  "name": "zhihu-md",
   "version": "1.1.10",
-  "description": "把知乎文章、回答、问题和热榜存为 Markdown，保留公式、代码和图片，一键下载或复制。",
+  "description": "Zhihu to Markdown — browser extension that saves Zhihu articles, answers, questions and the hot list as Markdown.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
@@ -22,8 +22,16 @@
     "zhihu",
     "markdown"
   ],
-  "author": "",
+  "author": "SimonSun",
   "license": "MIT",
+  "homepage": "https://github.com/Tendo33/zhihu-md#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tendo33/zhihu-md.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tendo33/zhihu-md/issues"
+  },
   "devDependencies": {
     "archiver": "^7.0.1",
     "esbuild": "^0.25.10",

@@ -47,7 +47,7 @@ npm run package
 
 1. 用 esbuild 把内容脚本、弹窗、设置页和后台打进 `dist/`
 2. 带上样式、图标、清单和说明
-3. 生成 `build/zhihu-to-markdown-v<version>.zip`
+3. 生成 `build/zhihu-md-v<version>.zip`
 
 ## 关键文件说明
 

@@ -55,6 +55,10 @@ body.sp-body{min-height:100vh;padding:clamp(20px,5vw,40px) 20px 32px;background:
   body.sp-body{padding:16px 12px 24px}
   .sp-hd>img{width:32px;height:32px;border-radius:8px}
   .sp-ttl h1{font-size:var(--fs-lg)}
+  /* 320 宽：标题和版本号同一行，标题永不折行（实在放不下时省略号） */
+  .sp-hd{gap:var(--sp-2)}
+  .sp-ttl h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sp-acts .chip{padding:0 8px}
 }
 
 /* ---------- 系列视觉：选中色、纯色主按钮、轻量开关、分段选择、置灰按钮 ---------- */

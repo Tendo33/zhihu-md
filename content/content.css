@@ -13,8 +13,8 @@
   --blue: #0a5fd1;
   --focus-ring: #0a5fd1;
   --bg-secondary: #FFFFFF;
-  --border-subtle: #dde1e6;
-  --text-primary: #1b1d22;
+  --border-subtle: #e8e8ec; /* 系列视觉 v3：中性色与 popup / 设置页同一套 */
+  --text-primary: #17181c;
   /* 球本体底色/字色单独成变量：深色下改为设计裁定的 #1a6ae0 + 白字（R13） */
   --ball-bg: var(--accent);
   --ball-bg-hover: var(--accent-hover);
@@ -236,7 +236,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
   color: var(--text-primary);
   font-size: 12px;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: 10px;
   border: 1px solid var(--border-subtle);
   /* R12：不再整行 nowrap；空间不够时只在两个 .nw 短语之间折行，四边到视口 ≥8px */
   white-space: normal;
@@ -252,7 +252,7 @@ html[data-theme="dark"] #zhihu-md-floating-ball.docked-right.warning {
   
   transition: background-color 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), color 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
   font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans", sans-serif; /* 发版审计 N2：与球本体同一字体栈 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 32px -8px rgba(17, 18, 22, 0.22), 0 2px 6px -2px rgba(17, 18, 22, 0.08);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### 改进
+
+### 改进
+
+- 界面刷新（与 arXiv to Markdown、Journal to Markdown 同一套视觉）：弹窗改成一张白纸，当前页面是一块浅色面板，「最近导出」是细线容器；次按钮改为无边浅色块，主按钮纯色，开关、分段选择、数字框统一为 8–14px 圆角。设置页分组改为细线容器。知乎页面上的悬浮球提示框同步换成 10px 圆角和新中性色。浅色 / 深色都重新校对了对比度。
+
+- Chrome / Edge 包不再带 `browser_specific_settings`；Firefox 包只留 `background.scripts`，并声明 Firefox 140 及以上。与 arXiv to Markdown、Journal to Markdown 相同。
+- `npm run package` 同时打出 Chrome / Edge 与 Firefox 两个 zip（`build/zhihu-md-v<version>-chrome.zip`、`-firefox.zip`）和 `build/SHA256SUMS.txt`。发版只在 `v*` 标签上运行，并核对标签与 `package.json`、`manifest.src.json` 的版本。
+
 ## [1.2.0] - 2026-11-03
 
 ### 改进

@@ -8,8 +8,8 @@ assert.match(popup, /\.alert \.x \{[^}]*max-width: 100%/, 'N1：按钮区不超�
 assert.match(popup, /\.alert \.x \.btn \{[^}]*max-width: 100%/, 'N1：按钮本身不超过整行');
 const opt = read('options/options.css');
 assert.ok(!/rgba\(12,\s*74,\s*110/.test(opt), 'S1：不再有天蓝色调阴影');
-assert.ok(read('options/options.html').includes('../lib/series.css'), 'S1：设置页卡片阴影来自系列外壳（series.css 用 --shadow-1 token）');
-assert.match(read('lib/series.css'), /\.sp \.grp\{box-shadow:var\(--shadow-1\)/);
+assert.ok(read('options/options.html').includes('../lib/series.css'), 'S1：设置页分组外观来自系列外壳（series.css）');
+assert.match(read('lib/series.css'), /\.sp \.grp\{box-shadow:none;border-color:var\(--border\)/, '系列视觉 v3：分组是细线容器，不带阴影');
 const js = read('popup/popup.js');
 const nr = js.match(/function showNotReady\([^)]*\) \{([\s\S]*?)\n\}/)[1];
 assert.ok(!/setExportActionsEnabled\(false, text\)/.test(nr), 'S2：不可导出原因只在提示框里出现一次');

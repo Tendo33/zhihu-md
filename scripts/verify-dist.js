@@ -66,11 +66,13 @@ export function verifyBackground(manifest, target = 'chrome') {
   const errors = [];
   const scripts = manifest.background?.scripts;
   if (target === 'firefox') {
-    if (!Array.isArray(scripts) || !scripts.length) errors.push('Firefox 产物缺少 background.scripts（Firefox 不支持 service_worker）');
+    if (!Array.isArray(scripts) || !scripts.length) errors.push('Firefox 产物缺少 background.scripts（Firefox 包只用 background.scripts）');
+    if (manifest.background?.service_worker) errors.push('Firefox 产物不能有 background.service_worker（Firefox 包只用 background.scripts）');
   } else if (scripts !== undefined) {
     errors.push('Chrome/Edge 产物不能有 background.scripts（MV3 下 Chrome 会报错）');
   }
   if (target !== 'firefox' && !manifest.background?.service_worker) errors.push('Chrome/Edge 产物缺少 background.service_worker');
+  if (target !== 'firefox' && manifest.browser_specific_settings) errors.push('Chrome/Edge 产物不能有 browser_specific_settings');
   return errors;
 }
 

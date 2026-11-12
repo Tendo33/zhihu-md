@@ -141,7 +141,7 @@ npm install
 npm run build     # 输出未打包扩展到 dist/
 npm run lint
 npm test
-npm run package   # 生成 build/zhihu-md-v<version>.zip
+npm run package   # build/zhihu-md-v<version>-chrome.zip 与 -firefox.zip，外加 SHA256SUMS.txt
 ```
 
 文档入口：[docs/README.md](./docs/README.md)，包括 [架构](./docs/architecture.md)、[导出链路](./docs/request-lifecycle.md)、[开发维护](./docs/development.md)。

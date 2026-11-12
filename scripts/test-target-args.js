@@ -36,15 +36,19 @@ for (const bad of [['--target='], ['--target'], ['--target=edge']]) {
   assert.equal(v.status, 1, `verify-dist ${bad.join(' ')} 应退出 1`);
   assert.match(v.stderr, /verify:dist 失败：--target|verify:dist 失败：未知的 --target 值/);
 }
-// 空格形式真的产出 Firefox 包，verify 也认空格形式
+// 空格形式真的产出 Firefox 包，verify 也认空格形式。
+// CI 里 npm test 排在 build:firefox 之后、package 之前：原来就有 dist-firefox 时不能删，否则 package 找不到它。
+const hadFirefoxDist = fs.existsSync(path.join(root, 'dist-firefox', 'manifest.json'));
 try {
   const b = run('build.js', ['--target', 'firefox']);
   assert.equal(b.status, 0, b.stderr);
   const mf = JSON.parse(fs.readFileSync(path.join(root, 'dist-firefox', 'manifest.json'), 'utf8'));
-  assert.ok(Array.isArray(mf.background?.scripts), 'Firefox 包保留 background.scripts');
+  assert.deepEqual(mf.background, { scripts: ['background/background.js'] });
+  assert.equal(mf.browser_specific_settings?.gecko?.id, 'zhihu-md@tendo33');
+  assert.equal(mf.browser_specific_settings?.gecko?.strict_min_version, '140.0');
   const v = run('verify-dist.js', ['dist-firefox', '--target', 'firefox']);
   assert.equal(v.status, 0, v.stderr);
 } finally {
-  fs.rmSync(path.join(root, 'dist-firefox'), { recursive: true, force: true });
+  if (!hadFirefoxDist) fs.rmSync(path.join(root, 'dist-firefox'), { recursive: true, force: true });
 }
 console.log('target args tests passed');

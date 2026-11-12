@@ -8,7 +8,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // 目标浏览器：默认 chrome（Chrome / Edge，产出 dist/）；--target=firefox 或 --target firefox 产出 dist-firefox/。
 // --target 写错（空值、缺值、未知值）时报错退出，不再静默打 Chrome 包。
 // Chrome 对 MV3 的 background.scripts 报「requires manifest version of 2 or lower」，
-// 所以 Chrome 包去掉 scripts；Firefox 不支持 service_worker，Firefox 包保留 scripts。
+// 所以 Chrome 包去掉 scripts，也不带 browser_specific_settings。
+// Firefox 包只用 background.scripts，并保留 gecko 设置。与 journal-md 相同。
 const parsed = parseTargetArgs(process.argv.slice(2));
 if (parsed.error) {
   console.error(`build 失败：${parsed.error}`);
@@ -84,7 +85,12 @@ fs.writeFileSync(optionsHtmlPath, useBundledScript(fs.readFileSync(optionsHtmlPa
 const manifest = JSON.parse(fs.readFileSync(path.join(out, 'manifest.json'), 'utf8'));
 manifest.background.service_worker = 'background/background.js';
 manifest.content_scripts[0].js = ['content/content.js'];
-if (target === 'chrome') delete manifest.background.scripts;
+if (target === 'chrome') {
+  delete manifest.background.scripts;
+  delete manifest.browser_specific_settings;
+} else {
+  delete manifest.background.service_worker;
+}
 fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 console.log(`built ${out} (target: ${target})`);

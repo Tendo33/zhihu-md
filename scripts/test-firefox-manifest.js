@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const m = JSON.parse(fs.readFileSync(new URL('../manifest.src.json', import.meta.url), 'utf8'));
 assert.equal(m.browser_specific_settings?.gecko?.id, 'zhihu-md@tendo33');
+assert.equal(m.browser_specific_settings?.gecko?.strict_min_version, '140.0');
 assert.deepEqual(m.background.scripts, [m.background.service_worker]);
 console.log('firefox manifest tests passed');
 

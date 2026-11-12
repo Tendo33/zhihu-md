@@ -1,7 +1,7 @@
 name: Release
 
+# 只在推送版本标签时运行；GitHub Release 只由这个工作流创建。
 on:
-  workflow_dispatch:
   push:
     tags:
       - "v*"
@@ -16,31 +16,47 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
+          cache: npm
 
       - name: Install deps
         run: npm ci
 
-      - name: Build package
-        run: npm run package
-
-      - name: Read version
-        id: pkg
+      - name: Check tag matches package.json and manifest
         shell: bash
         run: |
           VERSION="$(node -p 'require("./package.json").version')"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          MANIFEST="$(node -p 'require("./manifest.src.json").version')"
+          test "${GITHUB_REF_NAME}" = "v${VERSION}" || { echo "tag ${GITHUB_REF_NAME} != v${VERSION}"; exit 1; }
+          test "${MANIFEST}" = "${VERSION}" || { echo "manifest ${MANIFEST} != package ${VERSION}"; exit 1; }
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
 
-      - name: Verify artifact
+      - name: Lint
+        run: npm run lint
+
+      # build + build:firefox + verify:dist:chrome + verify:dist:firefox + zip + SHA256SUMS.txt
+      - name: Build packages
+        run: npm run package
+
+      - name: Test
+        run: |
+          npm test
+          npm run check:keys
+
+      - name: Verify artifacts
         shell: bash
         run: |
-          test -f "build/zhihu-md-v${{ steps.pkg.outputs.version }}.zip"
+          test -f "build/zhihu-md-v${VERSION}-chrome.zip"
+          test -f "build/zhihu-md-v${VERSION}-firefox.zip"
+          test -f "build/SHA256SUMS.txt"
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            "build/zhihu-md-v${{ steps.pkg.outputs.version }}.zip" \
+          gh release create "${GITHUB_REF_NAME}" \
+            "build/zhihu-md-v${VERSION}-chrome.zip" \
+            "build/zhihu-md-v${VERSION}-firefox.zip" \
+            "build/SHA256SUMS.txt" \
             --generate-notes \
-            --title "Zhihu to Markdown ${{ github.ref_name }}"
+            --title "${GITHUB_REF_NAME}"

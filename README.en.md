@@ -139,7 +139,7 @@ npm install
 npm run build     # unpacked extension in dist/
 npm run lint
 npm test
-npm run package   # build/zhihu-md-v<version>.zip
+npm run package   # build/zhihu-md-v<version>-chrome.zip, -firefox.zip, and SHA256SUMS.txt
 ```
 
 Developer docs (Chinese) start at [docs/README.md](./docs/README.md).

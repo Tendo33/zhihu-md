@@ -45,9 +45,9 @@ npm run package
 
 这个命令会：
 
-1. 用 esbuild 把内容脚本、弹窗、设置页和后台打进 `dist/`
-2. 带上样式、图标、清单和说明
-3. 生成 `build/zhihu-md-v<version>.zip`
+1. 用 esbuild 把内容脚本、弹窗、设置页和后台打进 `dist/`（Chrome / Edge）和 `dist-firefox/`
+2. 带上样式、图标、清单和说明，并校验两份产物
+3. 生成 `build/zhihu-md-v<version>-chrome.zip`、`build/zhihu-md-v<version>-firefox.zip` 和 `build/SHA256SUMS.txt`
 
 ## 关键文件说明
 

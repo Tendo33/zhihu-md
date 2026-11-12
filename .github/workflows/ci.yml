@@ -4,26 +4,76 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  check:
+  # 三个 to Markdown 插件共用这一段：lint → 双端构建 → 双端校验 → test → check:keys → zip。
+  # test 放在 build 之后，与 arxiv-md 相同（那边 CI=true 时要检查 dist/_locales）。
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm test
       - run: npm run build
-      - run: npm run verify:dist
+      - run: npm run build:firefox
+      - run: npm run verify:dist:chrome
+      - run: npm run verify:dist:firefox
+      - run: npm test
+      - run: npm run check:keys
+      - run: node scripts/package.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zhihu-md-packages
+          path: |
+            build/*-chrome.zip
+            build/*-firefox.zip
+            build/SHA256SUMS.txt
+          if-no-files-found: error
+
+  # 扩展 e2e（有界面的 Chromium + xvfb）。新增 e2e 脚本时只需往 E2E_SCRIPTS 里追加一行。
+  # 本仓库不依赖 playwright，这里装到仓库外的临时目录，经 E2E_PLAYWRIGHT_DIR 交给脚本。
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      PLAYWRIGHT_VERSION: 1.60.0
+      E2E_SCRIPTS: |
+        scripts/e2e-shortcut.js
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: |
+          mkdir -p "$RUNNER_TEMP/e2e-tools"
+          cd "$RUNNER_TEMP/e2e-tools"
+          npm init -y >/dev/null
+          npm install --no-save --no-audit --no-fund "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y xvfb
+          echo "E2E_PLAYWRIGHT_DIR=$RUNNER_TEMP/e2e-tools" >> "$GITHUB_ENV"
+          echo "CHROME_PATH=$(node -p "require('playwright').chromium.executablePath()")" >> "$GITHUB_ENV"
+      - run: npm run build
+      - name: Run e2e scripts
+        run: |
+          set -e
+          for s in $E2E_SCRIPTS; do
+            echo "::group::$s"
+            xvfb-run -a node "$s"
+            echo "::endgroup::"
+          done
 
   # 必过：用真实 markdown-it（html:true）渲染检查 raw HTML 泄漏（test-html-like-text + test-fixtures 全部样本）。
   # markdown-it 只临时装（--no-save --ignore-scripts，精确版本），不进 package.json / package-lock。
@@ -36,7 +86,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm install --no-save --ignore-scripts "markdown-it@${MARKDOWN_IT_VERSION}"

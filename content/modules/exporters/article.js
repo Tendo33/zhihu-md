@@ -4,6 +4,7 @@
  */
 
 import { failureResult } from '../../../lib/failure-reason.js';
+import { DEFAULT_IMAGE_DIR, normalizeImageDir } from '../../../lib/image-pack.js';
 import { parseHtmlInert } from '../../../lib/safe-dom.js';
 import { CONSTANTS, cleanFilename, querySelectorAny } from '../constants.js';
 import { PageDetector } from '../detector.js';
@@ -232,6 +233,21 @@ author: ${yamlQuote(author || '未知')}`;
   },
 
   /**
+   * Read the configured image folder for ZIP exports
+   * @returns {Promise<string>}
+   */
+  async getImageDir() {
+    try {
+      const settings = await new Promise((resolve) => {
+        chrome.storage.sync.get({ imageDir: DEFAULT_IMAGE_DIR }, resolve);
+      });
+      return normalizeImageDir(settings.imageDir).dir;
+    } catch {
+      return DEFAULT_IMAGE_DIR;
+    }
+  },
+
+  /**
    * Export article as Markdown
    * @param {boolean} downloadImages - Whether to download images locally
    * @returns {Object}
@@ -267,8 +283,9 @@ author: ${yamlQuote(author || '未知')}`;
     }
 
     try {
+      const imageDir = downloadImages ? await this.getImageDir() : DEFAULT_IMAGE_DIR;
       const clonedContainer = this.preprocessContainer(container);
-      const turndownService = createTurndownService(downloadImages);
+      const turndownService = createTurndownService(downloadImages, imageDir);
       
       let markdown = turndownService.turndown(clonedContainer);
       const frontMatter = this.generateFrontMatter(
@@ -289,7 +306,8 @@ author: ${yamlQuote(author || '未知')}`;
           content: markdown,
           filename: filename,
           images: images,
-          downloadImages: downloadImages
+          downloadImages: downloadImages,
+          imageDir: imageDir
         }
       };
     } catch (error) {

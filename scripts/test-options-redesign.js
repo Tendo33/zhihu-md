@@ -83,7 +83,8 @@ console.log('options redesign tests passed');
   // B1 之后说明里按短语包了 .nw，文案按 textContent 比对（与规格逐字一致）
   assert.equal(descText(html, 'showFloatingBall'), '在知乎首页、关注、热榜、问题、回答和专栏页显示悬浮球：点击下载，右键复制。');
   assert.equal(descText(html, 'maxAnswerCount'), '问题页的回答，以及首页、关注信息流都按这个数量导出。填 0 表示尽量全部导出（最多 1000 条）；没导完时文件会标注已截断。');
-  assert.equal(descText(html, 'downloadImages'), '把文中图片一起保存，导出为含 .md 和 images 文件夹的 ZIP 包；关闭时图片保留在线链接。');
+  assert.equal(descText(html, 'downloadImages'), '把文中图片一起保存，导出为含 .md 和图片文件夹的 ZIP 包；关闭时图片保留在线链接。');
+  assert.equal(descText(html, 'imageDir'), '下载图片到本地时，图片放在 ZIP 里的这个文件夹中。只能用文字、数字、下划线、短横线和点。');
   assert.match(rule('.option-desc'), /text-wrap: pretty;/);
   assert.match(rule('.option-desc'), /color: var\(--text-2\);/);
   assert.match(rule('.nw'), /white-space: nowrap;/);
@@ -125,6 +126,52 @@ console.log('options redesign tests passed');
   assert.equal(store.downloadImages, true);
   assert.equal(page.document.getElementById('status').textContent, '✓ 已保存');
   console.log('options redesign M7 passed');
+}
+
+// 图片文件夹：默认值、非法名不写入并提示、合法名保存
+{
+  const { parseHTML } = await import('linkedom');
+  const page = parseHTML(read('options/options.html').replace(/<script[\s\S]*?<\/script>/g, ''));
+  globalThis.window = page.window; globalThis.document = page.document;
+  let store = { showFloatingBall: true, maxAnswerCount: 20, downloadImages: true };
+  globalThis.chrome = { storage: { sync: { get: (d, cb) => cb({ ...d, ...store }), set: (o, cb) => { store = { ...store, ...o }; cb && cb(); } } } };
+  await import('../options/options.js?m7dir');
+  page.document.dispatchEvent(new page.window.Event('DOMContentLoaded'));
+  const input = page.document.getElementById('imageDir');
+  const note = page.document.getElementById('note-imageDir');
+  const status = page.document.getElementById('status');
+  const wait = () => new Promise((r) => setTimeout(r, 40));
+  assert.equal(input.value, 'images', '默认值是 images');
+  input.value = 'my assets';
+  input.dispatchEvent(new page.window.Event('change'));
+  await wait();
+  assert.equal(store.imageDir, undefined, '非法名字不写入');
+  assert.equal(note.textContent, '不允许使用：只能用文字、数字、下划线、短横线和点');
+  assert.equal(status.textContent, '图片文件夹名未保存');
+  input.value = 'assets';
+  input.dispatchEvent(new page.window.Event('change'));
+  await wait();
+  assert.equal(store.imageDir, 'assets', '合法名字写入');
+  assert.equal(note.textContent, '');
+  assert.equal(status.textContent, '✓ 已保存');
+  console.log('options image dir passed');
+}
+
+// 两个提示同时更新时各自独立（图片文件夹提示不能取消条数提示）
+{
+  const { parseHTML } = await import('linkedom');
+  const page = parseHTML(read('options/options.html').replace(/<script[\s\S]*?<\/script>/g, ''));
+  globalThis.window = page.window; globalThis.document = page.document;
+  globalThis.chrome = { storage: { sync: { get: (d, cb) => cb(d), set: (o, cb) => cb && cb() } } };
+  const { announceNote } = await import('../options/options.js?m7note');
+  const countNote = page.document.getElementById('note-maxAnswerCount');
+  const dirNote = page.document.getElementById('note-imageDir');
+  announceNote(countNote, '条数提示');
+  announceNote(dirNote, '目录提示');
+  await new Promise((r) => setTimeout(r, 40));
+  assert.equal(countNote.textContent, '条数提示');
+  assert.equal(dirNote.textContent, '目录提示');
+  console.log('options note isolation passed');
 }
 
 // 设计验收 B1：三段说明按短语包 .nw（只在标点 / 空格处断行），空格在 span 外，textContent 不变

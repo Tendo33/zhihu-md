@@ -111,6 +111,16 @@ for (const f of linked) assert.ok(r.files.some((x) => x.filename === f), '没有
   assert.ok(zip.includes('images/img_001_v2-a.png'));
   assert.ok(!zip.includes('images/img_002_v2-b'), 'zip 和 Markdown 都不再有失败的那张');
   assert.ok(zip.includes('](https://pic2.zhimg.com/v2-b.jpg)'));
+
+  // 自定义图片文件夹：消息里的 imageDir 同时决定 Markdown 路径和 ZIP 目录
+  const mdAssets = images.map((im, i) => `![图${i}](assets/${im.filename})`).join('\n\n');
+  const resAssets = await new Promise((done) => L.msg({
+    action: 'download', filename: 'b.md', content: mdAssets, images, downloadImages: true, imageDir: 'assets', title: 'b'
+  }, {}, done));
+  assert.equal(resAssets.success, true);
+  const zipAssets = Buffer.from(dlUrl.split(',')[1], 'base64').toString('latin1');
+  assert.ok(zipAssets.includes('assets/img_001_v2-a.png'), 'ZIP 用设置的目录');
+  assert.ok(!zipAssets.includes('images/img_001_v2-a.png'), '不再写默认目录');
 }
 
 // popup：已保存 + 信息条「N 张图片未能下载，已保留在线链接」

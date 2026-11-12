@@ -4,7 +4,7 @@
  */
 
 import TurndownService from '../../lib/turndown.min.js';
-import { markdownImageUrl } from '../../lib/image-pack.js';
+import { DEFAULT_IMAGE_DIR, markdownImageUrl, normalizeImageDir } from '../../lib/image-pack.js';
 
 /**
  * Configure Turndown with custom rules for Zhihu.
@@ -65,7 +65,7 @@ export function tidyMarkdown(markdown) {
     : part.replace(/^[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n'))).join('');
 }
 
-export function createTurndownService(downloadImages = false) {
+export function createTurndownService(downloadImages = false, imageDir = DEFAULT_IMAGE_DIR) {
   const turndownService = new TurndownService({
     headingStyle: 'atx',
     codeBlockStyle: 'fenced',
@@ -79,8 +79,9 @@ export function createTurndownService(downloadImages = false) {
   turndownService.escape = (text) => baseEscape(text).replace(/<(?=[A-Za-z/!?])/g, '\\<');
 
   // Attach a per-instance image collector when download mode is enabled
+  const dir = normalizeImageDir(imageDir).dir;
   const collector = downloadImages
-    ? { images: [], addImage(url, filename) { this.images.push({ url, filename }); return `images/${filename}`; } }
+    ? { images: [], addImage(url, filename) { this.images.push({ url, filename }); return `${dir}/${filename}`; } }
     : null;
   turndownService.imageCollector = collector;
 

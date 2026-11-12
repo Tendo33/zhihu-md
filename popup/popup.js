@@ -387,6 +387,7 @@ async function handleExport() {
     const msg = { action: 'download', filename: response.data.filename, content: response.data.content, title };
     if (response.data.images && response.data.images.length > 0) {
       msg.images = response.data.images;
+      msg.imageDir = response.data.imageDir;
       msg.downloadImages = true;
     }
     sentToBackground = true; // 之后的失败由 background 记录

@@ -29,7 +29,7 @@
 - **Question pages in bulk**: keeps fetching answers through Zhihu's answer API; 20 by default, up to 1000 (larger numbers count as 1000). If it stops early, the file gets `truncated: true`.
 - **Home feed, Following and Hot list**: exported as item-by-item list documents.
 - **Formatting kept**: headings, lists, quotes; math as `$...$` / `$$...$$`; fenced code with language detection; tables; link cards become plain links.
-- **Optional image bundling**: with "下载图片到本地" on, downloads of columns, answers and question pages become a ZIP with an `images/` folder.
+- **Optional image bundling**: with "下载图片到本地" on, downloads of columns, answers and question pages become a ZIP with an image folder (default `images/`).
 - **Copy Markdown**: from the popup, the floating ball (right-click) or the context menu; you can also copy just the selection.
 - **Floating ball**: draggable, snaps to the edge, remembers its position; can be turned off.
 - **Recent exports** in the popup (title, status and time); the file you just saved can be shown in its folder with one click.
@@ -95,6 +95,7 @@ Long exports started from the popup (such as a question page) need the popup to 
 | 悬浮球 (floating button) | Show the floating ball | On |
 | 最多导出条数 (max items) | Limit for question pages and feeds. Max 1000; larger numbers count as 1000. 0 means no limit within the cap: as many answers as the question page lists, or scroll until no new cards on feeds, up to 1000 either way; files that stop early get `truncated: true` | 20 |
 | 下载图片到本地 (download images) | Bundle images into a ZIP for column, answer and question downloads; copy, feed and hot exports keep remote images | Off |
+| 图片文件夹 (image folder) | Folder for images inside the ZIP produced by "下载图片到本地"; letters, digits, underscore, dash and dot only. Invalid names show an inline hint and are not saved | `images` |
 
 Settings live in `chrome.storage.sync` (synced with your browser account when browser sync is on); the ball position and recent exports in `chrome.storage.local`.
 

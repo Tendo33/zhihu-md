@@ -83,8 +83,8 @@
 
 1. 单篇导出在图片模式下先执行 `startImageCollection()`。
 2. 自定义图片规则把原图 URL 收集到 `imageCollector`。
-3. Markdown 中图片路径被改写为 `images/文件名`。
-4. 内容脚本把 `content`、`filename`、`images` 一并发给后台脚本。
+3. Markdown 中图片路径被改写为 `<图片文件夹>/文件名`，默认 `images/文件名`。
+4. 内容脚本把 `content`、`filename`、`images`、`imageDir` 一并发给后台脚本。
 5. 后台脚本逐张 `fetch()` 图片。
 6. 后台脚本用内置 ZIP 组装逻辑把 Markdown 和图片打成一个压缩包。
 7. 最终下载 `<原文件名>_with_images.zip`。

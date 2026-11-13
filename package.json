@@ -39,5 +39,10 @@
     "esbuild": "^0.25.10",
     "eslint": "^8.57.1",
     "linkedom": "^0.18.12"
+  },
+  "overrides": {
+    "archiver-utils": {
+      "glob": "14.0.6"
+    }
   }
 }

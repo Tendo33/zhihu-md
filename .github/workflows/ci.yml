@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     env:
-      PLAYWRIGHT_VERSION: 1.60.0
+      PLAYWRIGHT_VERSION: 1.65.0
       E2E_SCRIPTS: |
         scripts/e2e-shortcut.js
     steps:

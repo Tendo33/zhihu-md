@@ -1,6 +1,6 @@
 {
   "name": "zhihu-md",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Zhihu to Markdown — browser extension that saves Zhihu articles, answers, questions and the hot list as Markdown.",
   "type": "module",
   "scripts": {

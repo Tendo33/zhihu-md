@@ -5,10 +5,12 @@ import { QuestionExporter } from '../content/modules/exporters/question.js';
 import { FeedExporter } from '../content/modules/exporters/feed.js';
 import {
   answerIdFromItem,
+  authorUrlFromApi,
   extractHotItems,
   extractHotFallback,
   findAnswerItem,
   findAuthorName,
+  findAuthorUrl,
   findExpandButton,
   findFeedLink,
   findFeedTimeText,
@@ -97,6 +99,26 @@ assert.strictEqual(findAuthorName(dom.document.querySelector('.AnswerItem')), '�
 const target = findAnswerItem(dom.document, '100');
 assert.strictEqual(findAuthorName(target), '阿汪');
 assert.strictEqual(target.querySelector('.RichText').textContent.trim(), '目标回答');
+
+// 作者主页：头像链接是空文本但 href 已指向主页；正文里的 @ 提及不算
+assert.strictEqual(findAuthorUrl(dom.document.querySelector('.AnswerItem')), 'https://www.zhihu.com/people/a');
+assert.strictEqual(findAuthorUrl(target), 'https://www.zhihu.com/people/b');
+const profileDom = parseHTML(`<!doctype html><body>
+  <div class="AnswerItem" id="mention">
+    <div class="RichText ztext"><a href="/people/other">@别人</a></div>
+  </div>
+  <div class="AnswerItem" id="org">
+    <div class="AuthorInfo"><a href="//www.zhihu.com/org/team"></a><a href="/org/team">机构</a></div>
+    <div class="RichText ztext"><a href="/people/other">@别人</a></div>
+  </div>
+  <a class="UserLink-link AuthorInfo-name" id="self" href="/people/self">甲</a>
+</body>`).document;
+assert.strictEqual(findAuthorUrl(profileDom.querySelector('#mention')), '');
+assert.strictEqual(findAuthorUrl(profileDom.querySelector('#org')), 'https://www.zhihu.com/org/team');
+assert.strictEqual(findAuthorUrl(profileDom.querySelector('#self')), 'https://www.zhihu.com/people/self');
+assert.strictEqual(authorUrlFromApi({ url_token: 'alice' }), 'https://www.zhihu.com/people/alice');
+assert.strictEqual(authorUrlFromApi({ url_token: 'team', type: 'org' }), 'https://www.zhihu.com/org/team');
+assert.strictEqual(authorUrlFromApi(null), '');
 
 const card = dom.document.querySelector('.TopstoryItem');
 assert.strictEqual(findExpandButton(card).textContent.trim(), '阅读全文');

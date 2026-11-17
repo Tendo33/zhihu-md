@@ -9,9 +9,11 @@ import { CONSTANTS, cleanFilename, querySelectorAny } from '../constants.js';
 import { PageDetector } from '../detector.js';
 import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
+  authorUrlFromApi,
   fetchAnswerRecord,
   findAnswerItem,
   findAuthorName,
+  findAuthorUrl,
   formatUnixTime,
   parseZhihuTime,
   yamlQuote,
@@ -69,6 +71,22 @@ export const ArticleExporter = {
   },
 
   /**
+   * Get author profile link
+   * @param {string} pageType
+   * @returns {string}
+   */
+  getAuthorUrl(pageType) {
+    if (pageType === 'column') {
+      // 只从作者块里找，别把正文或推荐位里的 @ 提及当成作者
+      return findAuthorUrl(querySelectorAny(document, CONSTANTS.SELECTORS.AUTHOR.COLUMN));
+    } else if (pageType === 'answer' || pageType === 'question') {
+      const answerId = pageType === 'answer' ? window.location.pathname.match(/\/answer\/(\d+)/)?.[1] : '';
+      return findAuthorUrl(findAnswerItem(document, answerId));
+    }
+    return '';
+  },
+
+  /**
    * Extract time info from page
    * @param {string} pageType 
    * @returns {{createdTime: string, editedTime: string}}
@@ -98,15 +116,22 @@ export const ArticleExporter = {
    * @param {string} url 
    * @param {string} createdTime 
    * @param {string} editedTime 
+   * @param {string} authorUrl
    * @returns {string}
    */
-  generateFrontMatter(title, author, url, createdTime = '', editedTime = '') {
+  generateFrontMatter(title, author, url, createdTime = '', editedTime = '', authorUrl = '') {
     const date = new Date().toISOString().split('T')[0];
     let frontMatter = `---
 title: ${yamlQuote(title)}
 url: ${yamlQuote(url)}
-author: ${yamlQuote(author || '未知')}
-date: ${date}`;
+author: ${yamlQuote(author || '未知')}`;
+
+    // 回答被删后还能从作者主页找回内容，所以把主页链接一起写进 Front Matter
+    if (authorUrl) {
+      frontMatter += `\nauthor_url: ${yamlQuote(authorUrl)}`;
+    }
+
+    frontMatter += `\ndate: ${date}`;
 
     if (createdTime) {
       frontMatter += `\ncreated: ${yamlQuote(createdTime)}`;
@@ -219,6 +244,7 @@ date: ${date}`;
 
     const title = this.getTitle(pageType);
     let author = this.getAuthor(pageType);
+    let authorUrl = this.getAuthorUrl(pageType);
     let container = this.getContentContainer(pageType);
     let { createdTime, editedTime } = this.getTimeInfo(pageType);
 
@@ -228,6 +254,7 @@ date: ${date}`;
       if (record?.content) {
         container = parseHtmlInert(record.content);
         author = record.author?.name || author;
+        authorUrl = authorUrlFromApi(record.author) || authorUrl;
         createdTime = formatUnixTime(record.created_time);
         editedTime = record.updated_time && record.updated_time !== record.created_time
           ? formatUnixTime(record.updated_time)
@@ -244,7 +271,9 @@ date: ${date}`;
       const turndownService = createTurndownService(downloadImages);
       
       let markdown = turndownService.turndown(clonedContainer);
-      const frontMatter = this.generateFrontMatter(title, author, window.location.href, createdTime, editedTime);
+      const frontMatter = this.generateFrontMatter(
+        title, author, window.location.href, createdTime, editedTime, authorUrl
+      );
       markdown = frontMatter + markdown;
       markdown = tidyMarkdown(markdown);
 

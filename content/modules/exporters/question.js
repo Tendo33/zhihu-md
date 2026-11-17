@@ -13,9 +13,11 @@ import { PageDetector } from '../detector.js';
 import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
   answerIdFromItem,
+  authorUrlFromApi,
   cleanText,
   fetchAnswerRecord,
   findAuthorName,
+  findAuthorUrl,
   findExpandButton,
   formatUnixTime,
   pageQuestionFeeds,
@@ -35,6 +37,7 @@ export const QuestionExporter = {
     return {
       id,
       author: findAuthorName(answerItem) || '匿名用户',
+      authorUrl: findAuthorUrl(answerItem),
       createdTime: times.createdTime,
       editedTime: times.editedTime,
       contentEl,
@@ -46,6 +49,7 @@ export const QuestionExporter = {
     return {
       id: record.id,
       author: record.author,
+      authorUrl: record.authorUrl || '',
       createdTime: record.createdTime,
       editedTime: record.editedTime,
       url: answerUrl(questionId, record.id),
@@ -216,6 +220,7 @@ ${detailMarkdown}
 ## 回答 ${index + 1}
 
 **作者**: ${answer.author}`;
+        if (answer.authorUrl) markdown += `  \n**作者主页**: [${answer.author}](${answer.authorUrl})`;
         if (answer.createdTime) markdown += `  \n**创建于**: ${answer.createdTime}`;
         if (answer.editedTime) markdown += `  \n**编辑于**: ${answer.editedTime}`;
         if (answer.url) markdown += `  \n**链接**: [查看回答](${answer.url})`;
@@ -289,6 +294,7 @@ ${answer.content}
     return {
       id,
       author: source.author?.name || dom?.author || '匿名用户',
+      authorUrl: authorUrlFromApi(source.author) || dom?.authorUrl || '',
       createdTime: createdTime || dom?.createdTime || '',
       editedTime: editedTime || dom?.editedTime || '',
       url: answerUrl(questionId, id),

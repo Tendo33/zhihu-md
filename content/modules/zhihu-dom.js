@@ -75,6 +75,35 @@ export function findAuthorName(root) {
   return cleanText(link);
 }
 
+/**
+ * Profile link of the author. The avatar link is empty but already points at
+ * the profile, the name link points there too, and org accounts use /org/xxx.
+ * Mentions inside the body are not the author. Returns '' so callers can omit
+ * the field when the page has no link (anonymous users).
+ */
+export function findAuthorUrl(root) {
+  if (!root?.querySelectorAll) return '';
+  const scope = root.querySelector('.AuthorInfo') || root;
+  const anchors = [...scope.querySelectorAll('a[href]')];
+  // Some layouts make .AuthorInfo-name itself an a.UserLink-link
+  if (root.matches?.('a[href]')) anchors.unshift(root);
+  for (const anchor of anchors) {
+    if (anchor.closest?.('.RichText, .RichContent-inner')) continue;
+    const href = anchor.getAttribute('href') || '';
+    if (!/\/(?:people|org)\//.test(href)) continue;
+    return normalizeUrl(href);
+  }
+  return '';
+}
+
+/** The author object from the API only carries url_token; build the profile URL. */
+export function authorUrlFromApi(author) {
+  const token = String(author?.url_token || '').trim();
+  if (!token) return '';
+  const kind = author?.type === 'org' ? 'org' : 'people';
+  return `https://www.zhihu.com/${kind}/${token}`;
+}
+
 function digits(value) {
   const text = String(value ?? '').trim();
   return /^\d+$/.test(text) ? text : '';

@@ -210,6 +210,7 @@ export const FloatingBall = {
         // Include images if download mode
         if (result.data.images && result.data.images.length > 0) {
           messageData.images = result.data.images;
+          messageData.imageDir = result.data.imageDir;
           messageData.downloadImages = true;
         }
 

@@ -193,6 +193,35 @@ body {
   color: var(--text-2);
 }
 
+/* 图片文件夹：ZIP 内的单层目录名，样式与数字框保持一致 */
+.text-input {
+  width: 140px;
+  height: 36px;
+  padding: 0 10px;
+  font: 500 14px/1 var(--font-sans);
+  background: var(--surface);
+  border: 1px solid var(--text-2);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth);
+}
+
+.text-input:hover {
+  border-color: var(--text);
+}
+
+.text-input:focus {
+  background: var(--surface);
+  border-color: var(--brand);
+}
+
+.text-input:focus-visible {
+  border-color: var(--text-2); /* 和数字框一致：焦点只靠 2px 外圈表示 */
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
 /* 设计 M3：保存提示在页脚第一行（不再 position:fixed 浮层）；页脚其余部分见 series.css .sp-ft */
 .status-msg {
   position: static;

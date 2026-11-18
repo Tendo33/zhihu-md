@@ -54,12 +54,23 @@
       <div class="option-item">
         <div class="option-content">
           <label class="option-label" id="label-downloadImages" for="downloadImages">下载图片到本地</label>
-          <div class="option-desc" id="desc-downloadImages"><span class="nw">把文中图片</span><span class="nw">一起保存，</span><span class="nw">导出为含 .md 和</span> <span class="nw">images 文件夹的</span> <span class="nw">ZIP 包；</span><span class="nw">关闭时图片</span><span class="nw">保留在线链接。</span></div>
+          <div class="option-desc" id="desc-downloadImages"><span class="nw">把文中图片</span><span class="nw">一起保存，</span><span class="nw">导出为含 .md</span> <span class="nw">和图片文件夹的</span> <span class="nw">ZIP 包；</span><span class="nw">关闭时图片</span><span class="nw">保留在线链接。</span></div>
         </div>
         <span class="switch">
           <input type="checkbox" role="switch" id="downloadImages" aria-labelledby="label-downloadImages" aria-describedby="desc-downloadImages">
           <span class="slider" aria-hidden="true"></span>
         </span>
+      </div>
+
+      <div class="option-item option-item--field">
+        <div class="option-content">
+          <label class="option-label" id="label-imageDir" for="imageDir">图片文件夹</label>
+          <div class="option-desc" id="desc-imageDir"><span class="nw">下载图片到本地时，</span><span class="nw">图片放在 ZIP 里的</span><span class="nw">这个文件夹中。</span><span class="nw">只能用文字、数字、</span><span class="nw">下划线、短横线和点。</span></div>
+        </div>
+        <div class="field-col">
+          <input type="text" id="imageDir" name="imageDir" value="images" maxlength="32" autocomplete="off" spellcheck="false" class="text-input" aria-labelledby="label-imageDir" aria-describedby="desc-imageDir note-imageDir">
+          <div class="field-note" id="note-imageDir" role="status" aria-live="polite"></div>
+        </div>
       </div>
     </section>
 

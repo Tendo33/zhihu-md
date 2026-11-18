@@ -5,6 +5,7 @@
 
 import { capAnswerCount } from '../../../lib/answer-limit.js';
 import { failureResult } from '../../../lib/failure-reason.js';
+import { DEFAULT_IMAGE_DIR, normalizeImageDir } from '../../../lib/image-pack.js';
 import { partialHint, partialText } from '../../../lib/partial-export.js';
 import { parseHtmlInert } from '../../../lib/safe-dom.js';
 import { ArticleExporter } from './article.js';
@@ -13,9 +14,11 @@ import { PageDetector } from '../detector.js';
 import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
   answerIdFromItem,
+  authorUrlFromApi,
   cleanText,
   fetchAnswerRecord,
   findAuthorName,
+  findAuthorUrl,
   findExpandButton,
   formatUnixTime,
   pageQuestionFeeds,
@@ -35,6 +38,7 @@ export const QuestionExporter = {
     return {
       id,
       author: findAuthorName(answerItem) || '匿名用户',
+      authorUrl: findAuthorUrl(answerItem),
       createdTime: times.createdTime,
       editedTime: times.editedTime,
       contentEl,
@@ -46,6 +50,7 @@ export const QuestionExporter = {
     return {
       id: record.id,
       author: record.author,
+      authorUrl: record.authorUrl || '',
       createdTime: record.createdTime,
       editedTime: record.editedTime,
       url: answerUrl(questionId, record.id),
@@ -121,11 +126,13 @@ export const QuestionExporter = {
 
     try {
       let maxAnswerCount = CONSTANTS.DEFAULTS.MAX_ANSWER_COUNT;
+      let imageDir = DEFAULT_IMAGE_DIR;
       try {
         const settings = await new Promise((resolve) => {
-          chrome.storage.sync.get({ maxAnswerCount: 20 }, resolve);
+          chrome.storage.sync.get({ maxAnswerCount: 20, imageDir: DEFAULT_IMAGE_DIR }, resolve);
         });
         maxAnswerCount = capAnswerCount(settings.maxAnswerCount); // 旧值或同步来的大数字也截到 1000
+        imageDir = normalizeImageDir(settings.imageDir).dir;
       } catch {
         // Use default
       }
@@ -139,7 +146,7 @@ export const QuestionExporter = {
       const detailEl = await this.expandQuestionDetail();
       await this.expandVisibleAnswers();
 
-      const turndownService = createTurndownService(downloadImages);
+      const turndownService = createTurndownService(downloadImages, imageDir);
       const domById = new Map();
       for (const item of document.querySelectorAll('.AnswerItem')) {
         const record = this.readAnswer(item);
@@ -216,6 +223,7 @@ ${detailMarkdown}
 ## 回答 ${index + 1}
 
 **作者**: ${answer.author}`;
+        if (answer.authorUrl) markdown += `  \n**作者主页**: [${answer.author}](${answer.authorUrl})`;
         if (answer.createdTime) markdown += `  \n**创建于**: ${answer.createdTime}`;
         if (answer.editedTime) markdown += `  \n**编辑于**: ${answer.editedTime}`;
         if (answer.url) markdown += `  \n**链接**: [查看回答](${answer.url})`;
@@ -245,6 +253,7 @@ ${answer.content}
           filename: cleanFilename(title) + '_多回答.md',
           images,
           downloadImages: downloadImages && images.length > 0,
+          imageDir,
           ...(partial ? { partial } : {}),
         }
       };
@@ -289,6 +298,7 @@ ${answer.content}
     return {
       id,
       author: source.author?.name || dom?.author || '匿名用户',
+      authorUrl: authorUrlFromApi(source.author) || dom?.authorUrl || '',
       createdTime: createdTime || dom?.createdTime || '',
       editedTime: editedTime || dom?.editedTime || '',
       url: answerUrl(questionId, id),

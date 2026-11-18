@@ -6,7 +6,7 @@
 import { createLogger } from '../lib/logger.js';
 import { createZipWithImages } from '../lib/zip.js';
 import { recordRecent, titleFromFilename } from '../lib/recent-exports.js';
-import { applyImageResults, normalizeImageUrl } from '../lib/image-pack.js';
+import { applyImageResults, DEFAULT_IMAGE_DIR, normalizeImageDir, normalizeImageUrl } from '../lib/image-pack.js';
 import { createMenus, handleMenuClick, openAndWait, showLinkFailure } from './context-menu.js';
 
 const Logger = createLogger('[Zhihu-MD Background]');
@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     // Check if we need to download images
     if (message.downloadImages && message.images && message.images.length > 0) {
-      handleDownloadWithImages(message.filename, message.content, message.images)
+      handleDownloadWithImages(message.filename, message.content, message.images, message.imageDir)
         .then((info) => {
           Logger.success('带图片下载完成');
           remember(message, true);
@@ -97,16 +97,18 @@ async function handleDownload(filename, content) {
  * @param {string} filename 
  * @param {string} content 
  * @param {Array} images - Array of {url, filename}
+ * @param {string} [imageDir] - ZIP 内图片目录，默认 images
  */
-async function handleDownloadWithImages(filename, content, images) {
+async function handleDownloadWithImages(filename, content, images, imageDir = DEFAULT_IMAGE_DIR) {
+  const dir = normalizeImageDir(imageDir).dir;
   Logger.info(`开始下载 ${images.length} 张图片...`);
   
   // Download all images
   // 发版 QA ZR-09：失败的图片在正文里退回在线链接；成功的按实际格式定扩展名
-  const packed = applyImageResults(content, images, await downloadImages(images));
+  const packed = applyImageResults(content, images, await downloadImages(images), dir);
   
   // Create ZIP file
-  const zipBlob = await createZipWithImages(filename, packed.content, packed.files);
+  const zipBlob = await createZipWithImages(filename, packed.content, packed.files, dir);
   
   // Download ZIP
   const reader = new FileReader();

@@ -10,6 +10,7 @@ import { createTurndownService, tidyMarkdown } from '../turndown-rules.js';
 import {
   cleanText,
   findAuthorName,
+  findAuthorUrl,
   findExpandButton,
   findFeedLink,
   findFeedTimeText,
@@ -42,6 +43,7 @@ export const FeedExporter = {
    */
   async processFeedItem(feedItem, turndownService) {
     const author = findAuthorName(feedItem) || '未知作者';
+    const authorUrl = findAuthorUrl(feedItem);
     const linkEl = findFeedLink(feedItem);
     const fullUrl = normalizeUrl(linkEl?.getAttribute('href') || '');
     const parsedTime = parseZhihuTime(findFeedTimeText(feedItem));
@@ -81,6 +83,7 @@ export const FeedExporter = {
     return {
       title,
       author,
+      authorUrl,
       url: fullUrl,
       time: timeText,
       content: contentMd
@@ -177,6 +180,10 @@ item_count: ${processedItems.length}${truncated ? '\ntruncated: true' : ''}
 # ${index + 1}. ${item.title}
 
 **作者**: ${item.author}`;
+
+        if (item.authorUrl) {
+          markdown += `  \n**作者主页**: [${item.author}](${item.authorUrl})`;
+        }
 
         if (item.time) {
           markdown += `  

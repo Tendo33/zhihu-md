@@ -23,5 +23,17 @@ assert.match(frontMatter, /author: "作者"/);
 assert.match(frontMatter, /url: "https:\/\/zhuanlan\.zhihu\.com\/p\/1"/);
 assert.match(frontMatter, /created: "2020-01-01"/);
 assert.doesNotMatch(frontMatter, /edited:/);
+assert.doesNotMatch(frontMatter, /author_url:/, '没拿到主页链接时不输出空字段');
+
+const withAuthorUrl = ArticleExporter.generateFrontMatter(
+  't',
+  '作者',
+  'https://zhuanlan.zhihu.com/p/1',
+  '',
+  '',
+  'https://www.zhihu.com/people/x'
+);
+assert.match(withAuthorUrl, /author_url: "https:\/\/www\.zhihu\.com\/people\/x"/);
+assert.match(withAuthorUrl, /author: "作者"\nauthor_url: /, 'author_url 跟在 author 后面');
 
 console.log('filename and front matter assertions passed');

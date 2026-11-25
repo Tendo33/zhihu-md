@@ -6,11 +6,18 @@
 
 **Save Zhihu articles, answers, questions and the hot list as Markdown in one click.**
 
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh?style=flat-square&label=Chrome%20Web%20Store&color=0a5fd1)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh)
-[![License: MIT](https://img.shields.io/badge/License-MIT-black?style=flat-square)](./LICENSE)
-[![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](./manifest.src.json)
+[![Chrome](https://img.shields.io/badge/Chrome-121%2B-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](manifest.src.json)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](package.json)
+[![esbuild](https://img.shields.io/badge/esbuild-0.25-FFCF00?style=flat-square&logo=esbuild&logoColor=black)](package.json)
 
-[Install](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) · [中文说明](./README.md) · [Usage (zh)](./docs/usage.md) · [Troubleshooting (zh)](./docs/troubleshooting.md) · [Privacy](./PRIVACY.md) · [Changelog](./CHANGELOG.md)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh?style=flat-square&label=Chrome%20Web%20Store&color=0a5fd1)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh)
+[![License](https://img.shields.io/badge/License-MIT-2EA043?style=flat-square)](LICENSE)
+[![Privacy](https://img.shields.io/badge/Privacy-no_server-10B981?style=flat-square)](PRIVACY.md)
+
+[Install](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) · [Usage](#usage) · [Export flow](#how-an-export-runs) · [Settings](#settings) · [FAQ](#faq)
+
+<sub>[中文](README.md) · English</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png">
@@ -86,6 +93,37 @@ Open `chrome://extensions`, enable Developer mode, click "Load unpacked" and pic
 
 Long exports started from the popup (such as a question page) need the popup to stay open until the download starts. The floating ball has no such limit.
 
+## How an export runs
+
+An export goes from page content to a file on disk through a handful of extension modules:
+
+```mermaid
+flowchart LR
+    A[You open a Zhihu page<br/>column, answer, question, feed, hot list] --> B[Content script<br/>detects the page type]
+    B --> C{Page type}
+    C -->|Column / single answer| D[Parse the article DOM]
+    C -->|Question| E[Answer API fills the rest<br/>20 by default, 1000 max]
+    C -->|Feed / hot list| F[Collect item entries]
+    D --> G[Convert to Markdown<br/>front matter, math, code, tables]
+    E --> G
+    F --> G
+    G --> H{Download or copy?}
+    H -->|Download| I{Bundle images?}
+    I -->|Yes| J[Fetch zhimg.com images<br/>zip with images/ folder]
+    I -->|No| K[Single .md file]
+    H -->|Copy| L[Write to clipboard]
+
+    classDef client fill:#3B82F6,stroke:#2563EB,color:#fff,stroke-width:2px
+    classDef service fill:#10B981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef data fill:#8B5CF6,stroke:#7C3AED,color:#fff,stroke-width:2px
+    classDef choice fill:#F59E0B,stroke:#D97706,color:#fff,stroke-width:2px
+
+    class A client
+    class B,D,E,F,G,J service
+    class K,L data
+    class C,H,I choice
+```
+
 ## Settings
 
 <img src="docs/screenshots/settings.png" width="720" alt="Settings page">
@@ -132,6 +170,8 @@ Check `chrome://extensions/shortcuts`.
 **Exports broke after a Zhihu redesign.**
 Bulk exports depend on page structure. Please open an issue with the page type and URL.
 
+More in [docs/troubleshooting.md](./docs/troubleshooting.md).
+
 ## Development
 
 ```bash
@@ -142,7 +182,7 @@ npm test
 npm run package   # build/zhihu-md-v<version>-chrome.zip, -firefox.zip, and SHA256SUMS.txt
 ```
 
-Developer docs (Chinese) start at [docs/README.md](./docs/README.md).
+Developer docs (Chinese) start at [docs/README.md](./docs/README.md), including [architecture](./docs/architecture.md) and [export pipeline](./docs/request-lifecycle.md), plus [development and maintenance](./docs/development.md).
 
 ## Also in the series
 

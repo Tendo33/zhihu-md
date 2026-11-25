@@ -11,7 +11,7 @@ assert.equal(JSON.parse(read('manifest.src.json')).version, v);
 assert.match(read('CHANGELOG.md'), new RegExp(`^## \\[${v.replace(/\./g, '\\.')}\\] - \\d{4}-\\d{2}-\\d{2}$`, 'm'));
 // README 只写默认快捷键，实际生效的以弹窗底栏为准（升级用户可能保留旧快捷键）
 assert.match(read('README.md'), /默认 `Alt\+Shift\+K`[^\n]*以弹窗底栏显示的为准/);
-assert.match(read('README.en.md'), /Defaults to `Alt\+Shift\+K`[^\n]*the popup footer shows the one in effect/);
+assert.match(read('README_en.md'), /Defaults to `Alt\+Shift\+K`[^\n]*the popup footer shows the one in effect/);
 {
   const cl = read('CHANGELOG.md');
   const section = (ver) => cl.slice(cl.indexOf(`## [${ver}]`), cl.indexOf('\n## [', cl.indexOf(`## [${ver}]`) + 1) >>> 0);

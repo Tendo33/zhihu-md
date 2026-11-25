@@ -4,13 +4,20 @@
 
 # Zhihu to Markdown
 
-**把知乎文章、回答、问题和热榜一键存为 Markdown**
+**把知乎文章、回答、问题和热榜一键存为 Markdown。**
+
+[![Chrome](https://img.shields.io/badge/Chrome-121%2B-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](manifest.src.json)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](package.json)
+[![esbuild](https://img.shields.io/badge/esbuild-0.25-FFCF00?style=flat-square&logo=esbuild&logoColor=black)](package.json)
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/heeilejdelmogpbnbbhdokgfabmhkenh?style=flat-square&label=Chrome%20Web%20Store&color=0a5fd1)](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh)
-[![License: MIT](https://img.shields.io/badge/License-MIT-black?style=flat-square)](./LICENSE)
-[![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)](./manifest.src.json)
+[![License](https://img.shields.io/badge/License-MIT-2EA043?style=flat-square)](LICENSE)
+[![Privacy](https://img.shields.io/badge/Privacy-no_server-10B981?style=flat-square)](PRIVACY.md)
 
-[安装](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) · [English](./README.en.md) · [使用说明](./docs/usage.md) · [常见问题](./docs/troubleshooting.md) · [隐私说明](./PRIVACY.md) · [更新日志](./CHANGELOG.md)
+[安装](https://chromewebstore.google.com/detail/zhihu-md/heeilejdelmogpbnbbhdokgfabmhkenh) · [使用](#使用) · [导出流程](#导出是怎么走的) · [设置](#设置) · [常见问题](#常见问题)
+
+<sub>中文 · [English](README_en.md)</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png">
@@ -85,6 +92,37 @@ npm run build
 <img src="docs/screenshots/popup.png" width="300" alt="工具栏弹窗">
 
 弹窗触发的长导出（如问题页批量）需要保持弹窗打开，直到下载开始；用悬浮球没有这个限制。
+
+## 导出是怎么走的
+
+一次导出从页面内容到落盘文件，中间只经过扩展自己的几个模块：
+
+```mermaid
+flowchart LR
+    A[你打开知乎页面<br/>专栏、回答、问题、信息流、热榜] --> B[内容脚本<br/>识别页面类型]
+    B --> C{页面类型}
+    C -->|专栏 / 单条回答| D[解析正文 DOM]
+    C -->|问题页| E[回答接口补充<br/>默认 20 条，上限 1000]
+    C -->|信息流 / 热榜| F[整理成条目清单]
+    D --> G[转 Markdown<br/>Front Matter、公式、代码、表格]
+    E --> G
+    F --> G
+    G --> H{下载还是复制?}
+    H -->|下载| I{打包图片?}
+    I -->|是| J[下载 zhimg.com 图片<br/>生成含 images/ 的 ZIP]
+    I -->|否| K[单个 .md 文件]
+    H -->|复制| L[写入剪贴板]
+
+    classDef client fill:#3B82F6,stroke:#2563EB,color:#fff,stroke-width:2px
+    classDef service fill:#10B981,stroke:#059669,color:#fff,stroke-width:2px
+    classDef data fill:#8B5CF6,stroke:#7C3AED,color:#fff,stroke-width:2px
+    classDef choice fill:#F59E0B,stroke:#D97706,color:#fff,stroke-width:2px
+
+    class A client
+    class B,D,E,F,G,J service
+    class K,L data
+    class C,H,I choice
+```
 
 ## 设置
 

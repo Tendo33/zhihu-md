@@ -41,5 +41,5 @@ assert.doesNotMatch(privacy, /not part of the declared host access/);
 const readme = fs.readFileSync(new URL('README.md', root), 'utf8');
 assert.match(readme, /\| `https:\/\/\*\.zhimg\.com` \|/);
 assert.doesNotMatch(readme, /无需权限/);
-assert.match(fs.readFileSync(new URL('README.en.md', root), 'utf8'), /\| `https:\/\/\*\.zhimg\.com` \|/);
+assert.match(fs.readFileSync(new URL('README_en.md', root), 'utf8'), /\| `https:\/\/\*\.zhimg\.com` \|/);
 console.log('no-prompt permissions tests passed');

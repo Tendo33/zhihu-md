@@ -138,7 +138,7 @@ npm run package
 
 ## 发布前检查清单
 
-发布前请对照根目录的 [MANIFEST_UPDATE.md](../MANIFEST_UPDATE.md)。
+发布前请对照 [MANIFEST_UPDATE.md](MANIFEST_UPDATE.md)。
 
 ## 文档维护约定
 

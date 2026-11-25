@@ -17,4 +17,4 @@
 - 产品说明：[README.md](../README.md)
 - 更新日志：[CHANGELOG.md](../CHANGELOG.md)
 - 隐私：[PRIVACY.md](../PRIVACY.md)
-- 发版清单：[MANIFEST_UPDATE.md](../MANIFEST_UPDATE.md)
+- 发版清单：[MANIFEST_UPDATE.md](MANIFEST_UPDATE.md)

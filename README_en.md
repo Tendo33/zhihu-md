@@ -182,7 +182,7 @@ npm test
 npm run package   # build/zhihu-md-v<version>-chrome.zip, -firefox.zip, and SHA256SUMS.txt
 ```
 
-Developer docs (Chinese) start at [docs/README.md](./docs/README.md), including [architecture](./docs/architecture.md) and [export pipeline](./docs/request-lifecycle.md), plus [development and maintenance](./docs/development.md).
+Developer docs (Chinese) start at [docs/index.md](./docs/index.md), including [architecture](./docs/architecture.md) and [export pipeline](./docs/request-lifecycle.md), plus [development and maintenance](./docs/development.md).
 
 ## Also in the series
 
